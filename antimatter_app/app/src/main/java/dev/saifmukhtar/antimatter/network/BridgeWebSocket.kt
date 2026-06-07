@@ -37,6 +37,8 @@ class BridgeWebSocket(private val context: Context) {
     private val scope = CoroutineScope(Dispatchers.IO + Job())
     
     private var currentUrl: String? = null
+    private var clientId: String? = null
+    private var clientSecret: String? = null
     private var reconnectAttempt = 0
     private var isConnecting = false
     private var manuallyDisconnected = false
@@ -69,9 +71,11 @@ class BridgeWebSocket(private val context: Context) {
         // No init needed
     }
 
-    fun connect(url: String) {
+    fun connect(url: String, clientId: String? = null, clientSecret: String? = null) {
         manuallyDisconnected = false
         currentUrl = url
+        this.clientId = clientId?.takeIf { it.isNotBlank() }
+        this.clientSecret = clientSecret?.takeIf { it.isNotBlank() }
         connectInternal()
     }
 
@@ -88,11 +92,17 @@ class BridgeWebSocket(private val context: Context) {
         updateConnectionState(ConnectionState.CONNECTING)
 
         try {
-            val request = Request.Builder()
+            val requestBuilder = Request.Builder()
                 .url(currentUrl!!)
                 .header("Bypass-Tunnel-Reminder", "true")
                 .header("User-Agent", "localtunnel")
-                .build()
+                
+            if (clientId != null && clientSecret != null) {
+                requestBuilder.header("CF-Access-Client-Id", clientId!!)
+                requestBuilder.header("CF-Access-Client-Secret", clientSecret!!)
+            }
+                
+            val request = requestBuilder.build()
 
             webSocket = client.newWebSocket(request, object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -181,6 +191,7 @@ class BridgeWebSocket(private val context: Context) {
             is OutboundMessage.GetFiles -> "{\"type\":\"GET_FILES\"${if (message.path != null) ", \"path\":\"${message.path}\"" else ""}}"
             is OutboundMessage.ReadFile -> "{\"type\":\"READ_FILE\", \"path\":\"${message.path}\"}"
             is OutboundMessage.SubscribeConversation -> "{\"type\":\"SUBSCRIBE_CONVERSATION\", \"conversationId\":\"${message.conversationId}\"}"
+            is OutboundMessage.GetHistory -> "{\"type\":\"GET_HISTORY\"}"
             is OutboundMessage.Ping -> "{\"type\":\"PING\"}"
             else -> "{}"
         }

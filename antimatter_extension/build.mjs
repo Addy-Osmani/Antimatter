@@ -11,8 +11,8 @@ const buildOptions = {
   format: 'cjs',
   platform: 'node',
   target: 'node18',
-  sourcemap: true,
-  minify: false,              // keep readable for debugging
+  sourcemap: false,
+  minify: true,              // keep readable for debugging
   logLevel: 'info',
 };
 

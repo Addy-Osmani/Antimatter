@@ -21,9 +21,14 @@ import dev.saifmukhtar.antimatter.network.BridgeWebSocket
 fun ConnectScreen(
     connectionState: BridgeWebSocket.ConnectionState,
     savedUrl: String? = null,
-    onConnectClick: (String) -> Unit
+    savedClientId: String? = null,
+    savedClientSecret: String? = null,
+    onConnectClick: (String, String?, String?) -> Unit
 ) {
     var ipAddress by remember { mutableStateOf(savedUrl ?: "") }
+    var clientId by remember { mutableStateOf(savedClientId ?: "") }
+    var clientSecret by remember { mutableStateOf(savedClientSecret ?: "") }
+    var showAdvanced by remember { mutableStateOf(clientId.isNotBlank() || clientSecret.isNotBlank()) }
 
     Scaffold(
         topBar = {
@@ -99,6 +104,29 @@ fun ConnectScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
+                    TextButton(onClick = { showAdvanced = !showAdvanced }) {
+                        Text(if (showAdvanced) "Hide Advanced Options" else "Show Advanced Options")
+                    }
+                    
+                    if (showAdvanced) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = clientId,
+                            onValueChange = { clientId = it },
+                            label = { Text("Cloudflare Client ID (Optional)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = clientSecret,
+                            onValueChange = { clientSecret = it },
+                            label = { Text("Cloudflare Client Secret (Optional)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
                     Button(
                         onClick = {
                             val cleanIp = ipAddress.trim()
@@ -110,7 +138,7 @@ fun ConnectScreen(
                                     url = "wss://$url.loca.lt"
                                 }
                             }
-                            onConnectClick(url)
+                            onConnectClick(url, clientId.trim(), clientSecret.trim())
                         },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = connectionState != BridgeWebSocket.ConnectionState.CONNECTING

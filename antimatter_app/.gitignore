@@ -8,3 +8,17 @@
 /captures
 .externalNativeBuild
 .cxx
+local.properties
+# Built application files
+*.apk
+*.aab
+*.ap_
+*.aapt
+*.app
+*.iab
+*.jar
+
+# Signing files
+keystore.properties
+*.keystore
+*.jks

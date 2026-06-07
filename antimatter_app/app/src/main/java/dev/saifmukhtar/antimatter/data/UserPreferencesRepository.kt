@@ -15,22 +15,32 @@ class UserPreferencesRepository(private val context: Context) {
 
     companion object {
         val WS_URL = stringPreferencesKey("ws_url")
+        val CF_CLIENT_ID = stringPreferencesKey("cf_client_id")
+        val CF_CLIENT_SECRET = stringPreferencesKey("cf_client_secret")
     }
 
-    val savedUrlFlow: Flow<String?> = context.dataStore.data
+    val savedCredentialsFlow: Flow<Triple<String?, String?, String?>> = context.dataStore.data
         .map { preferences ->
-            preferences[WS_URL]
+            Triple(
+                preferences[WS_URL],
+                preferences[CF_CLIENT_ID],
+                preferences[CF_CLIENT_SECRET]
+            )
         }
 
-    suspend fun saveUrl(url: String) {
+    suspend fun saveCredentials(url: String, clientId: String, clientSecret: String) {
         context.dataStore.edit { preferences ->
             preferences[WS_URL] = url
+            preferences[CF_CLIENT_ID] = clientId
+            preferences[CF_CLIENT_SECRET] = clientSecret
         }
     }
 
-    suspend fun clearUrl() {
+    suspend fun clearCredentials() {
         context.dataStore.edit { preferences ->
             preferences.remove(WS_URL)
+            preferences.remove(CF_CLIENT_ID)
+            preferences.remove(CF_CLIENT_SECRET)
         }
     }
 }

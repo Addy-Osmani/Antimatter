@@ -41,7 +41,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val chatUiState by chatViewModel.uiState.collectAsState()
                     val filesUiState by filesViewModel.uiState.collectAsState()
-                    val savedUrl by UserPreferencesRepository(this@MainActivity).savedUrlFlow.collectAsState(initial = null)
+                    val savedCredentials by UserPreferencesRepository(this@MainActivity).savedCredentialsFlow.collectAsState(initial = Triple(null, null, null))
+                    val savedUrl = savedCredentials.first
                     
                     var currentTab by remember { mutableStateOf(0) }
                     
@@ -98,7 +99,11 @@ class MainActivity : ComponentActivity() {
                         ConnectScreen(
                             connectionState = chatUiState.connectionState,
                             savedUrl = savedUrl,
-                            onConnectClick = { url -> chatViewModel.connectManually(url) }
+                            savedClientId = savedCredentials.second,
+                            savedClientSecret = savedCredentials.third,
+                            onConnectClick = { url, clientId, clientSecret -> 
+                                chatViewModel.connectManually(url, clientId, clientSecret) 
+                            }
                         )
                     }
                 }

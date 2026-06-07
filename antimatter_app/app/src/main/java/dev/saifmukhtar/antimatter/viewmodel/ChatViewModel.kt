@@ -56,9 +56,13 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
         // Auto-connect on startup
         viewModelScope.launch {
-            userPrefs.savedUrlFlow.collect { savedUrl ->
+            userPrefs.savedCredentialsFlow.collect { credentials ->
+                val savedUrl = credentials.first
+                val clientId = credentials.second
+                val clientSecret = credentials.third
+                
                 if (!savedUrl.isNullOrBlank() && uiState.value.connectionState == BridgeWebSocket.ConnectionState.DISCONNECTED) {
-                    webSocket.connect(savedUrl)
+                    webSocket.connect(savedUrl, clientId, clientSecret)
                 }
             }
         }
@@ -129,11 +133,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     // --- Actions ---
 
-    fun connectManually(url: String) {
+    fun connectManually(url: String, clientId: String? = null, clientSecret: String? = null) {
         viewModelScope.launch {
-            userPrefs.saveUrl(url)
+            userPrefs.saveCredentials(url, clientId ?: "", clientSecret ?: "")
         }
-        webSocket.connect(url)
+        webSocket.connect(url, clientId, clientSecret)
     }
 
     fun sendMessage(text: String) {
@@ -183,7 +187,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun disconnectManually() {
         viewModelScope.launch {
-            userPrefs.clearUrl()
+            userPrefs.clearCredentials()
         }
         webSocket.disconnect()
     }
