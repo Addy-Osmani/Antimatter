@@ -1,0 +1,8 @@
+Antimatter is an open-source bridge ecosystem that connects your mobile device directly to the local Antigravity IDE running on your host machine.
+
+Features:
+- Live Chat Sync: Real-time mirroring of the Antigravity agent's trajectory.
+- Remote Prompting: Send instructions directly from your phone.
+- Workspace Explorer: Browse the host computer's active directory tree.
+- Code Viewer: Read specific files remotely with syntax highlighting.
+- Smart Connection: Automatically connects using localtunnel subdomains.

@@ -1,0 +1,8 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build and package for F-Droid"
+  lane :build do
+    gradle(task: "clean assembleRelease")
+  end
+end

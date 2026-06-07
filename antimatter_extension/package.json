@@ -1,0 +1,87 @@
+{
+  "name": "antimatter-bridge",
+  "displayName": "Antimatter Bridge",
+  "description": "Bridges your live Antigravity IDE session to your Android Antimatter app over WebSocket.",
+  "version": "0.1.2",
+  "publisher": "dev-saifmukhtar-antimatter",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saifmukhtar/antimatter.git"
+  },
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "antimatter.startBridge",
+        "title": "Antimatter: Start Bridge Server"
+      },
+      {
+        "command": "antimatter.stopBridge",
+        "title": "Antimatter: Stop Bridge Server"
+      },
+      {
+        "command": "antimatter.showStatus",
+        "title": "Antimatter: Show Connection Status"
+      }
+    ],
+    "configuration": {
+      "title": "Antimatter Bridge",
+      "properties": {
+        "antimatter.port": {
+          "type": "number",
+          "default": 8765,
+          "description": "WebSocket port for the Antimatter bridge server"
+        },
+        "antimatter.autoStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically start the bridge server when Antigravity opens"
+        },
+        "antimatter.useLocalTunnel": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable LocalTunnel for a persistent public URL"
+        },
+        "antimatter.cloudflareHostname": {
+          "type": "string",
+          "default": "",
+          "description": "Designated Cloudflare Zero Trust hostname (e.g. ide.mydomain.com). If empty, falls back to Localtunnel."
+        },
+        "antimatter.localtunnelSubdomain": {
+          "type": "string",
+          "default": "saifs-antimatter",
+          "description": "Custom subdomain for LocalTunnel (e.g. 'my-bridge' -> my-bridge.loca.lt)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "package": "vsce package",
+    "release": "bash ./scripts/build-release.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.80.0",
+    "@types/ws": "^8.5.10",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.21.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@types/localtunnel": "^2.0.4",
+    "localtunnel": "^2.0.2",
+    "ws": "^8.17.0"
+  }
+}
