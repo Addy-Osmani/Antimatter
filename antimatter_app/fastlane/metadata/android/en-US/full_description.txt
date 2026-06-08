@@ -1,8 +1,12 @@
-Antimatter is an open-source bridge ecosystem that connects your mobile device directly to the local Antigravity IDE running on your host machine.
+Antimatter is an open-source bridge ecosystem that connects your mobile device directly to the local Google AntiGravity IDE running on your host machine.
+
+Because the AntiGravity IDE does not expose a public API for external control, Antimatter reverse-engineers the IDE's state by tailing the local file system (transcript.jsonl) and injecting commands back into the IDE via native VS Code Command Palette hooks.
 
 Features:
-- Live Chat Sync: Real-time mirroring of the Antigravity agent's trajectory.
-- Remote Prompting: Send instructions directly from your phone.
-- Workspace Explorer: Browse the host computer's active directory tree.
-- Code Viewer: Read specific files remotely with syntax highlighting.
-- Smart Connection: Automatically connects using localtunnel subdomains.
+* Real-Time Mirroring: See exactly what your AI agent is doing on your phone.
+* Remote Control: Send chat messages directly to your agent.
+* Diff Review: Review code modifications and accept/reject them remotely.
+* FOSS Compliant: This F-Droid build is 100% free of proprietary trackers (like Firebase Crashlytics or Google Play Services).
+* Enterprise Security: Requires a secure 256-bit Bearer Token, features strict Origin validation to prevent CSWSH attacks, and utilizes Token Bucket Rate Limiting to prevent DoS.
+
+(Disclaimer: Antimatter is a community-driven project and is not an official product of Google.)

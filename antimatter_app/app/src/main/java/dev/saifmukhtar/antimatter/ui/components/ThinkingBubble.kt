@@ -20,9 +20,18 @@ import androidx.compose.ui.unit.dp
 import dev.saifmukhtar.antimatter.network.TrajectoryStep
 import androidx.compose.ui.graphics.toArgb
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+
 @Composable
-fun ThinkingBubble(
-    step: TrajectoryStep,
+fun ThoughtGroupBubble(
+    steps: List<TrajectoryStep>,
     isLatest: Boolean
 ) {
     // Pulse animation if this is the currently generating thought
@@ -37,14 +46,20 @@ fun ThinkingBubble(
         label = "alpha"
     )
 
+    var expanded by remember { mutableStateOf(false) }
+    val isUser = false // always AI
+    
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp, horizontal = 16.dp)
+            .padding(vertical = 4.dp, horizontal = 8.dp)
             .alpha(alpha),
         horizontalArrangement = Arrangement.Start
     ) {
-        Box(
+        // Spacer for AI avatar
+        Spacer(modifier = Modifier.width(40.dp))
+        
+        Column(
             modifier = Modifier
                 .border(
                     width = 1.dp,
@@ -55,21 +70,43 @@ fun ThinkingBubble(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
                     shape = RoundedCornerShape(8.dp)
                 )
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { expanded = !expanded }
                 .padding(8.dp)
         ) {
-            Row(verticalAlignment = Alignment.Top) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Lightbulb,
                     contentDescription = "Thinking",
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(16.dp).padding(top = 2.dp)
+                    modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                MarkdownText(
-                    markdown = step.value ?: "",
-                    modifier = Modifier.padding(12.dp),
-                    textColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
+                Text(
+                    text = if (isLatest) "Thinking..." else "Thought Process",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelMedium
                 )
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Expand",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            
+            AnimatedVisibility(visible = expanded) {
+                Column(modifier = Modifier.padding(top = 8.dp)) {
+                    for (step in steps) {
+                        if (!step.value.isNullOrBlank()) {
+                            MarkdownText(
+                                markdown = step.value,
+                                textColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
+                            )
+                        }
+                    }
+                }
             }
         }
     }

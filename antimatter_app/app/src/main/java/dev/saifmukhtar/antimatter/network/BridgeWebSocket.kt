@@ -95,7 +95,6 @@ class BridgeWebSocket(private val context: Context) {
             val requestBuilder = Request.Builder()
                 .url(currentUrl!!)
                 .header("Bypass-Tunnel-Reminder", "true")
-                .header("User-Agent", "localtunnel")
                 
             if (clientId != null && clientSecret != null) {
                 requestBuilder.header("CF-Access-Client-Id", clientId!!)
@@ -122,14 +121,18 @@ class BridgeWebSocket(private val context: Context) {
                             "PONG" -> InboundMessage.Pong()
                             "SESSION_STATE" -> gson.fromJson(text, InboundMessage.SessionState::class.java)
                             "STEP" -> gson.fromJson(text, InboundMessage.Step::class.java)
+                            "STEP_BATCH" -> gson.fromJson(text, InboundMessage.StepBatch::class.java)
                             "GENERATING" -> gson.fromJson(text, InboundMessage.Generating::class.java)
                             "RESPONSE_COMPLETE" -> gson.fromJson(text, InboundMessage.ResponseComplete::class.java)
                             "ACTIVE_FILE" -> gson.fromJson(text, InboundMessage.ActiveFile::class.java)
                             "FILE_CONTENT" -> gson.fromJson(text, InboundMessage.FileContent::class.java)
                             "FILE_TREE" -> gson.fromJson(text, InboundMessage.FileTree::class.java)
                             "CLOUDFLARE_URL" -> gson.fromJson(text, InboundMessage.CloudflareUrl::class.java)
+                            "DEBUG_STATUS" -> gson.fromJson(text, InboundMessage.DebugStatus::class.java)
+                            "TERMINAL_OUTPUT" -> gson.fromJson(text, InboundMessage.TerminalOutput::class.java)
                             "HISTORY_LIST" -> gson.fromJson(text, InboundMessage.HistoryList::class.java)
                             "ERROR" -> gson.fromJson(text, InboundMessage.Error::class.java)
+                            "SYSTEM_ALERT" -> gson.fromJson(text, InboundMessage.SystemAlert::class.java)
                             else -> InboundMessage.Unknown
                         }
                         _messages.emit(message)
@@ -161,10 +164,11 @@ class BridgeWebSocket(private val context: Context) {
 
     private fun scheduleReconnect() {
         if (manuallyDisconnected || currentUrl == null) return
+        if (reconnectAttempt >= 20) return // Max retries reached
         
         reconnectAttempt++
-        // Exponential backoff: 1s, 2s, 4s, 8s, max 10s
-        val delayMs = (2.0.pow(reconnectAttempt).toLong() * 1000).coerceAtMost(10000)
+        // Exponential backoff: max 30s
+        val delayMs = (2.0.pow(reconnectAttempt.coerceAtMost(5)).toLong() * 1000).coerceAtMost(30000)
         
         Log.d("BridgeWebSocket", "Scheduling reconnect in ${delayMs}ms (Attempt $reconnectAttempt)")
         scope.launch {
@@ -174,27 +178,7 @@ class BridgeWebSocket(private val context: Context) {
     }
 
     fun sendMessage(message: OutboundMessage) {
-        val json = when (message) {
-            is OutboundMessage.SendMessage -> {
-                val safeText = message.text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
-                "{\"type\":\"SEND_MESSAGE\", \"text\":\"$safeText\"}"
-            }
-            is OutboundMessage.NewConversation -> "{\"type\":\"NEW_CONVERSATION\"}"
-            is OutboundMessage.CancelResponse -> "{\"type\":\"CANCEL_RESPONSE\"}"
-            is OutboundMessage.AcceptEdits -> "{\"type\":\"ACCEPT_EDITS\"}"
-            is OutboundMessage.RejectEdits -> "{\"type\":\"REJECT_EDITS\"}"
-            is OutboundMessage.ChangeModel -> "{\"type\":\"CHANGE_MODEL\"}"
-            is OutboundMessage.NextHunk -> "{\"type\":\"NEXT_HUNK\"}"
-            is OutboundMessage.PrevHunk -> "{\"type\":\"PREV_HUNK\"}"
-            is OutboundMessage.AcceptHunk -> "{\"type\":\"ACCEPT_HUNK\"}"
-            is OutboundMessage.RejectHunk -> "{\"type\":\"REJECT_HUNK\"}"
-            is OutboundMessage.GetFiles -> "{\"type\":\"GET_FILES\"${if (message.path != null) ", \"path\":\"${message.path}\"" else ""}}"
-            is OutboundMessage.ReadFile -> "{\"type\":\"READ_FILE\", \"path\":\"${message.path}\"}"
-            is OutboundMessage.SubscribeConversation -> "{\"type\":\"SUBSCRIBE_CONVERSATION\", \"conversationId\":\"${message.conversationId}\"}"
-            is OutboundMessage.GetHistory -> "{\"type\":\"GET_HISTORY\"}"
-            is OutboundMessage.Ping -> "{\"type\":\"PING\"}"
-            else -> "{}"
-        }
+        val json = gson.toJson(message)
         Log.d("BridgeWebSocket", "Sending: ${json.take(100)}")
         webSocket?.send(json)
     }

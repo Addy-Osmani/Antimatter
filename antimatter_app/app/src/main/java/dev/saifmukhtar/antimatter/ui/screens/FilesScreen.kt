@@ -9,6 +9,9 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CreateNewFolder
+import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,9 +25,13 @@ import dev.saifmukhtar.antimatter.viewmodel.FilesUiState
 fun FilesScreen(
     uiState: FilesUiState,
     onRefresh: () -> Unit,
-    onOpenFile: (String) -> Unit
+    onOpenFile: (String) -> Unit,
+    onCreateNode: (path: String, isDirectory: Boolean) -> Unit
 ) {
     var expandedFolders by remember { mutableStateOf(setOf<String>()) }
+    var showCreateDialog by remember { mutableStateOf(false) }
+    var newNodeName by remember { mutableStateOf("") }
+    var isCreatingDirectory by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (uiState.fileTree == null && !uiState.isLoadingTree) {
@@ -42,6 +49,13 @@ fun FilesScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            if (uiState.fileTree != null && !uiState.isLoadingTree) {
+                FloatingActionButton(onClick = { showCreateDialog = true }) {
+                    Icon(Icons.Default.Add, contentDescription = "Create File/Folder")
+                }
+            }
         }
     ) { paddingValues ->
         Box(
@@ -60,7 +74,7 @@ fun FilesScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp)
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
                     items(uiState.fileTree) { node ->
                         FileTreeNode(
@@ -79,6 +93,55 @@ fun FilesScreen(
                     }
                 }
             }
+        }
+
+        if (showCreateDialog) {
+            AlertDialog(
+                onDismissRequest = { showCreateDialog = false },
+                title = { Text("Create New Node") },
+                text = {
+                    Column {
+                        OutlinedTextField(
+                            value = newNodeName,
+                            onValueChange = { newNodeName = it },
+                            label = { Text("Name (include path/ if needed)") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(
+                                selected = !isCreatingDirectory,
+                                onClick = { isCreatingDirectory = false }
+                            )
+                            Text("File", modifier = Modifier.clickable { isCreatingDirectory = false })
+                            Spacer(modifier = Modifier.width(16.dp))
+                            RadioButton(
+                                selected = isCreatingDirectory,
+                                onClick = { isCreatingDirectory = true }
+                            )
+                            Text("Directory", modifier = Modifier.clickable { isCreatingDirectory = true })
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if (newNodeName.isNotBlank()) {
+                            onCreateNode(newNodeName.trim(), isCreatingDirectory)
+                            newNodeName = ""
+                            showCreateDialog = false
+                            // Refresh triggered automatically after success but maybe wait a bit?
+                        }
+                    }) {
+                        Text("Create")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showCreateDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }

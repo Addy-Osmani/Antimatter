@@ -11,6 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.ui.text.font.FontFamily
 import dev.saifmukhtar.antimatter.ui.components.MarkdownText
 import dev.saifmukhtar.antimatter.viewmodel.FilesUiState
 
@@ -18,8 +25,12 @@ import dev.saifmukhtar.antimatter.viewmodel.FilesUiState
 @Composable
 fun FileViewScreen(
     uiState: FilesUiState,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSave: (path: String, content: String) -> Unit
 ) {
+    var isEditing by remember { mutableStateOf(false) }
+    var editedContent by remember(uiState.viewedFileContent) { mutableStateOf(uiState.viewedFileContent ?: "") }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -35,6 +46,25 @@ fun FileViewScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            if (uiState.viewedFileContent != null && !uiState.isLoadingFile) {
+                FloatingActionButton(onClick = {
+                    if (isEditing) {
+                        uiState.viewedFilePath?.let { path ->
+                            onSave(path, editedContent)
+                        }
+                        isEditing = false
+                    } else {
+                        isEditing = true
+                    }
+                }) {
+                    Icon(
+                        imageVector = if (isEditing) Icons.Default.Save else Icons.Default.Edit,
+                        contentDescription = if (isEditing) "Save" else "Edit"
+                    )
+                }
+            }
         }
     ) { paddingValues ->
         Box(
@@ -54,14 +84,37 @@ fun FileViewScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp)
+                        .padding(if (isEditing) 0.dp else 16.dp)
                 ) {
-                    MarkdownText(
-                        markdown = markdownCode,
-                        modifier = Modifier.fillMaxWidth(),
-                        textColor = MaterialTheme.colorScheme.onSurface.toArgb()
-                    )
+                    if (isEditing) {
+                        TextField(
+                            value = editedContent,
+                            onValueChange = { editedContent = it },
+                            modifier = Modifier.fillMaxSize(),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                fontFamily = FontFamily.Monospace,
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                                unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent
+                            )
+                        )
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            MarkdownText(
+                                markdown = markdownCode,
+                                modifier = Modifier.fillMaxWidth(),
+                                textColor = MaterialTheme.colorScheme.onSurface.toArgb()
+                            )
+                        }
+                    }
                 }
             } else {
                 Text(

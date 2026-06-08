@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.WifiFind
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,7 +24,8 @@ fun ConnectScreen(
     savedUrl: String? = null,
     savedClientId: String? = null,
     savedClientSecret: String? = null,
-    onConnectClick: (String, String?, String?) -> Unit
+    onConnectClick: (String, String?, String?) -> Unit,
+    onScanQRClick: () -> Unit
 ) {
     var ipAddress by remember { mutableStateOf(savedUrl ?: "") }
     var clientId by remember { mutableStateOf(savedClientId ?: "") }
@@ -66,7 +68,7 @@ fun ConnectScreen(
             
             Text(
                 text = when (connectionState) {
-                    BridgeWebSocket.ConnectionState.DISCONNECTED -> "Disconnected. Enter LocalTunnel subdomain or IP."
+                    BridgeWebSocket.ConnectionState.DISCONNECTED -> "Disconnected. Enter Cloudflare URL and Pair Token."
                     BridgeWebSocket.ConnectionState.CONNECTING -> "Connecting..."
                     BridgeWebSocket.ConnectionState.CONNECTED -> "Connected!"
                     else -> ""
@@ -77,6 +79,22 @@ fun ConnectScreen(
             )
             
             Spacer(modifier = Modifier.height(32.dp))
+            
+            Button(
+                onClick = onScanQRClick,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Scan Pairing QR", style = MaterialTheme.typography.titleMedium)
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text("OR", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            
+            Spacer(modifier = Modifier.height(24.dp))
             
             Card(
                 shape = RoundedCornerShape(16.dp),
@@ -97,7 +115,7 @@ fun ConnectScreen(
                     OutlinedTextField(
                         value = ipAddress,
                         onValueChange = { ipAddress = it },
-                        label = { Text("Subdomain or IP Address") },
+                        label = { Text("Cloudflare URL (wss://...)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -113,14 +131,14 @@ fun ConnectScreen(
                         OutlinedTextField(
                             value = clientId,
                             onValueChange = { clientId = it },
-                            label = { Text("Cloudflare Client ID (Optional)") },
+                            label = { Text("Cloudflare Client ID (Optional for Zero Trust)") },
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = clientSecret,
                             onValueChange = { clientSecret = it },
-                            label = { Text("Cloudflare Client Secret (Optional)") },
+                            label = { Text("Cloudflare Client Secret (Optional for Zero Trust)") },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -129,14 +147,9 @@ fun ConnectScreen(
                     
                     Button(
                         onClick = {
-                            val cleanIp = ipAddress.trim()
-                            var url = cleanIp
+                            var url = ipAddress.trim()
                             if (!url.startsWith("ws://") && !url.startsWith("wss://")) {
-                                if (url.matches(Regex("^[0-9]+\\\\.[0-9]+\\\\.[0-9]+\\\\.[0-9]+(:[0-9]+)?$"))) {
-                                    url = "ws://$url"
-                                } else {
-                                    url = "wss://$url.loca.lt"
-                                }
+                                url = "wss://$url"
                             }
                             onConnectClick(url, clientId.trim(), clientSecret.trim())
                         },

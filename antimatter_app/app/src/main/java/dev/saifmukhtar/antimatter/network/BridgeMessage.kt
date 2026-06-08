@@ -76,6 +76,8 @@ sealed class InboundMessage {
         val index: Int
     ) : InboundMessage()
 
+    data class StepBatch(val steps: List<Step>) : InboundMessage()
+
     data class Generating(val conversationId: String) : InboundMessage()
     data class ResponseComplete(val conversationId: String) : InboundMessage()
 
@@ -93,6 +95,9 @@ sealed class InboundMessage {
     data class FileTree(val tree: List<FileNode>) : InboundMessage()
     data class CloudflareUrl(val url: String) : InboundMessage()
     data class Error(val message: String) : InboundMessage()
+    data class SystemAlert(val title: String, val body: String) : InboundMessage()
+    data class DebugStatus(@SerializedName("isActive") val isActive: Boolean) : InboundMessage()
+    data class TerminalOutput(@SerializedName("content") val content: String) : InboundMessage()
     data class HistoryList(val conversations: List<ConversationSummary>) : InboundMessage()
     object Unknown : InboundMessage()
 }
@@ -117,6 +122,17 @@ sealed class OutboundMessage(val type: String) {
     data class SubscribeConversation(val conversationId: String) : OutboundMessage("SUBSCRIBE_CONVERSATION")
     class GetHistory : OutboundMessage("GET_HISTORY")
     class Ping : OutboundMessage("PING")
+    
+    // Debug Controls
+    class DebugContinue : OutboundMessage("DEBUG_CONTINUE")
+    class DebugStepOver : OutboundMessage("DEBUG_STEP_OVER")
+    class DebugStepInto : OutboundMessage("DEBUG_STEP_INTO")
+    data class DebugStepOut(val dummy: String = "") : OutboundMessage("DEBUG_STEP_OUT")
+    data class DebugRestart(val dummy: String = "") : OutboundMessage("DEBUG_RESTART")
+    data class DebugStop(val dummy: String = "") : OutboundMessage("DEBUG_STOP")
+    
+    data class WriteFile(val path: String, val content: String) : OutboundMessage("WRITE_FILE")
+    data class CreateNode(val path: String, val isDirectory: Boolean) : OutboundMessage("CREATE_NODE")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -36,6 +36,10 @@ fun MarkdownText(
         modifier = modifier,
         factory = { ctx ->
             TextView(ctx).apply {
+                layoutParams = android.view.ViewGroup.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                )
                 setTextColor(textColor)
                 textSize = 16f
                 setLineSpacing(0f, 1.2f)

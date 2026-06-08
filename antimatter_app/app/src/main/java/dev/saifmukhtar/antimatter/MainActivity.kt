@@ -18,8 +18,11 @@ import dev.saifmukhtar.antimatter.network.BridgeWebSocket
 import androidx.compose.ui.unit.dp
 import dev.saifmukhtar.antimatter.ui.screens.ChatScreen
 import dev.saifmukhtar.antimatter.ui.screens.ConnectScreen
+import dev.saifmukhtar.antimatter.ui.screens.QRScannerScreen
 import dev.saifmukhtar.antimatter.ui.screens.FilesScreen
 import dev.saifmukhtar.antimatter.ui.screens.FileViewScreen
+import dev.saifmukhtar.antimatter.ui.screens.DebugScreen
+import androidx.compose.material.icons.filled.BugReport
 import dev.saifmukhtar.antimatter.ui.theme.AntimatterTheme
 import dev.saifmukhtar.antimatter.viewmodel.ChatViewModel
 import dev.saifmukhtar.antimatter.viewmodel.FilesViewModel
@@ -41,16 +44,42 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val chatUiState by chatViewModel.uiState.collectAsState()
                     val filesUiState by filesViewModel.uiState.collectAsState()
-                    val savedCredentials by UserPreferencesRepository(this@MainActivity).savedCredentialsFlow.collectAsState(initial = Triple(null, null, null))
+                    val savedCredentials by chatViewModel.userPrefs.savedCredentialsFlow.collectAsState(initial = Triple(null, null, null))
                     val savedUrl = savedCredentials.first
                     
                     var currentTab by remember { mutableStateOf(0) }
+                    var isScanningQR by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(intent) {
+                        intent?.data?.let { uri ->
+                            if (uri.scheme == "antimatter" && uri.host == "connect") {
+                                val url = uri.getQueryParameter("url")
+                                val token = uri.getQueryParameter("token")
+                                if (url != null && token != null) {
+                                    chatViewModel.connectManually(url, "token", token)
+                                }
+                            }
+                        }
+                    }
                     
-                    if (!savedUrl.isNullOrEmpty()) {
+                    if (isScanningQR) {
+                        QRScannerScreen(
+                            onQRScanned = { url, token, cfId, cfSecret ->
+                                isScanningQR = false
+                                // Since we decided the token isn't a Cloudflare client ID, but rather an auth token,
+                                // we'll connect with it.
+                                // Our QR URI: antimatter://connect?url=wss://...&token=...&cfid=...&cfsec=...
+                                val fullUrl = "$url?token=$token"
+                                chatViewModel.connectManually(fullUrl, cfId, cfSecret)
+                            },
+                            onNavigateBack = { isScanningQR = false }
+                        )
+                    } else if (!savedUrl.isNullOrEmpty()) {
                         if (filesUiState.viewedFilePath != null) {
                             FileViewScreen(
                                 uiState = filesUiState,
-                                onBack = { filesViewModel.closeFile() }
+                                onBack = { filesViewModel.closeFile() },
+                                onSave = { path, content -> filesViewModel.writeFile(path, content) }
                             )
                         } else {
                             Scaffold(
@@ -70,6 +99,12 @@ class MainActivity : ComponentActivity() {
                                             onClick = { currentTab = 1 },
                                             alwaysShowLabel = false
                                         )
+                                        NavigationBarItem(
+                                            icon = { Icon(Icons.Default.BugReport, contentDescription = "Debug") },
+                                            selected = currentTab == 2,
+                                            onClick = { currentTab = 2 },
+                                            alwaysShowLabel = false
+                                        )
                                     }
                                 }
                             ) { paddingValues ->
@@ -81,15 +116,27 @@ class MainActivity : ComponentActivity() {
                                             onCancel = { chatViewModel.cancelResponse() },
                                             onNewConversation = { chatViewModel.startNewConversation() },
                                             onSubscribeConversation = { id -> chatViewModel.subscribeConversation(id) },
-                                            onAcceptEdits = { /* TODO */ },
-                                            onRejectEdits = { /* TODO */ },
+                                            onAcceptEdits = { chatViewModel.acceptEdits() },
+                                            onRejectEdits = { chatViewModel.rejectEdits() },
+                                            onChangeModel = { chatViewModel.changeModel() },
                                             onDisconnect = { chatViewModel.disconnectManually() }
                                         )
-                                    } else {
+                                    } else if (currentTab == 1) {
                                         FilesScreen(
                                             uiState = filesUiState,
                                             onRefresh = { filesViewModel.loadFileTree() },
-                                            onOpenFile = { path -> filesViewModel.openFile(path) }
+                                            onOpenFile = { path -> filesViewModel.openFile(path) },
+                                            onCreateNode = { path, isDir -> filesViewModel.createNode(path, isDir) }
+                                        )
+                                    } else if (currentTab == 2) {
+                                        DebugScreen(
+                                            uiState = chatUiState,
+                                            onContinue = { chatViewModel.debugContinue() },
+                                            onStepOver = { chatViewModel.debugStepOver() },
+                                            onStepInto = { chatViewModel.debugStepInto() },
+                                            onStepOut = { chatViewModel.debugStepOut() },
+                                            onRestart = { chatViewModel.debugRestart() },
+                                            onStop = { chatViewModel.debugStop() }
                                         )
                                     }
                                 }
@@ -103,7 +150,8 @@ class MainActivity : ComponentActivity() {
                             savedClientSecret = savedCredentials.third,
                             onConnectClick = { url, clientId, clientSecret -> 
                                 chatViewModel.connectManually(url, clientId, clientSecret) 
-                            }
+                            },
+                            onScanQRClick = { isScanningQR = true }
                         )
                     }
                 }

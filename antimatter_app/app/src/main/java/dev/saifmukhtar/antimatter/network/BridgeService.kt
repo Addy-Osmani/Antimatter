@@ -9,13 +9,30 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import android.content.pm.ServiceInfo
 import dev.saifmukhtar.antimatter.AntimatterApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class BridgeService : Service() {
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        createAlertChannel()
+        
+        val webSocket = (application as AntimatterApp).webSocket
+        serviceScope.launch {
+            webSocket.messages.collect { message ->
+                if (message is InboundMessage.SystemAlert) {
+                    showSystemAlert(message.title, message.body)
+                }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -26,7 +43,11 @@ class BridgeService : Service() {
             .setOngoing(true)
             .build()
 
-        startForeground(1, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            startForeground(1, notification)
+        }
         
         return START_STICKY
     }
@@ -47,5 +68,32 @@ class BridgeService : Service() {
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
         }
+    }
+
+    private fun createAlertChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "alert_channel",
+                "System Alerts",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "High priority alerts from Antigravity IDE"
+            }
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun showSystemAlert(title: String, body: String) {
+        val notification = NotificationCompat.Builder(this, "alert_channel")
+            .setContentTitle(title)
+            .setContentText(body)
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(System.currentTimeMillis().toInt(), notification)
     }
 }

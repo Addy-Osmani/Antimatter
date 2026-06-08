@@ -36,6 +36,7 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
             webSocket.messages.collect { message ->
                 when (message) {
                     is InboundMessage.FileTree -> {
+                        android.util.Log.d("FilesViewModel", "Received FileTree with ${message.tree.size} items")
                         _uiState.update { it.copy(fileTree = message.tree, isLoadingTree = false) }
                     }
                     is InboundMessage.FileContent -> {
@@ -47,6 +48,9 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
                             )
                         }
                     }
+                    is InboundMessage.Error -> {
+                        _uiState.update { it.copy(isLoadingTree = false, isLoadingFile = false) }
+                    }
                     else -> {}
                 }
             }
@@ -54,6 +58,7 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadFileTree(path: String? = null) {
+        android.util.Log.d("FilesViewModel", "loadFileTree called for path: $path")
         _uiState.update { it.copy(isLoadingTree = true) }
         webSocket.sendMessage(OutboundMessage.GetFiles(path))
     }
@@ -65,5 +70,15 @@ class FilesViewModel(application: Application) : AndroidViewModel(application) {
 
     fun closeFile() {
         _uiState.update { it.copy(viewedFilePath = null, viewedFileContent = null, viewedFileLanguage = null) }
+    }
+
+    fun writeFile(path: String, content: String) {
+        webSocket.sendMessage(OutboundMessage.WriteFile(path, content))
+        // Optimistically update viewed content
+        _uiState.update { it.copy(viewedFileContent = content) }
+    }
+
+    fun createNode(path: String, isDirectory: Boolean) {
+        webSocket.sendMessage(OutboundMessage.CreateNode(path, isDirectory))
     }
 }

@@ -1,0 +1,24 @@
+Categories:
+  - Development
+License: MIT
+AuthorName: Saif Mukhtar
+AuthorEmail: saifmukhtar@saifmukhtar.dev
+SourceCode: https://github.com/saifmukhtar/antimatter
+IssueTracker: https://github.com/saifmukhtar/antimatter/issues
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.1.0
+CurrentVersionCode: 1
+
+Builds:
+  - versionName: 0.1.0
+    versionCode: 1
+    commit: v0.1.0
+    subdir: antimatter_app
+    gradle:
+      - yes
+    gradleprops:
+      - productFlavors=foss
+
+AutoName: Antimatter

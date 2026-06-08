@@ -26,6 +26,16 @@ android {
         versionName = "0.1.0"
     }
 
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("foss") {
+            dimension = "distribution"
+        }
+        create("standard") {
+            dimension = "distribution"
+        }
+    }
+
     signingConfigs {
         create("release") {
             if (keystorePropertiesFile.exists()) {
@@ -44,10 +54,12 @@ android {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = false
         }
         debug {
             isDebuggable = true
             applicationIdSuffix = ".debug"
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = true
         }
     }
 
@@ -99,6 +111,16 @@ dependencies {
 
     // DataStore (Persistence)
     implementation(libs.androidx.datastore.preferences)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // QR Code Scanning (CameraX + ML Kit)
+    val cameraxVersion = "1.3.1"
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
 
     // Markdown rendering with syntax highlighting
     implementation(libs.markwon.core)
@@ -108,7 +130,17 @@ dependencies {
     implementation(libs.markwon.ext.tables)
     implementation(libs.markwon.ext.strikethrough)
 
+    // Firebase (Crashlytics)
+    "standardImplementation"(platform(libs.firebase.bom))
+    "standardImplementation"(libs.firebase.crashlytics)
+
     debugImplementation(libs.androidx.ui.tooling)
+}
+
+val isStandard = gradle.startParameter.taskNames.any { it.contains("Standard", ignoreCase = true) } || gradle.startParameter.taskNames.isEmpty()
+if (isStandard) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 configurations.all {

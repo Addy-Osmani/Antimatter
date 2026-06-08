@@ -26,7 +26,9 @@ data class ChatUiState(
     val cloudflareUrl: String? = null,
     val currentModel: String = "gemini-2.5-pro",
     val error: String? = null,
-    val history: List<dev.saifmukhtar.antimatter.network.ConversationSummary> = emptyList()
+    val history: List<dev.saifmukhtar.antimatter.network.ConversationSummary> = emptyList(),
+    val isDebugActive: Boolean = false,
+    val terminalOutput: String = ""
 )
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
@@ -34,7 +36,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val webSocket: BridgeWebSocket
         get() = (getApplication<Application>() as AntimatterApp).webSocket
 
-    private val userPrefs = UserPreferencesRepository(application)
+    val userPrefs = UserPreferencesRepository(application)
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
@@ -101,6 +103,22 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     state.copy(steps = newSteps)
                 }
             }
+            is InboundMessage.StepBatch -> {
+                _uiState.update { state ->
+                    val newSteps = state.steps.toMutableList()
+                    message.steps.forEach { batchStep ->
+                        if (batchStep.index < newSteps.size) {
+                            newSteps[batchStep.index] = batchStep.step
+                        } else {
+                            while (newSteps.size < batchStep.index) {
+                                newSteps.add(TrajectoryStep(case = "unknown", value = "..."))
+                            }
+                            newSteps.add(batchStep.step)
+                        }
+                    }
+                    state.copy(steps = newSteps)
+                }
+            }
             is InboundMessage.Generating -> {
                 _uiState.update {
                     it.copy(isGenerating = true, conversationId = message.conversationId)
@@ -124,8 +142,19 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             is InboundMessage.HistoryList -> {
                 _uiState.update { it.copy(history = message.conversations) }
             }
+            is InboundMessage.DebugStatus -> {
+                _uiState.update { it.copy(isDebugActive = message.isActive) }
+            }
+            is InboundMessage.TerminalOutput -> {
+                _uiState.update { it.copy(terminalOutput = it.terminalOutput + message.content) }
+            }
             is InboundMessage.Error -> {
                 _uiState.update { it.copy(error = message.message) }
+                // Auto-dismiss error after 5 seconds
+                viewModelScope.launch {
+                    kotlinx.coroutines.delay(5000)
+                    _uiState.update { if (it.error == message.message) it.copy(error = null) else it }
+                }
             }
             else -> {} // Handle FileTree, FileContent etc in a separate ViewModel or UI state
         }
@@ -180,6 +209,18 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun rejectEdits() {
         webSocket.sendMessage(OutboundMessage.RejectEdits())
     }
+    
+    fun changeModel() {
+        webSocket.sendMessage(OutboundMessage.ChangeModel())
+    }
+    
+    // Debug Controls
+    fun debugContinue() { webSocket.sendMessage(OutboundMessage.DebugContinue()) }
+    fun debugStepOver() { webSocket.sendMessage(OutboundMessage.DebugStepOver()) }
+    fun debugStepInto() { webSocket.sendMessage(OutboundMessage.DebugStepInto()) }
+    fun debugStepOut() { webSocket.sendMessage(OutboundMessage.DebugStepOut()) }
+    fun debugRestart() { webSocket.sendMessage(OutboundMessage.DebugRestart()) }
+    fun debugStop() { webSocket.sendMessage(OutboundMessage.DebugStop()) }
     
     fun dismissError() {
         _uiState.update { it.copy(error = null) }
