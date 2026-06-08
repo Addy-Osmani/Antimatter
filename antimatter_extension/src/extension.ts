@@ -710,7 +710,7 @@ async function startQuickTunnel(port: number): Promise<void> {
       if (match && match[0]) {
         cloudflareUrl = match[0].replace('https://', 'wss://');
         log(`Quick Tunnel URL: ${cloudflareUrl}`);
-        broadcast({ type: 'CLOUDFLARE_URL', url: cloudflareUrl });
+        broadcast({ type: 'CLOUDFLARE_URL', url: cloudflareUrl as string });
         resolve();
       }
     });
