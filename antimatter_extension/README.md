@@ -32,11 +32,9 @@ You can customize the bridge by going to VS Code Settings and searching for `Ant
 |---|---|---|
 | `antimatter.autoStart` | Automatically start the bridge server when Antigravity opens | `true` |
 | `antimatter.port` | WebSocket port for the Antimatter bridge server | `8765` |
-| `antimatter.useLocalTunnel` | Enable LocalTunnel for a persistent public URL | `false` |
-| `antimatter.localtunnelSubdomain` | Custom subdomain for LocalTunnel (e.g. 'my-bridge' -> my-bridge.loca.lt) | `"saifs-antimatter"` |
 | `antimatter.cloudflareHostname` | Designated Cloudflare Zero Trust hostname (e.g. ide.mydomain.com) | `""` |
 
-*(Note: We have officially deprecated the insecure Localtunnel fallback to protect your host environment from MITM attacks).*
+*(Note: We have completely removed the insecure Localtunnel dependency. If `cloudflareHostname` is left blank, the extension will now automatically spawn a free Cloudflare Quick Tunnel (`trycloudflare.com`) and secure it with a 256-bit Bearer token).*
 
 ## Commands
 You can trigger these via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):

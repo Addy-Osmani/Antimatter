@@ -10,8 +10,9 @@ Antimatter is an open-source bridge ecosystem that connects your mobile device d
 
 By connecting your phone to the IDE, you can view your active AI agent's trajectory, monitor its thought process, read logs in real-time, send new prompts, and browse your workspace files—all from your mobile device.
 
-![Chat Screen](docs/images/chat-screen.png)
-![File Browser Screen](docs/images/file-browser.png)
+![First Chat Screen](docs/images/first_chat.png)
+![Workspace Screen](docs/images/workspace.png)
+![Code Viewer](docs/images/code_viewer.png)
 
 ---
 
@@ -22,6 +23,7 @@ Because this repository contains multiple sub-projects, we have split the docume
 - [**VS Code Extension README**](antimatter_extension/README.md) - Learn how the bridge works.
 - [**Android App README**](antimatter_app/README.md) - Learn how the mobile client works.
 - [**Architecture Deep Dive**](ARCHITECTURE.md) - Understand how we reverse-engineered the IDE hooks without official APIs.
+- [**Zero Trust Guide**](ZERO_TRUST.md) - Learn how to set up Cloudflare Zero Trust (UI & CLI guides).
 - [**Security Policy**](SECURITY.md) - Read about our Bearer Tokens, CSWSH protections, and Rate Limiting.
 - [**Changelog**](CHANGELOG.md) - Detailed technical tracking of all project updates.
 - [**Contributing Guidelines**](CONTRIBUTING.md) - How to run this project locally and submit PRs.
@@ -48,7 +50,7 @@ This project leverages several modern open-source technologies:
 - **Android App**: Kotlin, Jetpack Compose, OkHttp (WebSockets), Markwon (Markdown rendering).
 - **Barcode Scanning**: Pure-Java `com.google.zxing:core` ensuring 100% FOSS compliance for F-Droid.
 - **VS Code Extension**: TypeScript, Node.js, `ws` (WebSocket server).
-- **Secure Networking**: Cloudflare Zero Trust (`cloudflared`).
+- **Secure Networking**: Cloudflare Zero Trust (`cloudflared`) and free automatic Quick Tunnels.
 
 ---
 
