@@ -5,7 +5,8 @@ import * as net from 'net';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import localtunnel from 'localtunnel';
+import * as crypto from 'crypto';
+import * as QRCode from 'qrcode';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  TYPES
@@ -65,10 +66,14 @@ interface FileNode {
 // ─────────────────────────────────────────────────────────────────────────────
 
 let wss: WebSocketServer | null = null;
-let localTunnelInstance: localtunnel.Tunnel | null = null;
+let quickTunnelProcess: child_process.ChildProcess | null = null;
 let cloudflareUrl: string | null = null;
 let statusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
+let globalPairingToken: string = '';
+
+// Security: IP-based connection rate limiting
+const ipFailureCounts = new Map<string, { count: number, resetAt: number }>();
 
 // Conversation tracking
 let currentConversationId: string | null = null;
@@ -97,6 +102,13 @@ export function activate(context: vscode.ExtensionContext) {
   outputChannel = vscode.window.createOutputChannel('Antimatter Bridge');
   log('Antimatter Bridge activating...');
 
+  // Initialize or retrieve pairing token
+  globalPairingToken = context.globalState.get<string>('pairingToken', '');
+  if (!globalPairingToken) {
+    globalPairingToken = crypto.randomBytes(32).toString('base64url');
+    context.globalState.update('pairingToken', globalPairingToken);
+  }
+
   // Status bar item showing connection count
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBarItem.command = 'antimatter.showStatus';
@@ -110,6 +122,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('antimatter.startBridge', () => startBridge(context)),
     vscode.commands.registerCommand('antimatter.stopBridge', stopBridge),
     vscode.commands.registerCommand('antimatter.showStatus', showStatus),
+    vscode.commands.registerCommand('antimatter.showPairingQR', showPairingQR),
   );
 
   // Auto-start if configured
@@ -158,7 +171,34 @@ async function startBridge(context: vscode.ExtensionContext) {
 
     wss.on('connection', (ws, req) => {
       const remoteAddr = req.socket.remoteAddress ?? 'unknown';
-      log(`Client connected: ${remoteAddr}`);
+      const now = Date.now();
+
+      // Check IP rate limit
+      const failData = ipFailureCounts.get(remoteAddr);
+      if (failData && failData.count >= 5 && now < failData.resetAt) {
+        log(`Client blocked due to rate limiting: ${remoteAddr}`);
+        ws.close(4000, 'Rate Limited');
+        return;
+      }
+
+      // Verify token
+      let token = '';
+      try {
+        const urlObj = new URL(req.url || '', 'http://localhost');
+        token = urlObj.searchParams.get('token') || '';
+      } catch (e) { }
+
+      if (token !== globalPairingToken) {
+        log(`Unauthorized connection attempt from ${remoteAddr} (Invalid Token)`);
+        
+        const count = (failData?.count || 0) + 1;
+        ipFailureCounts.set(remoteAddr, { count, resetAt: now + 60000 }); // 1 min ban
+        
+        ws.close(4001, 'Unauthorized');
+        return;
+      }
+
+      log(`Client connected and authenticated: ${remoteAddr}`);
       clients.add(ws);
       updateStatusBar();
 
@@ -206,11 +246,8 @@ async function startBridge(context: vscode.ExtensionContext) {
       vscode.window.showErrorMessage(`Antimatter Bridge error: ${err.message}`);
     });
 
-    // Start mDNS discovery broadcast removed per user request
-
-    // Tunnel Handling (Cloudflared or LocalTunnel)
+    // Tunnel Handling (Cloudflared)
     const cloudflareHostname = config.get<string>('cloudflareHostname', '').trim();
-    const useLocalTunnel = config.get<boolean>('useLocalTunnel', true);
 
     if (cloudflareHostname) {
       log(`Using designated Cloudflare Zero Trust hostname: ${cloudflareHostname}`);
@@ -218,8 +255,8 @@ async function startBridge(context: vscode.ExtensionContext) {
       // Send URL slightly delayed to ensure clients that might connect receive it,
       // though typically clients connect AFTER the URL is known.
       setTimeout(() => broadcast({ type: 'CLOUDFLARE_URL', url: cloudflareUrl as string }), 500);
-    } else if (useLocalTunnel) {
-      await startLocalTunnel(port);
+    } else {
+      await startQuickTunnel(port);
     }
 
     // Start polling for conversation state changes
@@ -243,9 +280,9 @@ function stopBridge() {
     pollingTimer = null;
   }
   
-  if (localTunnelInstance) {
-    localTunnelInstance.close();
-    localTunnelInstance = null;
+  if (quickTunnelProcess) {
+    quickTunnelProcess.kill();
+    quickTunnelProcess = null;
   }
 
   cloudflareUrl = null;
@@ -262,6 +299,61 @@ function stopBridge() {
   }
 
   updateStatusBar();
+}
+
+async function showPairingQR() {
+  const url = cloudflareUrl;
+  if (!url) {
+    vscode.window.showErrorMessage('Antimatter Bridge is still starting up or failed to get a tunnel URL. Check logs.');
+    return;
+  }
+
+  const pairingUrl = `antimatter://connect?url=${encodeURIComponent(url)}&token=${encodeURIComponent(globalPairingToken)}`;
+  
+  try {
+    const qrDataUrl = await QRCode.toDataURL(pairingUrl, { 
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 400,
+      color: { dark: '#000000FF', light: '#FFFFFFFF' }
+    });
+
+    const panel = vscode.window.createWebviewPanel(
+      'antimatterQR',
+      'Antimatter Pairing QR',
+      vscode.ViewColumn.One,
+      { enableScripts: true }
+    );
+
+    panel.webview.html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: var(--vscode-editor-background); color: var(--vscode-editor-foreground); font-family: var(--vscode-font-family); margin: 0; }
+          .container { text-align: center; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+          h2 { color: #333; margin-top: 0; }
+          img { max-width: 100%; border: 1px solid #eee; border-radius: 4px; }
+          p { margin-top: 1rem; color: #666; max-width: 400px; font-size: 14px; }
+          .token-box { margin-top: 1rem; background: #f4f4f4; padding: 0.5rem; border-radius: 6px; font-family: monospace; color: #333; word-break: break-all; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>Pair Device</h2>
+          <img src="${qrDataUrl}" alt="Pairing QR Code"/>
+          <p>Scan this QR code with the Antimatter Android app to securely connect your device.</p>
+          <p><strong>Manual Connection Token:</strong></p>
+          <div class="token-box">${globalPairingToken}</div>
+        </div>
+      </body>
+      </html>
+    `;
+  } catch (err) {
+    vscode.window.showErrorMessage('Failed to generate QR code.');
+    log(`QR Generation Error: ${err}`);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -598,41 +690,45 @@ async function buildFileTree(dirPath: string, depth: number): Promise<FileNode[]
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  TUNNEL UTILITIES (LocalTunnel)
+//  TUNNEL UTILITIES (Cloudflare Quick Tunnels)
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function startLocalTunnel(port: number): Promise<void> {
-  const config = vscode.workspace.getConfiguration('antimatter');
-  const subdomain = config.get<string>('localtunnelSubdomain', '');
+async function startQuickTunnel(port: number): Promise<void> {
+  log(`Starting Cloudflare Quick Tunnel on port ${port}...`);
+  return new Promise((resolve) => {
+    quickTunnelProcess = child_process.spawn('cloudflared', [
+      'tunnel',
+      '--url',
+      `http://127.0.0.1:${port}`,
+      '--protocol',
+      'http2'
+    ]);
 
-  log(`Starting LocalTunnel on port ${port}...`);
-  try {
-    const opts: any = { port };
-    if (subdomain) {
-      opts.subdomain = subdomain;
-    }
-    
-    localTunnelInstance = await localtunnel(opts);
-    
-    localTunnelInstance.on('error', err => {
-      log(`LocalTunnel error: ${err.message}`);
-    });
-
-    localTunnelInstance.on('close', () => {
-      log('LocalTunnel closed.');
-      cloudflareUrl = null;
-      if (!isIntentionalClose && wss) {
-        log('Restarting LocalTunnel in 5s...');
-        setTimeout(() => startLocalTunnel(port), 5000);
+    quickTunnelProcess.stderr?.on('data', (data) => {
+      const output = data.toString();
+      const match = output.match(/https:\/\/[a-zA-Z0-9-]+\.trycloudflare\.com/);
+      if (match && match[0]) {
+        cloudflareUrl = match[0].replace('https://', 'wss://');
+        log(`Quick Tunnel URL: ${cloudflareUrl}`);
+        broadcast({ type: 'CLOUDFLARE_URL', url: cloudflareUrl });
+        resolve();
       }
     });
 
-    cloudflareUrl = localTunnelInstance.url.replace('https://', 'wss://');
-    log(`LocalTunnel URL: ${cloudflareUrl}`);
-    broadcast({ type: 'CLOUDFLARE_URL', url: cloudflareUrl });
-  } catch (err: any) {
-    log(`Failed to start LocalTunnel: ${err.message}`);
-  }
+    quickTunnelProcess.on('close', (code) => {
+      log(`Quick Tunnel closed with code ${code}.`);
+      cloudflareUrl = null;
+      if (!isIntentionalClose && wss) {
+        log('Restarting Quick Tunnel in 5s...');
+        setTimeout(() => startQuickTunnel(port), 5000);
+      }
+    });
+    
+    quickTunnelProcess.on('error', (err) => {
+      log(`Failed to start Cloudflare Quick Tunnel: ${err.message}. Make sure 'cloudflared' is installed.`);
+      resolve(); // resolve so it doesn't block forever
+    });
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

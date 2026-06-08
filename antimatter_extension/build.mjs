@@ -10,7 +10,7 @@ const buildOptions = {
   external: ['vscode'],       // vscode is provided by the host — never bundle it
   format: 'cjs',
   platform: 'node',
-  target: 'node18',
+  target: 'node22',
   sourcemap: false,
   minify: true,              // keep readable for debugging
   logLevel: 'info',

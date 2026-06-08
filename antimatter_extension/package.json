@@ -1,8 +1,8 @@
 {
-  "name": "antimatter-bridge",
-  "displayName": "Antimatter Bridge",
+  "name": "antimatter",
+  "displayName": "Antimatter",
   "description": "Bridges your live Antigravity IDE session to your Android Antimatter app over WebSocket.",
-  "version": "0.1.3",
+  "version": "0.1.7",
   "license": "MIT",
   "author": "Saif Mukhtar",
   "homepage": "https://saifmukhtar.dev",
@@ -11,8 +11,13 @@
     "vscode": "^1.80.0"
   },
   "categories": [
+    "Machine Learning",
     "Other"
   ],
+  "galleryBanner": {
+    "color": "#0d0d0d",
+    "theme": "dark"
+  },
   "icon": "icon.png",
   "repository": {
     "type": "git",
@@ -33,10 +38,18 @@
       {
         "command": "antimatter.showStatus",
         "title": "Antimatter: Show Connection Status"
+      },
+      {
+        "command": "antimatter.showPairingQR",
+        "title": "Antimatter: Show Pairing QR"
+      },
+      {
+        "command": "antimatter.setCloudflareCredentials",
+        "title": "Antimatter: Set Cloudflare Credentials"
       }
     ],
     "configuration": {
-      "title": "Antimatter Bridge",
+      "title": "Antimatter",
       "properties": {
         "antimatter.port": {
           "type": "number",
@@ -48,20 +61,10 @@
           "default": true,
           "description": "Automatically start the bridge server when Antigravity opens"
         },
-        "antimatter.useLocalTunnel": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable LocalTunnel for a persistent public URL"
-        },
         "antimatter.cloudflareHostname": {
           "type": "string",
           "default": "",
-          "description": "Designated Cloudflare Zero Trust hostname (e.g. ide.mydomain.com). If empty, falls back to Localtunnel."
-        },
-        "antimatter.localtunnelSubdomain": {
-          "type": "string",
-          "default": "saifs-antimatter",
-          "description": "Custom subdomain for LocalTunnel (e.g. 'my-bridge' -> my-bridge.loca.lt)"
+          "description": "Designated Cloudflare Zero Trust hostname (e.g. ide.mydomain.com)"
         }
       }
     }
@@ -74,16 +77,16 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/qrcode": "^1.5.6",
     "@types/vscode": "^1.80.0",
     "@types/ws": "^8.5.10",
     "@vscode/vsce": "^3.9.2",
     "esbuild": "^0.28.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.6.2"
   },
   "dependencies": {
-    "@types/localtunnel": "^2.0.4",
-    "localtunnel": "^2.0.2",
-    "ws": "^8.17.0"
+    "qrcode": "^1.5.4",
+    "ws": "^8.21.0"
   },
   "overrides": {
     "axios": "^1.7.9"
