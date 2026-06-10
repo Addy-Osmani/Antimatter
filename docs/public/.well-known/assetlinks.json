@@ -1,0 +1,11 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "dev.saifmukhtar.antimatter",
+    "sha256_cert_fingerprints": [
+      "CC:FE:C9:37:02:A7:53:57:E5:D3:6E:F0:C4:B8:2E:CD:50:53:C3:39:9C:25:DC:B6:7C:A8:28:AC:AB:45:DA:7F",
+      "C6:5D:BE:9B:5B:33:BE:C6:34:BF:90:1A:C9:C0:59:98:EF:A5:BC:CB:42:1B:32:8F:B2:9A:D0:69:8A:54:4C:DC"
+    ]
+  }
+}]
