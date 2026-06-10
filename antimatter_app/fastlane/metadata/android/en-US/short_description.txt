@@ -1,1 +1,0 @@
-A secure, open-source bridge to control your local Google AntiGravity IDE.

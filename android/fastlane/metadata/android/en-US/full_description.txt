@@ -1,0 +1,14 @@
+Antimatter is an open-source bridge ecosystem that connects your mobile device directly to the local Google AntiGravity IDE running on your host machine.
+
+Because the AntiGravity IDE does not expose a public API for external control, Antimatter reverse-engineers the IDE's state by tailing the local file system (transcript.jsonl) and injecting commands back into the IDE via native VS Code Command Palette hooks.
+
+Features:
+* Real-Time Mirroring: See exactly what your AI agent is doing on your phone.
+* Remote Control: Send chat messages directly to your agent.
+* Remote Terminal Execution: Full remote shell execution secured by Biometric Fingerprint locks.
+* Partial Text Selection: Long-press AI chats or code blocks to trigger native copy/share selection tools.
+* Diff Review: Review code modifications and accept/reject them remotely.
+* 100% Tracker Free: The entire app is 100% free of proprietary trackers.
+* Enterprise Security: Requires a secure 256-bit Bearer Token, features strict Origin validation to prevent CSWSH attacks, and utilizes Token Bucket Rate Limiting to prevent DoS.
+
+(Disclaimer: Antimatter is a community-driven project and is not an official product of Google.)

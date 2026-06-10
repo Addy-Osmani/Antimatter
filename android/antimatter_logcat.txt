@@ -1,0 +1,200 @@
+--------------------------------------------------------
+✅ App is running with PID: 7643
+--------------------------------------------------------
+--------- beginning of main
+06-10 17:18:31.830  7643  7643 I ntimatter.debug: Late-enabling -Xcheck:jni
+06-10 17:18:31.847  7643  7643 I ntimatter.debug: Using generational CollectorTypeCMC GC.
+06-10 17:18:31.853  7643  7643 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+06-10 17:18:32.069  7643  7643 D nativeloader: Configuring clns-9 for other apk /data/app/~~3f32ymCOJ7Div-TK-eSw9A==/dev.saifmukhtar.antimatter.debug-yjsZ1MKN5EMDXKZdIlACfg==/base.apk. target_sdk_version=35, uses_libraries=, library_path=/data/app/~~3f32ymCOJ7Div-TK-eSw9A==/dev.saifmukhtar.antimatter.debug-yjsZ1MKN5EMDXKZdIlACfg==/lib/arm64:/data/app/~~3f32ymCOJ7Div-TK-eSw9A==/dev.saifmukhtar.antimatter.debug-yjsZ1MKN5EMDXKZdIlACfg==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/dev.saifmukhtar.antimatter.debug
+06-10 17:18:32.070  7643  7643 D CompatChangeReporter: Compat change id reported: 202956589; UID 10269; state: ENABLED
+06-10 17:18:32.073  7643  7643 I ntimatter.debug: AssetManager2(0xb400007b0f5cd298) locale list changing from [] to [en-IN]
+06-10 17:18:32.075  7643  7643 I Perf    : Connecting to perf service.
+06-10 17:18:32.078  7643  7643 V GraphicsEnvironment: Currently set values for:
+06-10 17:18:32.078  7643  7643 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[com.android.angle, com.linecorp.b612.android, com.campmobile.snow, com.google.android.apps.tachyon]
+06-10 17:18:32.079  7643  7643 V GraphicsEnvironment:   angle_gl_driver_selection_values=[angle, native, native, native]
+06-10 17:18:32.079  7643  7643 V GraphicsEnvironment: dev.saifmukhtar.antimatter.debug is not listed in per-application setting
+06-10 17:18:32.079  7643  7643 V GraphicsEnvironment: ANGLE allowlist from config: 
+06-10 17:18:32.079  7643  7643 V GraphicsEnvironment: dev.saifmukhtar.antimatter.debug is not listed in ANGLE allowlist or settings, returning default
+06-10 17:18:32.079  7643  7643 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+06-10 17:18:32.094  7643  7643 D CompatChangeReporter: Compat change id reported: 279646685; UID 10269; state: ENABLED
+--------- beginning of system
+06-10 17:18:32.106  7643  7668 I DisplayManager: Choreographer implicitly registered for the refresh rate.
+06-10 17:18:32.110  7643  7643 I ntimatter.debug: AssetManager2(0xb400007b0f6078f8) locale list changing from [] to [en-IN]
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: QUALCOMM build                   : f1c98d72b3, I45c5214ffd
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: Build Date                       : 07/11/25
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: OpenGL ES Shader Compiler Version: E031.47.18.36
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: Local Branch                     : 
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: Remote Branch                    : refs/tags/AU_LINUX_ANDROID_LA.VENDOR.14.3.0.11.00.00.973.839
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: Remote Branch                    : NONE
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: Reconstruct Branch               : NOTHING
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: Build Config                     : S L 16.1.2 AArch64
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: Driver Path                      : /vendor/lib64/egl/libGLESv2_adreno.so
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: Driver Version                   : 0800.49
+06-10 17:18:32.111  7643  7668 I AdrenoGLES-0: Process Name                     : dev.saifmukhtar.antimatter.debug
+06-10 17:18:32.118  7643  7668 I AdrenoGLES-0: PFP: 0x01100079, ME: 0x00000000
+06-10 17:18:32.122  7643  7643 E ashmem  : Pinning is deprecated since Android Q. Please use trim or other methods.
+06-10 17:18:32.124  7643  7668 I AdrenoUtils: <ReadGpuID:366>: Reading chip ID through GSL
+06-10 17:18:32.143  7643  7643 D CompatChangeReporter: Compat change id reported: 309578419; UID 10269; state: ENABLED
+06-10 17:18:32.144  7643  7643 D DesktopModeFlags: Toggle override initialized to: OVERRIDE_UNSET
+06-10 17:18:32.159  7643  7643 I ContentCaptureHelper: Setting logging level to OFF
+06-10 17:18:32.167  7643  7643 D CompatChangeReporter: Compat change id reported: 352594277; UID 10269; state: ENABLED
+06-10 17:18:32.170  7643  7643 D CompatChangeReporter: Compat change id reported: 349153669; UID 10269; state: ENABLED
+06-10 17:18:32.171  7643  7672 E HWUI    : attachRenderThreadToJvm
+06-10 17:18:32.171  7643  7672 E HWUI    : AM IS NOT NULL!
+06-10 17:18:32.171  7643  7673 E HWUI    : attachRenderThreadToJvm
+06-10 17:18:32.171  7643  7673 E HWUI    : AM IS NOT NULL!
+06-10 17:18:32.581  7643  7643 D nativeloader: Load /data/app/~~3f32ymCOJ7Div-TK-eSw9A==/dev.saifmukhtar.antimatter.debug-yjsZ1MKN5EMDXKZdIlACfg==/base.apk!/lib/arm64-v8a/libsqlcipher.so using class loader ns clns-9 (caller=/data/app/~~3f32ymCOJ7Div-TK-eSw9A==/dev.saifmukhtar.antimatter.debug-yjsZ1MKN5EMDXKZdIlACfg==/base.apk!classes15.dex): ok
+06-10 17:18:32.613  7643  7652 I ntimatter.debug: Compiler allocated 5158KB to compile void android.view.ViewRootImpl.performTraversals()
+06-10 17:18:32.662  7643  7643 W ntimatter.debug: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+06-10 17:18:32.662  7643  7643 W ntimatter.debug: Common causes for lock verification issues are non-optimized dex code
+06-10 17:18:32.662  7643  7643 W ntimatter.debug: and incorrect proguard optimizations.
+06-10 17:18:32.662  7643  7643 W ntimatter.debug: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+06-10 17:18:32.662  7643  7643 W ntimatter.debug: Method java.lang.Object androidx.compose.runtime.snapshots.SnapshotStateList.mutate(kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+06-10 17:18:32.662  7643  7643 W ntimatter.debug: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+06-10 17:18:32.662  7643  7643 W ntimatter.debug: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+06-10 17:18:32.786  7643  7643 D NtViewRootImpl: mPopUpViewOffsets: offset=(0.0, 0.0), scale=(1.0, 1.0)
+06-10 17:18:32.857  7643  7658 I HWUI    : Davey! duration=720ms; Flags=1, FrameTimelineVsyncId=29327130, IntendedVsync=122490666611242, Vsync=122490733277906, InputEventId=0, HandleInputStart=122490739002594, AnimationStart=122490739007646, PerformTraversalsStart=122490739079990, DrawStart=122491363210198, FrameDeadline=122490683277908, FrameStartTime=122490738697803, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=122491375689938, SyncStart=122491375787855, IssueDrawCommandsStart=122491375886344, SwapBuffers=122491385618688, FrameCompleted=122491387462646, DequeueBufferDuration=10833, QueueBufferDuration=298958, GpuCompleted=122491387462646, SwapBuffersCompleted=122491386847802, DisplayPresentTime=0, CommandSubmissionCompleted=122491385618688, 
+06-10 17:18:32.864  7643  7643 I Choreographer: Skipped 38 frames!  The application may be doing too much work on its main thread.
+06-10 17:18:32.889  7643  7643 D NtViewRootImpl: mPopUpViewOffsets: offset=(0.0, 0.0), scale=(1.0, 1.0)
+06-10 17:18:32.908  7643  7643 D InsetsController: hide(ime(), fromIme=false)
+06-10 17:18:32.908  7643  7643 I ImeTracker: dev.saifmukhtar.antimatter.debug:bc7daa0d: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+06-10 17:18:35.769  7643  7643 W WindowOnBackDispatcher: OnBackInvokedCallback is not enabled for the application.
+06-10 17:18:35.769  7643  7643 W WindowOnBackDispatcher: Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+06-10 17:18:35.835  7643  7712 I CameraManagerGlobal: Connecting to camera service
+06-10 17:18:35.840  7643  7712 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.841  7643  7712 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.841  7643  7712 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.841  7643  7712 W CameraManagerGlobal: [soar.cts] ignore the status update of camera: 2
+06-10 17:18:35.841  7643  7712 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.841  7643  7712 W CameraManagerGlobal: [soar.cts] ignore the status update of camera: 3
+06-10 17:18:35.841  7643  7712 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.841  7643  7712 W CameraManagerGlobal: [soar.cts] ignore the status update of camera: 4
+06-10 17:18:35.841  7643  7690 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.842  7643  7690 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.842  7643  7690 W CameraManagerGlobal: ignore the torch status update of camera: 2
+06-10 17:18:35.842  7643  7690 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.842  7643  7690 W CameraManagerGlobal: ignore the torch status update of camera: 3
+06-10 17:18:35.842  7643  7690 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.842  7643  7690 W CameraManagerGlobal: ignore the torch status update of camera: 4
+06-10 17:18:35.856  7643  7712 D CameraRepository: Added camera: 0
+06-10 17:18:35.867  7643  7712 I Camera2CameraInfo: Device Level: INFO_SUPPORTED_HARDWARE_LEVEL_3
+06-10 17:18:35.870  7643  7712 D CameraRepository: Added camera: 1
+06-10 17:18:35.870  7643  7712 I Camera2CameraInfo: Device Level: INFO_SUPPORTED_HARDWARE_LEVEL_3
+06-10 17:18:35.871  7643  7712 D CameraValidator: Verifying camera lens facing on Asteroids, lensFacingInteger: null
+06-10 17:18:35.886  7643  7643 D CameraOrientationUtil: getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+06-10 17:18:35.886  7643  7643 D CameraOrientationUtil: getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+06-10 17:18:35.898  7643  7643 D DynamicRangeResolver: Resolved dynamic range for use case androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4 to no compatible HDR dynamic ranges.
+06-10 17:18:35.898  7643  7643 D DynamicRangeResolver: DynamicRange@1bb8b04{encoding=UNSPECIFIED, bitDepth=0}
+06-10 17:18:35.898  7643  7643 D DynamicRangeResolver: ->
+06-10 17:18:35.898  7643  7643 D DynamicRangeResolver: DynamicRange@1f62b17{encoding=SDR, bitDepth=8}
+06-10 17:18:35.906  7643  7643 D CameraOrientationUtil: getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+06-10 17:18:35.906  7643  7643 D DeferrableSurface: Surface created[total_surfaces=1, used_surfaces=0](androidx.camera.core.processing.SurfaceEdge$SettableSurface@ff7d6e9}
+06-10 17:18:35.908  7643  7643 D DeferrableSurface: Surface created[total_surfaces=2, used_surfaces=0](androidx.camera.core.SurfaceRequest$2@edf8a5}
+06-10 17:18:35.908  7643  7643 D DeferrableSurface: New surface in use[total_surfaces=2, used_surfaces=1](androidx.camera.core.SurfaceRequest$2@edf8a5}
+06-10 17:18:35.909  7643  7643 D DeferrableSurface: use count+1, useCount=1 androidx.camera.core.SurfaceRequest$2@edf8a5
+06-10 17:18:35.909  7643  7643 D CameraOrientationUtil: getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+06-10 17:18:35.912  7643  7643 D CameraOrientationUtil: getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+06-10 17:18:35.913  7643  7643 D CameraOrientationUtil: getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+06-10 17:18:35.914  7643  7643 D DeferrableSurface: Surface created[total_surfaces=3, used_surfaces=1](androidx.camera.core.impl.ImmediateSurface@b123e46}
+06-10 17:18:35.915  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Use case androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260 ACTIVE
+06-10 17:18:35.915  7643  7643 D PreviewView: Surface requested by Preview.
+06-10 17:18:35.916  7643  7715 D UseCaseAttachState: Active and attached use case: [] for camera: 0
+06-10 17:18:35.917  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Use case androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525 ACTIVE
+06-10 17:18:35.917  7643  7715 D UseCaseAttachState: Active and attached use case: [] for camera: 0
+06-10 17:18:35.918  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Use cases [androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260, androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525] now ATTACHED
+06-10 17:18:35.918  7643  7643 D PreviewView: Preview transformation info updated. TransformationInfo{getCropRect=Rect(0, 0 - 1600, 1200), getRotationDegrees=90, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false}
+06-10 17:18:35.918  7643  7643 D PreviewTransform: Transformation info set: TransformationInfo{getCropRect=Rect(0, 0 - 1600, 1200), getRotationDegrees=90, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false} 1600x1200 false
+06-10 17:18:35.918  7643  7643 D CameraOrientationUtil: getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+06-10 17:18:35.918  7643  7715 D UseCaseAttachState: All use case: [androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260, androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525] for camera: 0
+06-10 17:18:35.919  7643  7715 D UseCaseAttachState: Active and attached use case: [androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260, androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525] for camera: 0
+06-10 17:18:35.920  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Resetting Capture Session
+06-10 17:18:35.920  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Releasing session in state INITIALIZED
+06-10 17:18:35.920  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Attempting to force open the camera.
+06-10 17:18:35.920  7643  7715 D CameraStateRegistry: tryOpenCamera(Camera@892e60c[id=0]) [Available Cameras: 1, Already Open: false (Previous state: null)] --> SUCCESS
+06-10 17:18:35.921  7643  7715 D CameraStateRegistry: Recalculating open cameras:
+06-10 17:18:35.921  7643  7715 D CameraStateRegistry: Camera                                       State                 
+06-10 17:18:35.921  7643  7715 D CameraStateRegistry: -------------------------------------------------------------------
+06-10 17:18:35.921  7643  7715 D CameraStateRegistry: Camera@e9dc537[id=1]                         UNKNOWN               
+06-10 17:18:35.921  7643  7715 D CameraStateRegistry: Camera@892e60c[id=0]                         OPENING               
+06-10 17:18:35.921  7643  7715 D CameraStateRegistry: -------------------------------------------------------------------
+06-10 17:18:35.921  7643  7715 D CameraStateRegistry: Open count: 1 (Max allowed: 1)
+06-10 17:18:35.921  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Opening camera.
+06-10 17:18:35.921  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Transitioning camera internal state: INITIALIZED --> OPENING
+06-10 17:18:35.921  7643  7715 D CameraStateMachine: New public camera state CameraState{type=OPENING, error=null} from OPENING and null
+06-10 17:18:35.921  7643  7715 D CameraStateMachine: Publishing new public camera state CameraState{type=OPENING, error=null}
+06-10 17:18:35.922  7643  7715 D UseCaseAttachState: All use case: [androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260, androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525] for camera: 0
+06-10 17:18:35.927  7643  7715 W libc    : Access denied finding property "persist.vendor.camera.privapp.list"
+06-10 17:18:35.928  7643  7643 D SurfaceViewImpl: Wait for new Surface creation.
+06-10 17:18:35.929  7643  7657 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.929  7643  7657 E CameraManagerGlobal: Camera 4 is not present. Ignore physical camera status change
+06-10 17:18:35.929  7643  7657 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.932  7643  7657 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.932  7643  7657 W CameraManagerGlobal: ignore the torch status update of camera: 2
+06-10 17:18:35.933  7643  7658 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.933  7643  7658 W CameraManagerGlobal: ignore the torch status update of camera: 3
+06-10 17:18:35.934  7643  7658 W libc    : Access denied finding property "vendor.camera.aux.packagelist"
+06-10 17:18:35.934  7643  7658 W CameraManagerGlobal: ignore the torch status update of camera: 4
+06-10 17:18:35.939  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Use case androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260 ACTIVE
+06-10 17:18:35.939  7643  7715 D UseCaseAttachState: Active and attached use case: [androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260, androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525] for camera: 0
+06-10 17:18:35.940  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Use case androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525 ACTIVE
+06-10 17:18:35.941  7643  7715 D UseCaseAttachState: Active and attached use case: [androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260, androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525] for camera: 0
+06-10 17:18:35.942  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} CameraDevice.onOpened()
+06-10 17:18:35.942  7643  7715 D Camera2CameraImpl: {Camera@892e60c[id=0]} Transitioning camera internal state: OPENING --> OPENED
+06-10 17:18:35.942  7643  7715 D CameraStateRegistry: Recalculating open cameras:
+06-10 17:18:35.942  7643  7715 D CameraStateRegistry: Camera                                       State                 
+06-10 17:18:35.942  7643  7715 D CameraStateRegistry: -------------------------------------------------------------------
+06-10 17:18:35.942  7643  7715 D CameraStateRegistry: Camera@e9dc537[id=1]                         UNKNOWN               
+06-10 17:18:35.942  7643  7715 D CameraStateRegistry: Camera@892e60c[id=0]                         OPEN                  
+06-10 17:18:35.942  7643  7715 D CameraStateRegistry: -------------------------------------------------------------------
+06-10 17:18:35.942  7643  7715 D CameraStateRegistry: Open count: 1 (Max allowed: 1)
+06-10 17:18:35.942  7643  7715 D CameraStateMachine: New public camera state CameraState{type=OPEN, error=null} from OPEN and null
+06-10 17:18:35.942  7643  7715 D CameraStateMachine: Publishing new public camera state CameraState{type=OPEN, error=null}
+06-10 17:18:35.943  7643  7715 D UseCaseAttachState: All use case: [androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260, androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525] for camera: 0
+06-10 17:18:35.945  7643  7715 D UseCaseAttachState: Active and attached use case: [androidx.camera.core.Preview-83cf324a-a19b-4c68-a1ed-c2844b5cced4173169260, androidx.camera.core.ImageAnalysis-1ca6d798-8051-43ad-ad06-7dc0b3686f0c136681525] for camera: 0
+06-10 17:18:35.947  7643  7643 D SurfaceViewImpl: Surface created.
+06-10 17:18:35.947  7643  7643 D SurfaceViewImpl: Surface changed. Size: 1600x1200
+06-10 17:18:35.947  7643  7643 D SurfaceViewImpl: Surface set on Preview.
+06-10 17:18:35.948  7643  7712 D SyncCaptureSessionBase: [androidx.camera.camera2.internal.SynchronizedCaptureSessionBaseImpl@828ad85] getSurface...done
+06-10 17:18:35.948  7643  7712 D CaptureSession: Opening capture session.
+06-10 17:18:35.951  7643  7712 D DeferrableSurface: use count+1, useCount=2 androidx.camera.core.SurfaceRequest$2@edf8a5
+06-10 17:18:35.951  7643  7712 D DeferrableSurface: New surface in use[total_surfaces=3, used_surfaces=2](androidx.camera.core.impl.ImmediateSurface@b123e46}
+06-10 17:18:35.951  7643  7712 D DeferrableSurface: use count+1, useCount=1 androidx.camera.core.impl.ImmediateSurface@b123e46
+06-10 17:18:36.032  7643  7712 D CaptureSession: Attempting to send capture request onConfigured
+06-10 17:18:36.033  7643  7712 D CaptureSession: Issuing request for session.
+06-10 17:18:36.033  7643  7712 D Camera2CaptureRequestBuilder: createCaptureRequest
+06-10 17:18:36.035  7643  7712 D CaptureSession: CameraCaptureSession.onConfigured() mState=OPENED
+06-10 17:18:36.035  7643  7712 D CaptureSession: CameraCaptureSession.onReady() OPENED
+06-10 17:18:36.471  7643  7712 D StreamStateObserver: Update Preview stream state to STREAMING
+06-10 17:18:37.631  7643  7772 D ProfileInstaller: Installing profile for dev.saifmukhtar.antimatter.debug
+06-10 17:18:37.761  7643  7643 D SurfaceViewImpl: Surface destroyed.
+06-10 17:18:37.761  7643  7643 D SurfaceViewImpl: Surface closed androidx.camera.core.SurfaceRequest@2d7369c
+06-10 17:18:37.761  7643  7643 D DeferrableSurface: surface closed,  useCount=2 closed=true androidx.camera.core.SurfaceRequest$2@edf8a5
+06-10 17:18:37.798  7643  7658 E BufferQueueProducer: [6b74c59 SurfaceView[dev.saifmukhtar.antimatter.debug/dev.saifmukhtar.antimatter.MainActivity]#1(BLAST Consumer)1](id:1ddb00000003,api:4,p:1745,c:7643) queueBuffer: BufferQueue has been abandoned
+06-10 17:18:37.823  7643  7658 E BufferQueueProducer: [6b74c59 SurfaceView[dev.saifmukhtar.antimatter.debug/dev.saifmukhtar.antimatter.MainActivity]#1(BLAST Consumer)1](id:1ddb00000003,api:4,p:1745,c:7643) dequeueBuffer: BufferQueue has been abandoned
+06-10 17:18:37.829  7643  7658 E BufferQueueProducer: [6b74c59 SurfaceView[dev.saifmukhtar.antimatter.debug/dev.saifmukhtar.antimatter.MainActivity]#1(BLAST Consumer)1](id:1ddb00000003,api:4,p:1745,c:7643) queueBuffer: BufferQueue has been abandoned
+06-10 17:18:37.858  7643  7658 E BufferQueueProducer: [6b74c59 SurfaceView[dev.saifmukhtar.antimatter.debug/dev.saifmukhtar.antimatter.MainActivity]#1(BLAST Consumer)1](id:1ddb00000003,api:4,p:1745,c:7643) queueBuffer: BufferQueue has been abandoned
+06-10 17:18:37.894  7643  7689 E BufferQueueProducer: [6b74c59 SurfaceView[dev.saifmukhtar.antimatter.debug/dev.saifmukhtar.antimatter.MainActivity]#1(BLAST Consumer)1](id:1ddb00000003,api:4,p:1745,c:7643) queueBuffer: BufferQueue has been abandoned
+06-10 17:18:37.983  7643  7712 D CaptureSession: CameraCaptureSession.onReady() OPENED
+06-10 17:18:38.027  7643  7643 D DeferrableSurface: surface closed,  useCount=0 closed=true androidx.camera.core.processing.SurfaceEdge$SettableSurface@ff7d6e9
+06-10 17:18:38.027  7643  7643 D DeferrableSurface: Surface terminated[total_surfaces=2, used_surfaces=2](androidx.camera.core.processing.SurfaceEdge$SettableSurface@ff7d6e9}
+06-10 17:18:38.027  7643  7643 D DeferrableSurface: use count-1,  useCount=1 closed=true androidx.camera.core.SurfaceRequest$2@edf8a5
+06-10 17:18:40.830  7643  7774 D BridgeWebSocket: Connected to wss://antimatter-extension.saifmukhtar.dev
+06-10 17:18:46.592  7643  7643 W WindowOnBackDispatcher: OnBackInvokedCallback is not enabled for the application.
+06-10 17:18:46.592  7643  7643 W WindowOnBackDispatcher: Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+06-10 17:18:46.659  7643  7643 D FilesViewModel: loadFileTree called for path: null
+06-10 17:18:46.663  7643  7643 D BridgeWebSocket: Sending: {"type":"GET_FILES"}
+06-10 17:18:47.398  7643  7774 D BridgeWebSocket: Received: {"type":"FILE_TREE","tree":[{"name":".github","path":"/home/saif/antimatter/.github","isDir":true,"c
+06-10 17:18:47.430  7643  7643 D FilesViewModel: Received FileTree with 19 items
+06-10 17:18:53.018  7643  7643 W WindowOnBackDispatcher: OnBackInvokedCallback is not enabled for the application.
+06-10 17:18:53.018  7643  7643 W WindowOnBackDispatcher: Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+06-10 17:18:53.069  7643  7643 D NtViewRootImpl: mPopUpViewOffsets: offset=(0.0, 0.0), scale=(1.0, 1.0)
+06-10 17:18:53.131  7643  7643 D NtViewRootImpl: mPopUpViewOffsets: offset=(0.0, 0.0), scale=(1.0, 1.0)
+06-10 17:18:53.132  7643  7643 D InsetsController: hide(ime(), fromIme=false)
+06-10 17:18:53.132  7643  7643 I ImeTracker: dev.saifmukhtar.antimatter.debug:ab1cb49b: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+06-10 17:18:53.949  7643  7643 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda13@41b2675
+06-10 17:18:53.965  7643  7668 D HWUI    : endAllActiveAnimators on 0xb400007a6f648f30 (UnprojectedRipple) with handle 0xb400007aaf637b40
+06-10 17:18:53.999  7643  7643 D NtViewRootImpl: mPopUpViewOffsets: offset=(0.0, 0.0), scale=(1.0, 1.0)
+06-10 17:18:54.002  7643  7643 D InsetsController: hide(ime(), fromIme=false)
+06-10 17:18:54.002  7643  7643 I ImeTracker: dev.saifmukhtar.antimatter.debug:df5acfe: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+06-10 17:18:57.133  7643  7643 W WindowOnBackDispatcher: OnBackInvokedCallback is not enabled for the application.
+06-10 17:18:57.133  7643  7643 W WindowOnBackDispatcher: Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
