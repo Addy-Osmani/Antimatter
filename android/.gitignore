@@ -17,6 +17,7 @@ local.properties
 *.app
 *.iab
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
 
 # Signing files
 keystore.properties
