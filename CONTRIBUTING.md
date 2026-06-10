@@ -14,22 +14,22 @@ To contribute to Antimatter, you will need to set up both the VSCode Extension a
 * Google AntiGravity IDE
 
 ### Setting Up the VSCode Extension
-1. Navigate to the `antimatter_extension` directory.
-2. Run `npm install`.
+1. Navigate to the `extension` directory.
+2. Run `npm install` to grab the dependencies.
 3. Run `npm run watch` to start the TypeScript compiler in watch mode.
 4. Press `F5` in VSCode to launch a new Extension Development Host.
 
 ### Setting Up the Android App
-1. Open the `antimatter_app` directory in Android Studio.
-2. Sync Gradle dependencies.
-3. Build and run the app on a physical Android device or emulator (Android 12+ required).
-4. *(Optional for Crashlytics)* To enable crash reporting locally in debug builds, ensure you have a valid `google-services.json` file in `antimatter_app/app/`.
+1. Open the `android` directory in Android Studio.
+2. Let Gradle sync and download the dependencies.
+3. Build and run the `app` configuration on your emulator or physical device.
+4. *(Optional for Crashlytics)* To enable crash reporting locally in debug builds, ensure you have a valid `google-services.json` file in `android/app/`.
 
 ## Submitting Pull Requests
 1. Fork the repository and create your branch from `main`.
 2. Ensure you have run formatting and linting:
    * Extension: `npm run lint`
-   * Android: `./gradlew lintFossDebug`
+   * Android: `./gradlew lintDebug`
 3. If you've added code that should be tested, add tests.
 4. Issue that pull request!
 

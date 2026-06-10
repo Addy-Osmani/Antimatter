@@ -1,0 +1,50 @@
+site_name: Antimatter Documentation
+site_description: Open-source bridge ecosystem connecting your mobile device to Google AntiGravity IDE
+site_author: Saif Mukhtar
+
+repo_name: saifmukhtar/antimatter
+repo_url: https://github.com/saifmukhtar/antimatter
+site_url: https://antimatter.saifmukhtar.dev
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  font:
+    text: Roboto
+    code: Roboto Mono
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: blue
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Features: FEATURES.md
+  - Setup & Architecture:
+    - Architecture: ARCHITECTURE.md
+    - Zero Trust Guide: ZERO_TRUST.md
+    - Security Policy: SECURITY.md
+  - Development & Project:
+    - Roadmap: ROADMAP.md
+    - Changelog: CHANGELOG.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - toc:
+      permalink: true

@@ -21,19 +21,19 @@ jobs:
         cache: gradle
 
     - name: Grant execute permission for gradlew
-      run: chmod +x antimatter_app/gradlew
+      run: chmod +x android/gradlew
 
     - name: Run Android Lint
-      run: cd antimatter_app && ./gradlew lintFossDebug
+      run: cd android && ./gradlew lintDebug
 
     - name: Run Unit Tests
-      run: cd antimatter_app && ./gradlew testFossDebugUnitTest
+      run: cd android && ./gradlew testDebugUnitTest
 
     - name: Build Debug APK
-      run: cd antimatter_app && ./gradlew assembleFossDebug
+      run: cd android && ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: antimatter_app/app/build/outputs/apk/foss/debug/app-foss-debug.apk
+        path: android/app/build/outputs/apk/debug/app-debug.apk
