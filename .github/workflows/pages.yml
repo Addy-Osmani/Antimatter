@@ -10,19 +10,20 @@ on:
       - 'README.md'
   workflow_dispatch:
 
+# Required permissions for GitHub Pages
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Configure Git Credentials
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -41,5 +42,17 @@ jobs:
       - name: Install MkDocs Material
         run: pip install mkdocs-material
         
+      # Build the site instead of deploying it to a branch
+      - name: Build MkDocs
+        run: mkdocs build
+        
+      # Upload the built site (MkDocs outputs to the 'site' directory by default)
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './site'
+          
+      # Deploy the artifact to GitHub Pages
       - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force
+        id: deployment
+        uses: actions/deploy-pages@v4
