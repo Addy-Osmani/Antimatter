@@ -184,6 +184,7 @@ fun AntimatterNavigation(
                             icon = { Icon(Icons.Default.Terminal, contentDescription = "Terminal") },
                             selected = currentTab == 2,
                             onClick = { currentTab = 2 },
+                            enabled = chatUiState.environment != "2.0",
                             alwaysShowLabel = false
                         )
                     }

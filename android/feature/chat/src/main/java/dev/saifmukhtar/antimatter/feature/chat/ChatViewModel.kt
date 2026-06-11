@@ -36,6 +36,7 @@ data class ChatUiState(
     val activeFile: String? = null,
     val activeFileLanguage: String? = null,
     val cloudflareUrl: String? = null,
+    val environment: String? = null,
     val currentModel: String = "gemini-2.5-pro",
     val error: String? = null,
     val history: List<dev.saifmukhtar.antimatter.core.network.ConversationSummary> = emptyList(),
@@ -92,7 +93,8 @@ class ChatViewModel @Inject constructor(
                         conversationId = message.conversationId,
                         expectedStepCount = message.stepCount,
                         currentModel = message.model,
-                        cloudflareUrl = message.cloudflareUrl
+                        cloudflareUrl = message.cloudflareUrl,
+                        environment = message.environment
                     )
                 }
                 

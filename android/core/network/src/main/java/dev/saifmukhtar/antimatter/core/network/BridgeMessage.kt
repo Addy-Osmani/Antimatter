@@ -68,7 +68,8 @@ sealed class InboundMessage {
         val conversationId: String? = null,
         val model: String = "",
         val stepCount: Int = 0,
-        val cloudflareUrl: String? = null
+        val cloudflareUrl: String? = null,
+        val environment: String? = null
     ) : InboundMessage()
 
     data class Step(

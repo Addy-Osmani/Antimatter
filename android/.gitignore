@@ -9,6 +9,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+.kotlin/
 # Built application files
 *.apk
 *.aab
