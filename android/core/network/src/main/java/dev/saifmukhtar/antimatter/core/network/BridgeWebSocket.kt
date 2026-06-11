@@ -44,7 +44,7 @@ class BridgeWebSocket(private val context: Context) {
     private var clientSecret: String? = null
     private var pubKey: String? = null
     private var reconnectAttempt = 0
-    private var isConnecting = false
+    private val isConnecting = java.util.concurrent.atomic.AtomicBoolean(false)
     private var manuallyDisconnected = false
 
     private var pendingChallenge: ByteArray? = null
@@ -96,8 +96,8 @@ class BridgeWebSocket(private val context: Context) {
     }
 
     private fun connectInternal() {
-        if (isConnecting || currentUrl == null || manuallyDisconnected) return
-        isConnecting = true
+        if (isConnecting.get() || currentUrl == null || manuallyDisconnected) return
+        isConnecting.set(true)
         updateConnectionState(ConnectionState.CONNECTING)
 
         try {
@@ -119,7 +119,7 @@ class BridgeWebSocket(private val context: Context) {
             webSocket = client.newWebSocket(request, object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
                     Log.d("BridgeWebSocket", "Connected to $currentUrl")
-                    isConnecting = false
+                    isConnecting.set(false)
                     reconnectAttempt = 0
                     
                     if (pubKey != null) {
@@ -223,7 +223,9 @@ class BridgeWebSocket(private val context: Context) {
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 Log.d("BridgeWebSocket", "Closed: $reason")
-                isConnecting = false
+                isConnecting.set(false)
+                authTimeoutJob?.cancel()
+                authTimeoutJob = null
                 updateConnectionState(ConnectionState.DISCONNECTED)
                 if (!manuallyDisconnected) {
                     scheduleReconnect()
@@ -232,13 +234,15 @@ class BridgeWebSocket(private val context: Context) {
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 Log.e("BridgeWebSocket", "Failure: ${t.message}")
-                isConnecting = false
+                isConnecting.set(false)
+                authTimeoutJob?.cancel()
+                authTimeoutJob = null
                 updateConnectionState(ConnectionState.DISCONNECTED)
                 scheduleReconnect()
             }
         })
         } catch (e: Exception) {
-            isConnecting = false
+            isConnecting.set(false)
             updateConnectionState(ConnectionState.DISCONNECTED)
             Log.e("BridgeWebSocket", "Failed to create request", e)
         }

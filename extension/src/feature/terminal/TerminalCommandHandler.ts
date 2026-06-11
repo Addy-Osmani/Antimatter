@@ -16,12 +16,61 @@ export class TerminalCommandHandler {
     this.router.register('EXECUTE_COMMAND', async (msg, ws) => {
       this.log(`Executing command: ${msg.command}`);
       
+      const cmdTrimmed = msg.command.trim();
+      const allowedPatterns = [
+        /^npm\s+/,
+        /^yarn\s+/,
+        /^git\s+/,
+        /^ls\s*/,
+        /^cat\s+/,
+        /^pwd\s*/,
+        /^echo\s+/,
+        /^mkdir\s+/
+      ];
+
+      const isAllowed = allowedPatterns.some(pattern => pattern.test(cmdTrimmed));
+      if (!isAllowed && !cmdTrimmed.startsWith('rm ')) {
+        this.log(`Command rejected by allowlist: ${msg.command}`);
+        this.connectionManager.broadcast({
+          type: 'COMMAND_OUTPUT',
+          text: `Error: Command not in allowlist.\n`,
+          isError: true
+        });
+        return;
+      }
+
+      if (cmdTrimmed.startsWith('rm ')) {
+        const answer = await vscode.window.showWarningMessage(
+          `Antimatter: Execute destructive command "${msg.command}"?`,
+          { modal: true },
+          'Execute', 'Cancel'
+        );
+        if (answer !== 'Execute') {
+          this.connectionManager.broadcast({
+            type: 'COMMAND_OUTPUT',
+            text: `Command execution cancelled by user.\n`,
+            isError: true
+          });
+          return;
+        }
+      }
+
       try {
         const shell = process.platform === 'win32' ? 'cmd.exe' : '/bin/sh';
         const args = process.platform === 'win32' ? ['/c', msg.command] : ['-c', msg.command];
         
         const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || process.cwd();
         const child = spawn(shell, args, { cwd });
+        
+        const TIMEOUT_MS = 5 * 60 * 1000;
+        const timeoutTimer = setTimeout(() => {
+          child.kill('SIGTERM');
+          this.connectionManager.broadcast({
+            type: 'COMMAND_OUTPUT',
+            text: `\n[Process terminated due to 5-minute timeout]\n`,
+            isError: true
+          });
+        }, TIMEOUT_MS);
         
         child.stdout.on('data', (data) => {
           this.connectionManager.broadcast({
@@ -40,6 +89,7 @@ export class TerminalCommandHandler {
         });
         
         child.on('close', (code) => {
+          clearTimeout(timeoutTimer);
           this.connectionManager.broadcast({
             type: 'COMMAND_OUTPUT',
             text: `\n[Process exited with code ${code}]\n`,
@@ -48,6 +98,7 @@ export class TerminalCommandHandler {
         });
         
         child.on('error', (err) => {
+          clearTimeout(timeoutTimer);
           this.log(`Failed to start command: ${err.message}`);
           this.connectionManager.broadcast({
             type: 'COMMAND_OUTPUT',

@@ -83,17 +83,26 @@ export class BridgeWebSocketServer {
         this.log(`Client connected (pending handshake): ${remoteAddr}`);
         this.connectionManager.addClient(ws);
 
+        const authTimeoutTimer = setTimeout(() => {
+          if (!this.connectionManager.isAuthenticated(ws)) {
+            this.log(`Closing connection from ${remoteAddr} due to auth challenge timeout`);
+            ws.close(4008, 'Auth Timeout');
+          }
+        }, 10000);
+
         // Set up the router listener
         ws.on('message', (raw) => {
           this.router.route(raw.toString(), ws);
         });
 
         ws.on('close', () => {
+          clearTimeout(authTimeoutTimer);
           this.log(`Client disconnected: ${remoteAddr}`);
           this.connectionManager.removeClient(ws);
         });
 
         ws.on('error', (err) => {
+          clearTimeout(authTimeoutTimer);
           this.log(`Client error (${remoteAddr}): ${err.message}`);
           this.connectionManager.removeClient(ws);
         });

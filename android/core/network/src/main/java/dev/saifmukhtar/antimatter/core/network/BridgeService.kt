@@ -36,6 +36,14 @@ class BridgeService : Service() {
                 }
             }
         }
+
+        serviceScope.launch {
+            webSocket.connectionState.collect { state ->
+                if (state == BridgeWebSocket.ConnectionState.DISCONNECTED) {
+                    stopSelf()
+                }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

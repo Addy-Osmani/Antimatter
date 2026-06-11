@@ -21,9 +21,30 @@
 #-renamesourcefileattribute SourceFile
 
 # Gson rules for Antimatter network models
--keep class dev.saifmukhtar.antimatter.network.InboundMessage** { *; }
--keep class dev.saifmukhtar.antimatter.network.OutboundMessage** { *; }
--keep class dev.saifmukhtar.antimatter.network.TrajectoryStep { *; }
--keep class dev.saifmukhtar.antimatter.network.Conversation { *; }
--keep class dev.saifmukhtar.antimatter.network.FileNode { *; }
--keep class dev.saifmukhtar.antimatter.network.ConversationSummary { *; }
+-keep class dev.saifmukhtar.antimatter.core.network.InboundMessage** { *; }
+-keep class dev.saifmukhtar.antimatter.core.network.OutboundMessage** { *; }
+-keep class dev.saifmukhtar.antimatter.core.network.TrajectoryStep { *; }
+
+# OkHttp
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-dontwarn okhttp3.**
+
+# SQLCipher
+-keep class net.sqlcipher.** { *; }
+-keep class net.sqlcipher.database.** { *; }
+
+# Room
+-keep class androidx.room.** { *; }
+-keep class * extends androidx.room.RoomDatabase { *; }
+
+# Cryptography / Ed25519
+-keep class java.security.** { *; }
+-keep class javax.crypto.** { *; }
+
+# Hilt / Dagger
+-keep class dagger.hilt.** { *; }
+-keep class dagger.** { *; }
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }

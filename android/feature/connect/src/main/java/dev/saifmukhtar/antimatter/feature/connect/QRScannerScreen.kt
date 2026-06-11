@@ -64,9 +64,41 @@ fun QRScannerScreen(
                 if (isAntimatterScheme || isHttpsScheme) {
                     val url = uri.getQueryParameter("url")
                     val token = uri.getQueryParameter("token")
-                    val cfId = uri.getQueryParameter("cfid")
-                    val cfSecret = uri.getQueryParameter("cfsec")
+                    var cfId = uri.getQueryParameter("cfid")
+                    var cfSecret = uri.getQueryParameter("cfsec")
+                    val cfEnc = uri.getQueryParameter("cfenc")
                     val pubKey = uri.getQueryParameter("pubkey")
+
+                    if (cfEnc != null && token != null) {
+                        try {
+                            val parts = cfEnc.split(":")
+                            if (parts.size == 3) {
+                                val iv = android.util.Base64.decode(parts[0], android.util.Base64.DEFAULT)
+                                val authTag = android.util.Base64.decode(parts[1], android.util.Base64.DEFAULT)
+                                val ciphertext = android.util.Base64.decode(parts[2], android.util.Base64.DEFAULT)
+                                
+                                val md = java.security.MessageDigest.getInstance("SHA-256")
+                                val keyBytes = md.digest(token.toByteArray(Charsets.UTF_8))
+                                val keySpec = javax.crypto.spec.SecretKeySpec(keyBytes, "AES")
+                                val gcmSpec = javax.crypto.spec.GCMParameterSpec(128, iv)
+                                
+                                val cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
+                                cipher.init(javax.crypto.Cipher.DECRYPT_MODE, keySpec, gcmSpec)
+                                
+                                val combined = ByteArray(ciphertext.size + authTag.size)
+                                System.arraycopy(ciphertext, 0, combined, 0, ciphertext.size)
+                                System.arraycopy(authTag, 0, combined, ciphertext.size, authTag.size)
+                                
+                                val decryptedBytes = cipher.doFinal(combined)
+                                val decryptedStr = String(decryptedBytes, Charsets.UTF_8)
+                                val json = org.json.JSONObject(decryptedStr)
+                                cfId = json.optString("id").takeIf { it.isNotBlank() } ?: cfId
+                                cfSecret = json.optString("secret").takeIf { it.isNotBlank() } ?: cfSecret
+                            }
+                        } catch (e: Exception) {
+                            Log.e("QRScanner", "Failed to decrypt cfenc", e)
+                        }
+                    }
                     if (url != null && token != null) {
                         onQRScanned(url, token, cfId, cfSecret, pubKey)
                     } else {

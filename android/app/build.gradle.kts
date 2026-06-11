@@ -61,6 +61,10 @@ android {
         jvmTarget = "17"
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         compose = true
     }
@@ -128,6 +132,12 @@ dependencies {
     ksp("io.noties:prism4j-bundler:2.0.0")
     implementation(libs.markwon.ext.tables)
     implementation(libs.markwon.ext.strikethrough)
+    
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // Modules
     implementation(project(":core:data"))

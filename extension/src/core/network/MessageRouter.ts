@@ -12,6 +12,12 @@ export class MessageRouter {
   }
 
   async route(raw: string, ws: WebSocket) {
+    if (Buffer.byteLength(raw, 'utf8') > 5 * 1024 * 1024) {
+      console.error(`Payload too large. Dropping message.`);
+      ws.send(JSON.stringify({ type: 'ERROR', message: 'Payload exceeds 5MB limit' }));
+      return;
+    }
+
     let msg: InboundMessage;
     try {
       msg = JSON.parse(raw);

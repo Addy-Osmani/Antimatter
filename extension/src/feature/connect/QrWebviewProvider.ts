@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as QRCode from 'qrcode';
+import * as crypto from 'crypto';
 
 export class QrWebviewProvider {
   constructor(private log: (msg: string) => void) {}
@@ -12,8 +13,22 @@ export class QrWebviewProvider {
 
     // Generate secure HTTPS App Link for Android intent filtering
     let pairingUrl = `https://antimatter.saifmukhtar.dev/connect?url=${encodeURIComponent(url)}&token=${encodeURIComponent(token)}&pubkey=${encodeURIComponent(pubkey)}`;
+    
     if (cfId && cfSecret) {
-      pairingUrl += `&cfid=${encodeURIComponent(cfId)}&cfsec=${encodeURIComponent(cfSecret)}`;
+      try {
+        const payload = JSON.stringify({ id: cfId, secret: cfSecret });
+        const key = crypto.createHash('sha256').update(token).digest();
+        const iv = crypto.randomBytes(12);
+        const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+        let encrypted = cipher.update(payload, 'utf8', 'base64');
+        encrypted += cipher.final('base64');
+        const authTag = cipher.getAuthTag().toString('base64');
+        
+        const cfEncrypted = `${iv.toString('base64')}:${authTag}:${encrypted}`;
+        pairingUrl += `&cfenc=${encodeURIComponent(cfEncrypted)}`;
+      } catch (err) {
+        this.log(`Failed to encrypt Cloudflare credentials: ${err}`);
+      }
     }
 
     try {
