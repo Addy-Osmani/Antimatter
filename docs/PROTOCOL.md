@@ -34,7 +34,7 @@ Android App                               VS Code Extension (Bridge)
 ### 1. Transport & origin validation
 The server binds to `127.0.0.1` on the configured `antimatter.port` (default **8765**) and is
 exposed publicly through a Cloudflare tunnel. During the HTTP upgrade, the server validates the
-`Origin` header — only `vscode-webview://…` origins and `https://<team>.cloudflareaccess.com`
+`Origin` header — only `vscode-webview://…` origins and `https://‹team›.cloudflareaccess.com`
 origins are allowed. Anything else is rejected with **HTTP 403 Forbidden Origin**, which blocks
 Cross‑Site WebSocket Hijacking (CSWSH).
 
@@ -42,18 +42,14 @@ Cross‑Site WebSocket Hijacking (CSWSH).
 The client must present the 256‑bit pairing token (transferred via the QR pairing code). The
 server reads it, in priority order, from:
 
-1. `Authorization: Bearer <token>` header
+1. `Authorization: Bearer ‹token›` header
 2. The first `Sec-WebSocket-Protocol` value
-3. A `?token=<token>` URL query parameter
+3. A `?token=‹token›` URL query parameter
 
 The token is compared with `crypto.timingSafeEqual`. An invalid/missing token closes the socket
 with code **`4001` Unauthorized**.
 
-### 3. Rate limiting
-Failed token attempts are counted per remote IP. After **5 failures** the IP is banned for
-**60 seconds**; connections during the ban are closed with code **`4000` Rate Limited`**.
-
-### 4. Ed25519 cryptographic handshake
+### 3. Ed25519 cryptographic handshake
 After the socket opens, the client sends an `AUTH_CHALLENGE` containing a base64 nonce. The bridge
 signs the raw nonce bytes with its persistent **Ed25519** private key (stored in VS Code
 `SecretStorage`) and returns an `AUTH_RESPONSE` with the base64 signature. The client verifies the
@@ -64,9 +60,11 @@ the genuine bridge and not a tunnel impostor. Only then is the client marked aut
 
 | Code   | Meaning        | Cause |
 |--------|----------------|-------|
-| `4000` | Rate Limited   | ≥ 5 failed auth attempts from this IP within the ban window |
 | `4001` | Unauthorized   | Missing or invalid pairing token |
 | `403`  | Forbidden Origin (HTTP) | `Origin` header not in the allow‑list |
+
+!!! note "Rate limiting planned"
+    Per-IP rate limiting (close code `4000`) is planned as a future feature to prevent brute-force token attacks.
 
 ---
 
@@ -84,7 +82,6 @@ ignored.
 | `SEND_MESSAGE` | `text: string` | Send a prompt to the active agent. |
 | `NEW_CONVERSATION` | — | Start a fresh conversation. |
 | `CANCEL_RESPONSE` | — | Cancel the in‑flight agent response. |
-| `CHANGE_MODEL` | — | Cycle/select the agent model. |
 | `ACCEPT_EDITS` / `REJECT_EDITS` | — | Accept or reject all proposed file edits. |
 | `NEXT_HUNK` / `PREV_HUNK` | — | Navigate between diff hunks. |
 | `ACCEPT_HUNK` / `REJECT_HUNK` | — | Accept or reject the current diff hunk. |
