@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## :material-tag: [1.1.0] — 2026-06-11
+
+### :material-plus-circle: Added
+
+- **Antigravity 2.0 Integration** — full support for the new Antigravity 2.0 standalone application via a native Python (`asyncio`) daemon plugin.
+- **Dual-Bridge Architecture** — the ecosystem now maintains two separate bridges (`extension/` for IDE and `plugin/` for 2.0) that share the same WebSocket protocol.
+- **Python Ed25519 Handshake** — ported the cryptographic identity verification to Python for the new daemon.
+
+### :material-sync: Changed
+
+- **Thought Process Streaming** — fixed bugs in `agent_bridge.py` step parsing to ensure the Android UI correctly indexes `plannerResponse` and `text` streams without creating blank bubbles.
+- **Documentation Overhaul** — completely updated the repository `README.md`, `ARCHITECTURE.md`, and MkDocs navigation to reflect the dual-bridge architecture.
+
 ## :material-tag: [1.0.0] — 2026-06-10
 
 ### :material-plus-circle: Added

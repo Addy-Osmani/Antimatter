@@ -26,13 +26,19 @@ The open-source bridge that connects your phone to the <strong>Google AntiGravit
 [Get Started :material-rocket-launch:](INSTALLATION.md){ .md-button .md-button--primary }
 [Download :material-download:](https://github.com/saifmukhtar/antimatter/releases){ .md-button }
 [API Reference :material-api:](PROTOCOL.md){ .md-button }
-
 </div>
 
 </div>
 
-!!! warning "Community Project Disclaimer"
-    Antimatter is an unofficial, community-driven, open-source project. It is **NOT** an official product of Google, nor is it officially affiliated with the Google AntiGravity IDE project.
+<div class="admonition warning">
+<p class="admonition-title">Community Project Disclaimer</p>
+<p>Antimatter is an unofficial, community-driven, open-source project. It is <strong>NOT</strong> an official product of Google, nor is it officially affiliated with the Google AntiGravity IDE project.</p>
+</div>
+
+<div class="admonition success">
+<p class="admonition-title">Antigravity 2.0 Support</p>
+<p>Antimatter now natively supports the standalone <strong>Antigravity 2.0</strong> desktop application! You can use our dual-bridge architecture to connect to both the classic IDE and the new 2.0 orchestrator seamlessly.</p>
+</div>
 
 ---
 

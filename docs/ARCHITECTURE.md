@@ -9,24 +9,22 @@ Antimatter bridges the gap between your local development environment and your m
 
 ## :material-sitemap: High-Level Architecture
 
+Antimatter operates through two distinct bridges depending on your environment, which both route into the exact same secure Cloudflare tunnel and Android client:
+
 ```text
 ┌──────────────────────┐        ┌──────────────────────────────────┐
 │   AntiGravity IDE    │        │   VS Code Extension (Bridge)     │
-│                      │        │                                  │
-│  Agent writes logs   │ ─────▶ │  BrainWatcher (fs.watch)         │
-│  to transcript.jsonl │        │  ├─ parses JSONL → TrajectoryStep│
-│                      │        │  └─ ChatStateManager             │
+│                      │        │  ├─ BrainWatcher (fs.watch)      │
+│  Agent writes logs   │ ─────▶ │  ├─ BridgeWebSocketServer (ws)   │
+│  to transcript.jsonl │        │  └─ Terminal proxy (node-pty)    │
 └──────────────────────┘        │                                  │
-                                │  BridgeWebSocketServer (ws)      │
-                                │  ├─ Origin validation            │
-                                │  ├─ Token + Ed25519 auth         │
-                                │  ├─ MessageRouter dispatch       │
-                                │  └─ broadcasts STEP / STEP_BATCH │
                                 │                                  │
-                                │  CloudflareTunnel (cloudflared)   │
-                                │  └─ wss://public-url             │
-                                └───────────────┬──────────────────┘
-                                                │ Cloudflare Edge
+┌──────────────────────┐        │   Antigravity 2.0 (Daemon)       │
+│   Antigravity 2.0    │        │  ├─ agent_bridge.py              │
+│                      │        │  ├─ asyncio WebSocket Server     │
+│  Core Agent Process  │ ─────▶ │  └─ Native Plugin Integration    │
+└──────────────────────┘        └───────────────┬──────────────────┘
+                                                │ Cloudflare Tunnel
                                                 ▼
                                 ┌──────────────────────────────────┐
                                 │   Android App (Client)           │
@@ -49,15 +47,15 @@ Antimatter bridges the gap between your local development environment and your m
 
 ## :material-numeric-1-circle: The File System Monitor (Reverse-Engineering)
 
-Since AntiGravity does **not** provide an official API to stream agent thoughts, Antimatter uses pure file-system monitoring to intercept the agent's brain activity.
+Since AntiGravity IDE does **not** provide an official API to stream agent thoughts, Antimatter's IDE Extension uses pure file-system monitoring to intercept the agent's brain activity. (Note: Antigravity 2.0 uses a native SDK plugin and bypasses this reverse-engineering).
 
-When an agent runs, it creates a unique conversation folder:
+When an IDE agent runs, it creates a unique conversation folder:
 
 ```text
 <appDataDir>/brain/<conversation-id>/.system_generated/logs/transcript.jsonl
 ```
 
-The extension's **`BrainWatcher`** uses `fs.watch` to monitor the `brain/` directory. It:
+For the IDE, the extension's **`BrainWatcher`** uses `fs.watch` to monitor the `brain/` directory. For Antigravity 2.0, the **`agent_bridge.py`** daemon tails the same file directly using asyncio. In both cases, the bridge:
 
 1. Detects the most recently modified conversation directory.
 2. Tails the `transcript.jsonl` file line-by-line.
@@ -71,7 +69,7 @@ The extension's **`BrainWatcher`** uses `fs.watch` to monitor the `brain/` direc
 
 ## :material-numeric-2-circle: The WebSocket Bridge
 
-The extension runs a [`ws`](https://github.com/websockets/ws) WebSocket server bound to `127.0.0.1` (never exposed directly). To bypass firewalls and NATs, the extension spawns a `cloudflared` process that creates a secure Cloudflare tunnel.
+The bridge runs a WebSocket server bound to `127.0.0.1` (never exposed directly). The IDE extension uses [`ws`](https://github.com/websockets/ws), while the Antigravity 2.0 daemon uses Python's `websockets` library. To bypass firewalls and NATs, the bridge spawns a `cloudflared` process that creates a secure Cloudflare tunnel.
 
 **Connection flow:**
 

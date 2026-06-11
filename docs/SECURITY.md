@@ -72,21 +72,28 @@ Path traversal attempts are rejected before reaching the filesystem.
 
 </div>
 
-### :material-numeric-5-circle: Rate Limiting (DoS Mitigation) — Planned
+### :material-numeric-5-circle: Payload Size Limits (DoS Mitigation)
 
 <div class="step-card" markdown>
 
-!!! info "Status: Planned for future release"
-    Rate limiting is not yet implemented but is planned as a future hardening feature.
+To protect against memory exhaustion attacks and Denial of Service (DoS), the WebSocket router strictly limits the size of incoming payloads. 
 
-The extension will implement **per-IP rate limiting** to prevent connection-flood attacks:
-
-- **5 failed token attempts** → IP banned for **60 seconds**
-- Prevents connection-flood attacks that could exhaust host memory and crash the IDE
+- **5MB Limit:** Any payload exceeding 5MB is immediately dropped.
+- The server responds with a `4000` close code or a standard error payload if the payload is grossly oversized.
 
 </div>
 
-### :material-numeric-6-circle: Secure Tunnels (Cloudflare)
+### :material-numeric-6-circle: Strict Terminal Allowlist
+
+<div class="step-card" markdown>
+
+The Remote Terminal operates under a strict regex-based allowlist. By default, only safe commands (e.g., `npm`, `yarn`, `git`, `ls`, `cat`, `pwd`) are permitted to execute blindly. 
+
+**Destructive Commands:** Commands such as `rm` trigger a synchronous, blocking modal inside the VS Code UI. The host user must explicitly click "Execute" on their desktop before the command runs.
+
+</div>
+
+### :material-numeric-7-circle: Secure Tunnels (Cloudflare)
 
 <div class="step-card" markdown>
 
