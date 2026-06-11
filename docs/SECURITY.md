@@ -25,7 +25,7 @@ Because Antimatter exposes a local WebSocket server that can proxy terminal comm
 
 <div class="step-card" markdown>
 
-**Token generation:** On first run, the extension generates a 256-bit Bearer Token with `crypto.randomBytes(32)` — equivalent entropy to AES-256. Stored in VS Code `SecretStorage` (OS keychain), never written to plain settings.
+**Token generation:** On first run, the extension generates a 256-bit Bearer Token with `crypto.randomBytes(32)` — equivalent entropy to AES-256. It's stored securely in VS Code `SecretStorage` (OS keychain: Keychain on macOS, Credential Manager on Windows, `libsecret` on Linux) and **persists across IDE restarts, reloads, and even uninstall/reinstall cycles**.
 
 **Token verification:** Every WebSocket connection must present this token. The server checks it with `crypto.timingSafeEqual` — immune to timing side-channel attacks. Invalid tokens → close code `4001 Unauthorized`.
 
@@ -72,13 +72,16 @@ Path traversal attempts are rejected before reaching the filesystem.
 
 </div>
 
-### :material-numeric-5-circle: Rate Limiting (DoS Mitigation)
+### :material-numeric-5-circle: Rate Limiting (DoS Mitigation) — Planned
 
 <div class="step-card" markdown>
 
-The extension implements **per-IP rate limiting**:
+!!! info "Status: Planned for future release"
+    Rate limiting is not yet implemented but is planned as a future hardening feature.
 
-- **5 failed token attempts** → IP banned for **60 seconds** (close code `4000 Rate Limited`)
+The extension will implement **per-IP rate limiting** to prevent connection-flood attacks:
+
+- **5 failed token attempts** → IP banned for **60 seconds**
 - Prevents connection-flood attacks that could exhaust host memory and crash the IDE
 
 </div>
@@ -106,7 +109,6 @@ The WebSocket server binds exclusively to `127.0.0.1` — it is **never** direct
 | Bearer token | Unauthorized connections | 256-bit random token, timing-safe comparison |
 | Ed25519 handshake | MITM / server spoofing | Cryptographic identity proof |
 | Origin validation | CSWSH attacks | Strict allow-list of Origins |
-| Rate limiting | Brute-force / DoS | Per-IP token failure tracking + ban |
 | Biometric lock | Physical device theft | Fingerprint/face required for terminal |
 | Path sandboxing | Arbitrary file read | Normalize + restrict to workspace |
 | Localhost binding | LAN snooping | Server only on `127.0.0.1` |
