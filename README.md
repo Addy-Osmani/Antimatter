@@ -23,6 +23,7 @@ Because this repository contains multiple sub-projects, we have split the source
 
 **Getting Started**
 - [**Installation & Setup**](docs/INSTALLATION.md) - End-to-end: install, tunnel, and pair your phone.
+- [**Antigravity 2.0 Integration**](docs/ANTIGRAVITY_2_0.md) - Learn how to install and use the native Antigravity Plugin.
 - [**Feature Breakdown**](docs/FEATURES.md) - A detailed list of everything Antimatter can do.
 - [**Troubleshooting & FAQ**](docs/TROUBLESHOOTING.md) - Fix common connection, tunnel, and pairing issues.
 
@@ -86,14 +87,15 @@ If you own a domain, this provides double-layered security.
 
 ## 📦 Repository Structure
 
-This is a monorepo containing two shippable sub-projects plus the documentation site:
+This is a monorepo containing multiple sub-projects and a documentation site:
 
 ```text
 antimatter/
-├── extension/   # VS Code / AntiGravity extension (TypeScript) — the bridge server
-├── android/     # Companion Android app (Kotlin / Jetpack Compose) — the mobile client
-├── docs/        # MkDocs Material documentation (published to antimatter.saifmukhtar.dev)
-└── mkdocs.yml   # Documentation site configuration
+├── plugin/ # Native Antigravity 2.0 bridge daemon (Python)
+├── extension/         # VS Code / AntiGravity IDE extension (TypeScript)
+├── android/           # Companion Android app (Kotlin / Jetpack Compose)
+├── docs/              # MkDocs Material documentation
+└── mkdocs.yml         # Documentation site configuration
 ```
 
 The extension and app communicate over an authenticated WebSocket — see the
@@ -117,6 +119,7 @@ This project leverages several modern open-source technologies:
 - **Android App**: Kotlin, Jetpack Compose, OkHttp (WebSockets), Markwon (Markdown rendering).
 - **Barcode Scanning**: Pure-Java `com.google.zxing:core` ensuring 100% FOSS compliance for F-Droid.
 - **VS Code Extension**: Node.js, TypeScript, `ws` (WebSocket server), `node-pty` (Planned for terminal).
+- **Antigravity 2.0 Daemon**: Python, `asyncio`, Google Antigravity SDK.
 - **Secure Networking**: Cloudflare Zero Trust (`cloudflared`) and free automatic Quick Tunnels.
 
 ## License

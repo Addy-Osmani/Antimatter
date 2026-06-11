@@ -6,3 +6,23 @@ site/
 *.log
 .env
 reports/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+*.egg-info/
+.hatch/
+
+# VSIX / Extension Manifests
+*.vsix
+extension.vsixmanifest
