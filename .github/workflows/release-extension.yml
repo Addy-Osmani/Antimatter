@@ -48,3 +48,8 @@ jobs:
         working-directory: extension
         if: startsWith(github.ref, 'refs/tags/')
         run: npx ovsx publish *.vsix -p ${{ secrets.OVSX_PAT }}
+        
+      - name: Publish to VS Code Marketplace
+        working-directory: extension
+        if: startsWith(github.ref, 'refs/tags/')
+        run: npx vsce publish -p ${{ secrets.VSCE_PAT }}

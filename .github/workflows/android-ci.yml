@@ -32,6 +32,12 @@ jobs:
     - name: Build Debug APK
       run: cd android && ./gradlew assembleDebug
 
+    - name: Run Release Lint
+      run: cd android && ./gradlew lintRelease
+
+    - name: Build Release APK
+      run: cd android && ./gradlew assembleRelease
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
