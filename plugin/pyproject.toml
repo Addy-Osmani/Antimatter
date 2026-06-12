@@ -6,8 +6,8 @@ build-backend = "hatchling.build"
 name = "antimatter-bridge"
 version = "1.0.0"
 description = "Antimatter Bridge daemon for Antigravity 2.0"
-readme = "../README.md"
-license = { file = "../LICENSE" }
+readme = "README.md"
+license = { file = "LICENSE" }
 authors = [
     { name = "Saif Mukhtar", email = "saif@example.com" }
 ]
