@@ -2,6 +2,7 @@ export type InboundMessage =
   | { type: 'SEND_MESSAGE'; text: string }
   | { type: 'NEW_CONVERSATION' }
   | { type: 'CANCEL_RESPONSE' }
+  | { type: 'CHANGE_MODEL' }
   | { type: 'ACCEPT_EDITS' }
   | { type: 'REJECT_EDITS' }
   | { type: 'NEXT_HUNK' }
