@@ -1,8 +1,26 @@
 default_platform(:android)
 
 platform :android do
-  desc "Build and package for F-Droid"
-  lane :build do
-    gradle(task: "clean assembleRelease")
+  desc "Run all static analysis and unit tests"
+  lane :test do
+    gradle(task: "lintDebug")
+    gradle(task: "testDebugUnitTest")
+    gradle(task: "lintRelease")
+  end
+
+  desc "Build a Debug APK"
+  lane :build_debug do
+    gradle(task: "clean assembleDebug")
+  end
+
+  desc "Build a Release APK and AAB"
+  lane :build_release do
+    gradle(task: "clean assembleRelease bundleRelease")
+  end
+
+  desc "Deploy to Google Play (Skeleton)"
+  lane :deploy_playstore do
+    # Requires a valid JSON key in the repo secrets
+    # upload_to_play_store(track: 'internal')
   end
 end

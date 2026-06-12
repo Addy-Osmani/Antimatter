@@ -23,20 +23,20 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
 
-    - name: Run Android Lint
-      run: cd android && ./gradlew lintDebug
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+        working-directory: android
 
-    - name: Run Unit Tests
-      run: cd android && ./gradlew testDebugUnitTest
+    - name: Run Static Analysis & Tests
+      working-directory: android
+      run: bundle exec fastlane test
 
     - name: Build Debug APK
-      run: cd android && ./gradlew assembleDebug
-
-    - name: Run Release Lint
-      run: cd android && ./gradlew lintRelease
-
-    - name: Build Release APK
-      run: cd android && ./gradlew assembleRelease
+      working-directory: android
+      run: bundle exec fastlane build_debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
