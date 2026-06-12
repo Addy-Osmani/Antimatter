@@ -15,7 +15,7 @@ CurrentVersionCode: 1
 Builds:
   - versionName: 1.0.0
     versionCode: 1
-    commit: v1.0.0
+    commit: 1ed6a19333334e05973f722e8c91bfd8fa9f7bb0
     subdir: android
     gradle:
       - yes
