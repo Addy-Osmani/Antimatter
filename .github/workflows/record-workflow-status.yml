@@ -1,0 +1,106 @@
+name: Record Workflow Status
+
+on:
+  workflow_run:
+    workflows: ["*"] # Listen to all workflows
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Record Status and Generate Dashboard
+        run: |
+          mkdir -p .github/ci-logs
+          
+          LOG_FILE=".github/ci-logs/workflow_logs.csv"
+          DASH_FILE=".github/ci-logs/DASHBOARD.md"
+          
+          if [ ! -f "$LOG_FILE" ]; then
+            echo "Date,Workflow,Status,Commit,URL" > "$LOG_FILE"
+          fi
+          
+          DATE=$(date -u +"%Y-%m-%d %H:%M")
+          WORKFLOW="${{ github.event.workflow_run.name }}"
+          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+          COMMIT_MSG="${{ github.event.workflow_run.head_commit.message }}"
+          COMMIT_MSG=$(echo "$COMMIT_MSG" | head -n 1 | tr -d ',' | tr -d '"' | tr -d '\n')
+          URL="${{ github.event.workflow_run.html_url }}"
+          
+          # Map conclusion to emoji
+          if [ "$CONCLUSION" = "success" ]; then
+            STATUS_ICON="✅ PASS"
+          elif [ "$CONCLUSION" = "failure" ]; then
+            STATUS_ICON="❌ FAIL"
+          elif [ "$CONCLUSION" = "cancelled" ]; then
+            STATUS_ICON="⚠️ CANCEL"
+          else
+            STATUS_ICON="❓ $CONCLUSION"
+          fi
+          
+          # Skip logging the status recorder itself to avoid infinite loops
+          if [ "$WORKFLOW" = "Record Workflow Status" ]; then
+            echo "Skipping logging for the logging workflow itself."
+            exit 0
+          fi
+          
+          # Append to log
+          echo "$DATE,$WORKFLOW,$STATUS_ICON,$COMMIT_MSG,$URL" >> "$LOG_FILE"
+          
+          # Calculate stats
+          TOTAL=$(tail -n +2 "$LOG_FILE" | wc -l)
+          PASSED=$(tail -n +2 "$LOG_FILE" | grep "✅ PASS" | wc -l || true)
+          FAILED=$(tail -n +2 "$LOG_FILE" | grep "❌ FAIL" | wc -l || true)
+          
+          if [ "$TOTAL" -gt 0 ]; then
+            PASS_RATE=$(( (PASSED * 100) / TOTAL ))
+          else
+            PASS_RATE=0
+          fi
+          
+          # Generate Dashboard
+          cat << 'EOF' > "$DASH_FILE"
+# 🔄 CI/CD WORKFLOW DASHBOARD
+
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-${PASS_RATE}%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-${TOTAL}-blue)
+
+| Metric | Count |
+|--------|-------|
+| **Total Runs** | ${TOTAL} |
+| **Passed** | ${PASSED} |
+| **Failed** | ${FAILED} |
+| **Pass Rate** | ${PASS_RATE}% |
+
+## Recent Runs
+
+| Date (UTC) | Workflow | Status | Commit | URL |
+|------------|----------|--------|--------|-----|
+EOF
+          
+          # Add the last 50 runs to the dashboard (reverse order so newest is first)
+          tail -n +2 "$LOG_FILE" | tail -n 50 | tac | while IFS=, read -r d w s c u; do
+            echo "| $d | $w | $s | $c | [View Log]($u) |" >> "$DASH_FILE"
+          done
+          
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/ci-logs/
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update workflow dashboard"
+            git push
+          fi

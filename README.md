@@ -12,6 +12,9 @@ Antimatter is an open-source bridge ecosystem that connects your mobile device d
 
 By connecting your phone to the IDE, you can view your active AI agent's trajectory, monitor its thought process, read logs in real-time, send new prompts, execute terminal commands, and browse your workspace files—all from your mobile device.
 
+## 📊 CI/CD Status
+[View Workflow Dashboard](.github/ci-logs/DASHBOARD.md)
+
 ---
 
 ## 📖 Official Documentation
