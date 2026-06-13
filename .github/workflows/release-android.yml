@@ -8,6 +8,9 @@ on:
     tags:
       - 'v1.*'
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest

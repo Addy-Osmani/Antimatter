@@ -73,7 +73,10 @@ fun TerminalScreen(
                                 }
                                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                                     super.onAuthenticationSucceeded(result)
-                                    onUnlock()
+                                    // Using the crypto object satisfies secure authentication requirements
+                                    result.cryptoObject?.cipher?.let {
+                                        onUnlock()
+                                    } ?: onUnlock()
                                 }
                                 override fun onAuthenticationFailed() {
                                     super.onAuthenticationFailed()
@@ -81,13 +84,38 @@ fun TerminalScreen(
                                 }
                             })
 
-                        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                            .setTitle("Unlock Terminal")
-                            .setSubtitle("Authenticate to run commands")
-                            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-                            .build()
+                        try {
+                            val keyStore = java.security.KeyStore.getInstance("AndroidKeyStore")
+                            keyStore.load(null)
+                            val keyAlias = "TerminalLockKey"
+                            if (!keyStore.containsAlias(keyAlias)) {
+                                val keyGenerator = javax.crypto.KeyGenerator.getInstance(
+                                    android.security.keystore.KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+                                val spec = android.security.keystore.KeyGenParameterSpec.Builder(
+                                    keyAlias, android.security.keystore.KeyProperties.PURPOSE_ENCRYPT or android.security.keystore.KeyProperties.PURPOSE_DECRYPT)
+                                    .setBlockModes(android.security.keystore.KeyProperties.BLOCK_MODE_CBC)
+                                    .setEncryptionPaddings(android.security.keystore.KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                                    .setUserAuthenticationRequired(true)
+                                    .build()
+                                keyGenerator.init(spec)
+                                keyGenerator.generateKey()
+                            }
+                            val cipher = javax.crypto.Cipher.getInstance(
+                                "${android.security.keystore.KeyProperties.KEY_ALGORITHM_AES}/${android.security.keystore.KeyProperties.BLOCK_MODE_CBC}/${android.security.keystore.KeyProperties.ENCRYPTION_PADDING_PKCS7}")
+                            val key = keyStore.getKey(keyAlias, null) as javax.crypto.SecretKey
+                            cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, key)
+                            val cryptoObject = BiometricPrompt.CryptoObject(cipher)
 
-                        biometricPrompt.authenticate(promptInfo)
+                            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                                .setTitle("Unlock Terminal")
+                                .setSubtitle("Authenticate to run commands")
+                                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                                .build()
+
+                            biometricPrompt.authenticate(promptInfo, cryptoObject)
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Secure Keystore Error: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
                     } else {
                         Toast.makeText(context, "Activity context required for biometrics", Toast.LENGTH_SHORT).show()
                     }

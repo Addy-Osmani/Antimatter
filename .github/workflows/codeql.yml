@@ -42,6 +42,9 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
+        config: |
+          paths-ignore:
+            - "**/build/generated/**"
 
     - name: Run manual build steps
       if: matrix.build-mode == 'manual'
