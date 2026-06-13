@@ -68,24 +68,22 @@ jobs:
           fi
           
           # Generate Dashboard
-          cat << 'EOF' > "$DASH_FILE"
-# 🔄 CI/CD WORKFLOW DASHBOARD
-
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-${PASS_RATE}%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-${TOTAL}-blue)
-
-| Metric | Count |
-|--------|-------|
-| **Total Runs** | ${TOTAL} |
-| **Passed** | ${PASSED} |
-| **Failed** | ${FAILED} |
-| **Pass Rate** | ${PASS_RATE}% |
-
-## Recent Runs
-
-| Date (UTC) | Workflow | Status | Commit | URL |
-|------------|----------|--------|--------|-----|
-EOF
+          echo "# 🔄 CI/CD WORKFLOW DASHBOARD" > "$DASH_FILE"
+          echo "" >> "$DASH_FILE"
+          echo "![Pass Rate](https://img.shields.io/badge/Pass%20Rate-${PASS_RATE}%25-brightgreen)" >> "$DASH_FILE"
+          echo "![Total Runs](https://img.shields.io/badge/Total%20Runs-${TOTAL}-blue)" >> "$DASH_FILE"
+          echo "" >> "$DASH_FILE"
+          echo "| Metric | Count |" >> "$DASH_FILE"
+          echo "|--------|-------|" >> "$DASH_FILE"
+          echo "| **Total Runs** | ${TOTAL} |" >> "$DASH_FILE"
+          echo "| **Passed** | ${PASSED} |" >> "$DASH_FILE"
+          echo "| **Failed** | ${FAILED} |" >> "$DASH_FILE"
+          echo "| **Pass Rate** | ${PASS_RATE}% |" >> "$DASH_FILE"
+          echo "" >> "$DASH_FILE"
+          echo "## Recent Runs" >> "$DASH_FILE"
+          echo "" >> "$DASH_FILE"
+          echo "| Date (UTC) | Workflow | Status | Commit | URL |" >> "$DASH_FILE"
+          echo "|------------|----------|--------|--------|-----|" >> "$DASH_FILE"
           
           # Add the last 50 runs to the dashboard (reverse order so newest is first)
           tail -n +2 "$LOG_FILE" | tail -n 50 | tac | while IFS=, read -r d w s c u; do
