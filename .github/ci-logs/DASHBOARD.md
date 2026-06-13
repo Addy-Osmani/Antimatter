@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-72%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-18-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-73%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-19-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 18 |
-| **Passed** | 13 |
+| **Total Runs** | 19 |
+| **Passed** | 14 |
 | **Failed** | 4 |
-| **Pass Rate** | 72% |
+| **Pass Rate** | 73% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-13 12:29 | Python CI | ✅ PASS | security: fix CodeQL taint tracking for client secret logging | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466800994) |
 | 2026-06-13 12:21 | CodeQL Advanced | ✅ PASS | security: fix CodeQL vulnerabilities (injection auth permissions logs) | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466414684) |
 | 2026-06-13 12:14 | Android CI | ✅ PASS | security: fix CodeQL vulnerabilities (injection auth permissions logs) | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466414667) |
 | 2026-06-13 12:12 | Extension CI | ✅ PASS | security: fix CodeQL vulnerabilities (injection auth permissions logs) | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466414671) |
