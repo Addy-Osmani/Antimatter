@@ -28,6 +28,9 @@ export class MessageRouter {
 
     const handler = this.handlers.get(msg.type);
     if (handler) {
+      if (msg.id) {
+        ws.send(JSON.stringify({ type: 'ACK', id: msg.id }));
+      }
       try {
         await handler(msg, ws);
       } catch (err: unknown) {

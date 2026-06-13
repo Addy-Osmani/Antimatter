@@ -14,6 +14,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import java.util.concurrent.ConcurrentHashMap
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -49,6 +51,15 @@ class BridgeWebSocket(private val context: Context) {
 
     private var pendingChallenge: ByteArray? = null
     private var authTimeoutJob: Job? = null
+
+    private data class PendingMessage(
+        val id: String,
+        val message: OutboundMessage,
+        val sentAt: Long,
+        var retryCount: Int = 0,
+        var timeoutJob: Job? = null
+    )
+    private val pendingAcks = ConcurrentHashMap<String, PendingMessage>()
 
     // State flows
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
@@ -169,6 +180,7 @@ class BridgeWebSocket(private val context: Context) {
                             "AUTH_RESPONSE" -> gson.fromJson(text, InboundMessage.AuthResponse::class.java)
                             "ARTIFACTS_LIST" -> gson.fromJson(text, InboundMessage.ArtifactsList::class.java)
                             "COMMAND_OUTPUT" -> gson.fromJson(text, InboundMessage.CommandOutput::class.java)
+                            "ACK" -> gson.fromJson(text, InboundMessage.Ack::class.java)
                             else -> InboundMessage.Unknown
                         }
                         
@@ -211,6 +223,11 @@ class BridgeWebSocket(private val context: Context) {
                                     updateConnectionState(ConnectionState.DISCONNECTED)
                                 }
                             }
+                            return@launch
+                        } else if (message is InboundMessage.Ack) {
+                            val pending = pendingAcks.remove(message.id)
+                            pending?.timeoutJob?.cancel()
+                            Log.d("BridgeWebSocket", "ACK received for ${message.id}")
                             return@launch
                         }
 
@@ -267,5 +284,33 @@ class BridgeWebSocket(private val context: Context) {
         val json = gson.toJson(message)
         Log.d("BridgeWebSocket", "Sending: ${json.take(100)}")
         webSocket?.send(json)
+    }
+
+    fun sendWithRetry(messageBuilder: (String) -> OutboundMessage) {
+        val id = UUID.randomUUID().toString()
+        val message = messageBuilder(id)
+        val pending = PendingMessage(id, message, System.currentTimeMillis())
+        pendingAcks[id] = pending
+        
+        sendMessage(message)
+        scheduleAckTimeout(pending)
+    }
+
+    private fun scheduleAckTimeout(pending: PendingMessage) {
+        pending.timeoutJob?.cancel()
+        pending.timeoutJob = scope.launch {
+            delay(5000) // 5 second timeout
+            if (pendingAcks.containsKey(pending.id)) {
+                if (pending.retryCount < 3) {
+                    pending.retryCount++
+                    Log.w("BridgeWebSocket", "No ACK for ${pending.id}, retrying (${pending.retryCount}/3)...")
+                    sendMessage(pending.message)
+                    scheduleAckTimeout(pending)
+                } else {
+                    Log.e("BridgeWebSocket", "Failed to deliver message ${pending.id} after 3 retries.")
+                    pendingAcks.remove(pending.id)
+                }
+            }
+        }
     }
 }

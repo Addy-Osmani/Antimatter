@@ -102,6 +102,7 @@ sealed class InboundMessage {
     data class AuthResponse(val signature: String = "") : InboundMessage()
     data class ArtifactsList(val artifacts: List<FileNode> = emptyList()) : InboundMessage()
     data class CommandOutput(val text: String = "", val isError: Boolean = false) : InboundMessage()
+    data class Ack(val id: String = "") : InboundMessage()
     object Unknown : InboundMessage()
 }
 
@@ -110,30 +111,33 @@ sealed class InboundMessage {
 // ─────────────────────────────────────────────────────────────────────────────
 
 sealed class OutboundMessage {
-    data class SendMessage(val text: String, val type: String = "SEND_MESSAGE") : OutboundMessage()
-    data class NewConversation(val type: String = "NEW_CONVERSATION") : OutboundMessage()
-    data class CancelResponse(val type: String = "CANCEL_RESPONSE") : OutboundMessage()
-    data class AcceptEdits(val type: String = "ACCEPT_EDITS") : OutboundMessage()
-    data class RejectEdits(val type: String = "REJECT_EDITS") : OutboundMessage()
-    data class ChangeModel(val type: String = "CHANGE_MODEL") : OutboundMessage()
-    data class NextHunk(val type: String = "NEXT_HUNK") : OutboundMessage()
-    data class PrevHunk(val type: String = "PREV_HUNK") : OutboundMessage()
-    data class AcceptHunk(val type: String = "ACCEPT_HUNK") : OutboundMessage()
-    data class RejectHunk(val type: String = "REJECT_HUNK") : OutboundMessage()
-    data class GetFiles(val path: String? = null, val type: String = "GET_FILES") : OutboundMessage()
-    data class ReadFile(val path: String, val type: String = "READ_FILE") : OutboundMessage()
+    open val id: String? = null
+    
+    data class SendMessage(val text: String, val type: String = "SEND_MESSAGE", override val id: String? = null) : OutboundMessage()
+    data class NewConversation(val type: String = "NEW_CONVERSATION", override val id: String? = null) : OutboundMessage()
+    data class CancelResponse(val type: String = "CANCEL_RESPONSE", override val id: String? = null) : OutboundMessage()
+    data class AcceptEdits(val type: String = "ACCEPT_EDITS", override val id: String? = null) : OutboundMessage()
+    data class RejectEdits(val type: String = "REJECT_EDITS", override val id: String? = null) : OutboundMessage()
+    data class ChangeModel(val type: String = "CHANGE_MODEL", override val id: String? = null) : OutboundMessage()
+    data class NextHunk(val type: String = "NEXT_HUNK", override val id: String? = null) : OutboundMessage()
+    data class PrevHunk(val type: String = "PREV_HUNK", override val id: String? = null) : OutboundMessage()
+    data class AcceptHunk(val type: String = "ACCEPT_HUNK", override val id: String? = null) : OutboundMessage()
+    data class RejectHunk(val type: String = "REJECT_HUNK", override val id: String? = null) : OutboundMessage()
+    data class GetFiles(val path: String? = null, val type: String = "GET_FILES", override val id: String? = null) : OutboundMessage()
+    data class ReadFile(val path: String, val type: String = "READ_FILE", override val id: String? = null) : OutboundMessage()
     data class SubscribeConversation(
         val conversationId: String,
         val lastKnownStepCount: Int? = null,
-        val type: String = "SUBSCRIBE_CONVERSATION"
+        val type: String = "SUBSCRIBE_CONVERSATION",
+        override val id: String? = null
     ) : OutboundMessage()
-    data class GetHistory(val type: String = "GET_HISTORY") : OutboundMessage()
-    data class Ping(val type: String = "PING") : OutboundMessage()
-    data class AuthChallenge(val challenge: String, val type: String = "AUTH_CHALLENGE") : OutboundMessage()
-    data class GetArtifacts(val conversationId: String, val type: String = "GET_ARTIFACTS") : OutboundMessage()
+    data class GetHistory(val type: String = "GET_HISTORY", override val id: String? = null) : OutboundMessage()
+    data class Ping(val type: String = "PING", override val id: String? = null) : OutboundMessage()
+    data class AuthChallenge(val challenge: String, val type: String = "AUTH_CHALLENGE", override val id: String? = null) : OutboundMessage()
+    data class GetArtifacts(val conversationId: String, val type: String = "GET_ARTIFACTS", override val id: String? = null) : OutboundMessage()
     
-    data class WriteFile(val path: String, val content: String, val type: String = "WRITE_FILE") : OutboundMessage()
-    data class ExecuteCommand(val command: String, val type: String = "EXECUTE_COMMAND") : OutboundMessage()
+    data class WriteFile(val path: String, val content: String, val type: String = "WRITE_FILE", override val id: String? = null) : OutboundMessage()
+    data class ExecuteCommand(val command: String, val type: String = "EXECUTE_COMMAND", override val id: String? = null) : OutboundMessage()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

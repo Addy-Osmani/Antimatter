@@ -1,4 +1,4 @@
-export type InboundMessage =
+export type BaseInboundMessage =
   | { type: 'SEND_MESSAGE'; text: string }
   | { type: 'NEW_CONVERSATION' }
   | { type: 'CANCEL_RESPONSE' }
@@ -19,7 +19,10 @@ export type InboundMessage =
   | { type: 'EXECUTE_COMMAND'; command: string }
   | { type: 'PING' };
 
+export type InboundMessage = BaseInboundMessage & { id?: string };
+
 export type OutboundMessage =
+  | { type: 'ACK'; id: string }
   | { type: 'PONG' }
   | { type: 'SESSION_STATE'; conversationId: string | null; model: string; stepCount: number; cloudflareUrl: string | null; environment: string }
   | { type: 'STEP'; step: TrajectoryStep; index: number }

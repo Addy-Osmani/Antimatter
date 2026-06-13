@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -47,10 +48,23 @@ class BridgeService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == "ACTION_DISCONNECT") {
+            webSocket.disconnect()
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        val disconnectIntent = PendingIntent.getService(
+            this, 0,
+            Intent(this, BridgeService::class.java).apply { action = "ACTION_DISCONNECT" },
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(this, "bridge_channel")
             .setContentTitle("Antimatter Bridge")
-            .setContentText("Connected to Antigravity IDE")
+            .setContentText(if (intent == null) "Reconnecting to Antigravity..." else "Connected to Antigravity IDE")
             .setSmallIcon(android.R.drawable.ic_dialog_info) // Fallback icon
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Disconnect", disconnectIntent)
             .setOngoing(true)
             .build()
 
@@ -60,7 +74,7 @@ class BridgeService : Service() {
             startForeground(1, notification)
         }
         
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? {
