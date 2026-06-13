@@ -3,6 +3,11 @@
 [![F-Droid](https://img.shields.io/badge/F--Droid-Get_it_on-blue.svg)](https://f-droid.org/packages/dev.saifmukhtar.antimatter/)
 [![GitHub Sponsor](https://img.shields.io/badge/Sponsor-❤️-blue.svg)](https://github.com/sponsors/saifmukhtar)
 [![Docs](https://img.shields.io/badge/docs-Website-deep_purple.svg)](https://antimatter.saifmukhtar.dev)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/saifmukhtar/antimatter)
+[![Author Website](https://img.shields.io/badge/Author-saifmukhtar.dev-black.svg)](https://saifmukhtar.dev)
+[![GitHub Stars](https://img.shields.io/github/stars/saifmukhtar/antimatter.svg?style=social)](https://github.com/saifmukhtar/antimatter/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Discord](https://img.shields.io/badge/Discord-Join_Community-7289da.svg)](https://discord.gg/saifmukhtar)
 
 > [!WARNING]
 > **Community Project Disclaimer**
