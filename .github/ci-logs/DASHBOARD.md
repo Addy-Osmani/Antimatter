@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-50%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-10-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-54%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-11-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 10 |
-| **Passed** | 5 |
+| **Total Runs** | 11 |
+| **Passed** | 6 |
 | **Failed** | 4 |
-| **Pass Rate** | 50% |
+| **Pass Rate** | 54% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-13 11:38 | Python CI | ✅ PASS | fix(python): correct invalid PyPI classifier in pyproject.toml | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465693643) |
 | 2026-06-13 11:35 | CodeQL Advanced | ✅ PASS | fix: replace heredoc with echo to prevent YAML indentation errors | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465425685) |
 | 2026-06-13 11:33 | CodeQL Advanced | ⚠️ CANCEL | Merge pull request #2 from saifmukhtar/dependabot/npm_and_yarn/extension/esbuild-0.28.1 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465452484) |
 | 2026-06-13 11:32 | CI | ❌ FAIL | Merge pull request #2 from saifmukhtar/dependabot/npm_and_yarn/extension/esbuild-0.28.1 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465452489) |
