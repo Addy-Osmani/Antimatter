@@ -25,8 +25,8 @@ def main():
         config["cloudflare_client_id"] = client_id
 
     secret = config.get('cloudflare_client_secret')
-    masked_secret = f"{secret[:4]}...{secret[-4:]}" if secret and len(secret) > 8 else ("***" if secret else "Not set")
-    print(f"\nCurrent Client Secret: {masked_secret}")
+    status = "(Set)" if secret else "(Not set)"
+    print(f"\nCurrent Client Secret: {status}")
     client_secret = input("Enter Cloudflare Access Client Secret (or press Enter to skip): ").strip()
     if client_secret:
         config["cloudflare_client_secret"] = client_secret
