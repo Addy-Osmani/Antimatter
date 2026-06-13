@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-50%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-8-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-44%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-9-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 8 |
+| **Total Runs** | 9 |
 | **Passed** | 4 |
 | **Failed** | 4 |
-| **Pass Rate** | 50% |
+| **Pass Rate** | 44% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-13 11:33 | CodeQL Advanced | ⚠️ CANCEL | Merge pull request #2 from saifmukhtar/dependabot/npm_and_yarn/extension/esbuild-0.28.1 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465452484) |
 | 2026-06-13 11:32 | CI | ❌ FAIL | Merge pull request #2 from saifmukhtar/dependabot/npm_and_yarn/extension/esbuild-0.28.1 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465452489) |
 | 2026-06-13 11:30 | CI | ❌ FAIL | fix: replace heredoc with echo to prevent YAML indentation errors | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465425670) |
 | 2026-06-13 11:28 | Android CI | ✅ PASS | Merge pull request #2 from saifmukhtar/dependabot/npm_and_yarn/extension/esbuild-0.28.1 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465452495) |
