@@ -14,7 +14,6 @@ import { FileSystemHelper } from './core/data/FileSystemHelper';
 import { TerminalCommandHandler } from './feature/terminal/TerminalCommandHandler';
 
 import * as fs from 'fs';
-import * as path from 'path';
 
 let outputChannel: vscode.OutputChannel;
 
@@ -42,15 +41,15 @@ export async function activate(context: vscode.ExtensionContext) {
   const tunnel = new CloudflareTunnel((msg) => connectionManager.broadcast(msg), log);
   const authHandler = new AuthHandler(context, connectionManager, log);
   await authHandler.init();
-  const wss = new BridgeWebSocketServer(connectionManager, authHandler, router, tunnel, log);
+  const wss = new BridgeWebSocketServer(connectionManager, authHandler, router, log);
   const brainWatcher = new BrainWatcher(chatManager, connectionManager, tunnel, log);
   const qrProvider = new QrWebviewProvider(log);
 
-  // 3. Feature Handlers
-  const chatHandler = new ChatCommandHandler(router, chatManager, log);
-  const fileHandler = new FileCommandHandler(router, fsHelper, log);
-  const historyManager = new HistoryManager(router, log);
-  const terminalHandler = new TerminalCommandHandler(router, connectionManager, log);
+  // 3. Feature Handlers (side-effectful — their constructors register routes)
+  new ChatCommandHandler(router, chatManager, log);
+  new FileCommandHandler(router, fsHelper, log);
+  new HistoryManager(router, log);
+  new TerminalCommandHandler(router, connectionManager, log);
 
   // 4. Register Routes
   router.register('AUTH_CHALLENGE', async (msg, ws) => {
@@ -81,12 +80,12 @@ export async function activate(context: vscode.ExtensionContext) {
     }, 500);
   });
 
-  router.register('SUBSCRIBE_CONVERSATION', async (msg, ws) => {
+  router.register('SUBSCRIBE_CONVERSATION', async (msg, _ws) => {
     chatManager.setActiveConversation(msg.conversationId);
     brainWatcher.setConversation(msg.conversationId, msg.lastKnownStepCount || 0);
   });
 
-  router.register('PING', async (msg, ws) => {
+  router.register('PING', async (_msg, ws) => {
     ws.send(JSON.stringify({ type: 'PONG' }));
   });
 

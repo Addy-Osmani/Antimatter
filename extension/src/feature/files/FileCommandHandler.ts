@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { WebSocket } from 'ws';
+
 import { FileSystemHelper } from '../../core/data/FileSystemHelper';
 import { MessageRouter } from '../../core/network/MessageRouter';
 

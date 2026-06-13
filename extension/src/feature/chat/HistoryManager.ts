@@ -14,7 +14,7 @@ export class HistoryManager {
   }
 
   private registerHandlers() {
-    this.router.register('GET_HISTORY', async (msg, ws) => {
+    this.router.register('GET_HISTORY', async (_msg, ws) => {
       try {
         const history = await this.getConversationHistory();
         this.log(`→ HISTORY_LIST with ${history.length} items`);

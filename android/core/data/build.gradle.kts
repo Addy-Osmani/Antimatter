@@ -21,6 +21,11 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    // Export Room schema JSON files for migration tracking
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
 }
 
 dependencies {
@@ -34,8 +39,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
-    // Room Database
-    val roomVersion = "2.7.0-alpha11"
+    // Room Database — stable 2.6.1 (downgraded from 2.7.0-alpha11)
+    val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")

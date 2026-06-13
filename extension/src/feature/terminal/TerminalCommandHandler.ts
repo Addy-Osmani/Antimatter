@@ -81,7 +81,7 @@ export class TerminalCommandHandler {
   }
 
   private registerHandlers() {
-    this.router.register('EXECUTE_COMMAND', async (msg, ws) => {
+    this.router.register('EXECUTE_COMMAND', async (msg, _ws) => {
       this.log(`Executing command: ${msg.command}`);
       const cmdTrimmed = msg.command.trim();
 

@@ -25,7 +25,7 @@ describe('MessageRouter', () => {
         const validPayload = JSON.stringify({ type: 'PING' });
         
         let handlerCalled = false;
-        router.register('PING', async (msg, ws) => {
+        router.register('PING', async (_msg, _ws) => {
             handlerCalled = true;
         });
 

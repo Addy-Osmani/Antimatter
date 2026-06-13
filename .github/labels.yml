@@ -1,0 +1,64 @@
+# GitHub Issue Labels for Antimatter
+# Apply via: gh label create "<name>" --color "<hex>" --description "<description>"
+# Or import via: https://github.com/nicedoc/github-label-sync
+
+labels:
+  # Contribution entry points
+  - name: "good first issue"
+    color: "7057ff"
+    description: "Good for newcomers — well-scoped with clear acceptance criteria"
+
+  - name: "help wanted"
+    color: "008672"
+    description: "Extra attention is needed — maintainer welcomes contributions"
+
+  # Component labels
+  - name: "android"
+    color: "3ddc84"
+    description: "Android companion app (Kotlin / Jetpack Compose)"
+
+  - name: "extension"
+    color: "007acc"
+    description: "VS Code Extension (TypeScript)"
+
+  - name: "python-daemon"
+    color: "3572a5"
+    description: "Python bridge daemon (AntiGravity 2.0)"
+
+  # Type labels
+  - name: "bug"
+    color: "d73a4a"
+    description: "Something isn't working"
+
+  - name: "enhancement"
+    color: "a2eeef"
+    description: "New feature or request"
+
+  - name: "security"
+    color: "e4e669"
+    description: "Security vulnerability or hardening"
+
+  - name: "performance"
+    color: "0075ca"
+    description: "Performance improvement"
+
+  - name: "documentation"
+    color: "0075ca"
+    description: "Improvements or additions to documentation"
+
+  - name: "test"
+    color: "d4c5f9"
+    description: "Adding or fixing tests"
+
+  # Status labels
+  - name: "needs-triage"
+    color: "ededed"
+    description: "This issue needs to be reviewed and prioritized"
+
+  - name: "duplicate"
+    color: "cfd3d7"
+    description: "This issue or pull request already exists"
+
+  - name: "wontfix"
+    color: "ffffff"
+    description: "This will not be worked on"

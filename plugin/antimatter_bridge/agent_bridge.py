@@ -191,15 +191,21 @@ class AgentBridge:
     async def send_workspace(self, root_path=None):
         if root_path is None:
             root_path = os.getcwd()
-            
-        # Build a 2-level deep file tree for the workspace to prevent overwhelming the socket
-        def build_tree(path, depth=0):
+
+        IGNORED = {
+            'node_modules', '.git', 'dist', 'build', 'out', '.gradle',
+            '__pycache__', '.venv', 'venv', '.idea', '.DS_Store', '.kotlin',
+        }
+
+        # Performance: Build the file tree in a thread pool so the synchronous
+        # os.listdir/os.path.isdir calls don't block the asyncio event loop.
+        def build_tree(path: str, depth: int = 0) -> list:
             if depth > 2:
                 return []
             nodes = []
             try:
-                for item in os.listdir(path):
-                    if item.startswith('.') or item == "__pycache__":
+                for item in sorted(os.listdir(path)):
+                    if item.startswith('.') or item in IGNORED:
                         continue
                     full_path = os.path.join(path, item)
                     is_dir = os.path.isdir(full_path)
@@ -211,11 +217,15 @@ class AgentBridge:
                     if is_dir and depth < 2:
                         node["children"] = build_tree(full_path, depth + 1)
                     nodes.append(node)
+            except PermissionError:
+                pass
             except Exception:
                 pass
+            # Directories first, then files, both alphabetical
             return sorted(nodes, key=lambda x: (not x["isDir"], x["name"]))
-            
-        tree = build_tree(root_path)
+
+        # Run synchronous tree scan off the event loop
+        tree = await asyncio.to_thread(build_tree, root_path)
         await self.websocket.send(json.dumps({
             "type": "FILE_TREE",
             "tree": tree

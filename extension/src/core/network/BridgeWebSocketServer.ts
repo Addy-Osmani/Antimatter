@@ -1,9 +1,9 @@
-import { WebSocketServer, WebSocket } from 'ws';
+import { WebSocketServer } from 'ws';
 import * as vscode from 'vscode';
 import { ConnectionManager } from '../../feature/connect/ConnectionManager';
 import { AuthHandler } from '../../feature/connect/AuthHandler';
 import { MessageRouter } from './MessageRouter';
-import { CloudflareTunnel } from '../../feature/connect/CloudflareTunnel';
+
 
 export class BridgeWebSocketServer {
   private wss: WebSocketServer | null = null;
@@ -13,7 +13,6 @@ export class BridgeWebSocketServer {
     private connectionManager: ConnectionManager,
     private authHandler: AuthHandler,
     private router: MessageRouter,
-    private tunnel: CloudflareTunnel,
     private log: (msg: string) => void
   ) {}
 

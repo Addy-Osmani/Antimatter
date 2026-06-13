@@ -11,7 +11,6 @@ describe('TerminalCommandHandler', () => {
     let router: MessageRouter;
     let mockConnectionManager: any;
     let logMock: any;
-    let commandHandler: TerminalCommandHandler;
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -21,7 +20,8 @@ describe('TerminalCommandHandler', () => {
         };
         logMock = jest.fn();
 
-        commandHandler = new TerminalCommandHandler(router, mockConnectionManager, logMock);
+        // Side-effect only: constructor registers route handlers on the router
+        void new TerminalCommandHandler(router, mockConnectionManager, logMock);
     });
 
     test('should reject command not in allowlist', async () => {
@@ -38,25 +38,18 @@ describe('TerminalCommandHandler', () => {
         expect(spawn).not.toHaveBeenCalled();
     });
 
-    test('should prompt for confirmation on destructive commands', async () => {
+    test('should block rm -rf via dangerous patterns denylist (no dialog)', async () => {
         const payload = JSON.stringify({
             type: 'EXECUTE_COMMAND',
             command: 'rm -rf node_modules'
         });
 
-        // Mock user clicking "Cancel"
-        (vscode.window.showWarningMessage as jest.Mock).mockResolvedValueOnce('Cancel');
-
         await router.route(payload, {} as any);
 
-        expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
-            expect.stringContaining("Execute destructive command"),
-            { modal: true },
-            "Execute",
-            "Cancel"
-        );
+        // rm -rf is caught by DANGEROUS_PATTERNS denylist — no dialog, just blocked
+        expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
         expect(mockConnectionManager.broadcast).toHaveBeenCalledWith(
-            expect.objectContaining({ text: expect.stringContaining('cancelled by user') })
+            expect.objectContaining({ text: expect.stringContaining('dangerous pattern') })
         );
         expect(spawn).not.toHaveBeenCalled();
     });

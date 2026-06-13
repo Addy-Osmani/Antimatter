@@ -6,51 +6,51 @@ export class ChatCommandHandler {
   constructor(
     private router: MessageRouter,
     private chatState: ChatStateManager,
-    private log: (msg: string) => void
+    _log: (msg: string) => void  // retained for API consistency; not used in this handler
   ) {
     this.registerHandlers();
   }
 
   private registerHandlers() {
-    this.router.register('SEND_MESSAGE', async (msg, ws) => {
+    this.router.register('SEND_MESSAGE', async (msg, _ws) => {
       await vscode.commands.executeCommand('antigravity.openAgent');
       await vscode.commands.executeCommand('antigravity.sendPromptToAgentPanel', msg.text);
     });
 
-    this.router.register('NEW_CONVERSATION', async (msg, ws) => {
+    this.router.register('NEW_CONVERSATION', async (_msg, _ws) => {
       await vscode.commands.executeCommand('antigravity.startNewConversation');
       this.chatState.clearActiveConversation();
     });
 
-    this.router.register('CANCEL_RESPONSE', async (msg, ws) => {
+    this.router.register('CANCEL_RESPONSE', async (_msg, _ws) => {
       await vscode.commands.executeCommand('workbench.action.chat.cancel');
     });
 
-    this.router.register('CHANGE_MODEL', async (msg, ws) => {
+    this.router.register('CHANGE_MODEL', async (_msg, _ws) => {
       await vscode.commands.executeCommand('workbench.action.chat.openModelPicker');
     });
 
-    this.router.register('ACCEPT_EDITS', async (msg, ws) => {
+    this.router.register('ACCEPT_EDITS', async (_msg, _ws) => {
       await vscode.commands.executeCommand('antigravity.prioritized.agentAcceptAllInFile');
     });
 
-    this.router.register('REJECT_EDITS', async (msg, ws) => {
+    this.router.register('REJECT_EDITS', async (_msg, _ws) => {
       await vscode.commands.executeCommand('antigravity.prioritized.agentRejectAllInFile');
     });
 
-    this.router.register('ACCEPT_HUNK', async (msg, ws) => {
+    this.router.register('ACCEPT_HUNK', async (_msg, _ws) => {
       await vscode.commands.executeCommand('antigravity.prioritized.agentAcceptFocusedHunk');
     });
 
-    this.router.register('REJECT_HUNK', async (msg, ws) => {
+    this.router.register('REJECT_HUNK', async (_msg, _ws) => {
       await vscode.commands.executeCommand('antigravity.prioritized.agentRejectFocusedHunk');
     });
 
-    this.router.register('NEXT_HUNK', async (msg, ws) => {
+    this.router.register('NEXT_HUNK', async (_msg, _ws) => {
       await vscode.commands.executeCommand('antigravity.prioritized.agentFocusNextHunk');
     });
 
-    this.router.register('PREV_HUNK', async (msg, ws) => {
+    this.router.register('PREV_HUNK', async (_msg, _ws) => {
       await vscode.commands.executeCommand('antigravity.prioritized.agentFocusPreviousHunk');
     });
   }
