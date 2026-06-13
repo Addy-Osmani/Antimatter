@@ -19,3 +19,4 @@ Date,Workflow,Status,Commit,URL
 2026-06-13 12:21,CodeQL Advanced,✅ PASS,security: fix CodeQL vulnerabilities (injection auth permissions logs),https://github.com/saifmukhtar/antimatter/actions/runs/27466414684
 2026-06-13 12:29,Python CI,✅ PASS,security: fix CodeQL taint tracking for client secret logging,https://github.com/saifmukhtar/antimatter/actions/runs/27466800994
 2026-06-13 12:30,Extension CI,✅ PASS,security: fix CodeQL taint tracking for client secret logging,https://github.com/saifmukhtar/antimatter/actions/runs/27466800993
+2026-06-13 12:31,Android CI,✅ PASS,security: fix CodeQL taint tracking for client secret logging,https://github.com/saifmukhtar/antimatter/actions/runs/27466801000
