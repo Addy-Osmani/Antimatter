@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-76%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-21-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-77%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-22-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 21 |
-| **Passed** | 16 |
+| **Total Runs** | 22 |
+| **Passed** | 17 |
 | **Failed** | 4 |
-| **Pass Rate** | 76% |
+| **Pass Rate** | 77% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-13 12:39 | CodeQL Advanced | ✅ PASS | security: fix CodeQL taint tracking for client secret logging | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466801004) |
 | 2026-06-13 12:31 | Android CI | ✅ PASS | security: fix CodeQL taint tracking for client secret logging | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466801000) |
 | 2026-06-13 12:30 | Extension CI | ✅ PASS | security: fix CodeQL taint tracking for client secret logging | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466800993) |
 | 2026-06-13 12:29 | Python CI | ✅ PASS | security: fix CodeQL taint tracking for client secret logging | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466800994) |
