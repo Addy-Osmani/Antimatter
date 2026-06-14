@@ -1,12 +1,12 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
 ![Pass Rate](https://img.shields.io/badge/Pass%20Rate-80%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-25-blue)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-26-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 25 |
-| **Passed** | 20 |
+| **Total Runs** | 26 |
+| **Passed** | 21 |
 | **Failed** | 4 |
 | **Pass Rate** | 80% |
 
@@ -14,6 +14,7 @@
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-14 09:11 | CodeQL Advanced | ✅ PASS | Future roadmap: Planning to support ios platform | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27494010402) |
 | 2026-06-14 09:04 | Android CI | ✅ PASS | Future roadmap: Planning to support ios platform | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27494010347) |
 | 2026-06-14 09:02 | Extension CI | ✅ PASS | Future roadmap: Planning to support ios platform | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27494010348) |
 | 2026-06-14 09:01 | Python CI | ✅ PASS | Future roadmap: Planning to support ios platform | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27494010329) |
