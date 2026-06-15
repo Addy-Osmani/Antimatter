@@ -1,12 +1,12 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
 ![Pass Rate](https://img.shields.io/badge/Pass%20Rate-66%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-53-blue)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-54-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 53 |
-| **Passed** | 35 |
+| **Total Runs** | 54 |
+| **Passed** | 36 |
 | **Failed** | 15 |
 | **Pass Rate** | 66% |
 
@@ -14,6 +14,7 @@
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-15 22:48 | Android CI | ✅ PASS | build: force js-yaml update to v4.2.0 via overrides to fix dependabot vulnerability alert | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27581377503) |
 | 2026-06-15 22:46 | Adapters CI | ✅ PASS | build: force js-yaml update to v4.2.0 via overrides to fix dependabot vulnerability alert | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27581377512) |
 | 2026-06-15 22:46 | iOS CI | ✅ PASS | build: force js-yaml update to v4.2.0 via overrides to fix dependabot vulnerability alert | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27581377524) |
 | 2026-06-15 22:46 | CodeQL Advanced | ✅ PASS | Merge pull request #3 from saifmukhtar/dependabot/npm_and_yarn/adapters/ag/form-data-4.0.6 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27580907050) |
@@ -63,4 +64,3 @@
 | 2026-06-13 11:30 | CI | ❌ FAIL | fix: replace heredoc with echo to prevent YAML indentation errors | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465425670) |
 | 2026-06-13 11:28 | Android CI | ✅ PASS | Merge pull request #2 from saifmukhtar/dependabot/npm_and_yarn/extension/esbuild-0.28.1 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465452495) |
 | 2026-06-13 11:28 | CodeQL Advanced | ✅ PASS | docs: add DeepWiki and social badges to README | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465239027) |
-| 2026-06-13 11:27 | Android CI | ✅ PASS | fix: replace heredoc with echo to prevent YAML indentation errors | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465425661) |
