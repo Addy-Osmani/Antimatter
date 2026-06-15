@@ -72,11 +72,23 @@ Developing with autonomous AI agents often means leaving them running for long p
 
     Browse files in your IDE workspace and view contents remotely from your phone.
 
--   :material-message-text:{ .lg .middle } **Remote Prompting**
+-   :material-message-text:{ .lg .middle } **Remote Prompting & Vision**
 
     ---
 
-    Send messages directly to your AI agent and start new conversations from your phone.
+    Send multimodal prompts directly to your AI agent with image attachments, and start new conversations from your phone.
+
+-   :material-console:{ .lg .middle } **Native Remote PTY Terminal**
+
+    ---
+
+    Open a fully interactive, bi-directional remote terminal shell directly from your phone into the host environment, supporting vim, htop, and full ANSI rendering.
+
+-   :material-database-search:{ .lg .middle } **FTS Global Search**
+
+    ---
+
+    Full Text Search across your entire local SQLite trajectory database in milliseconds to quickly find past agent actions.
 
 </div>
 
