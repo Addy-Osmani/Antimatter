@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-65%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-40-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-63%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-41-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 40 |
+| **Total Runs** | 41 |
 | **Passed** | 26 |
-| **Failed** | 13 |
-| **Pass Rate** | 65% |
+| **Failed** | 14 |
+| **Pass Rate** | 63% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-15 22:23 | npm_and_yarn in /adapters/ag for js-yaml - Update #1414775372 | ❌ FAIL | chore: update workflow dashboard | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27580281687) |
 | 2026-06-15 22:22 | Graph Update: uv in /core |  /core/gateway |  /core/shared-fs #1414773591 | [View Log](✅ PASS,feat: implement native PTY terminal for iOS Android and Gateway,https://github.com/saifmukhtar/antimatter/actions/runs/27580235376) |
 | 2026-06-15 22:21 | Adapters CI | ❌ FAIL | feat: implement native PTY terminal for iOS Android and Gateway | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27580233236) |
 | 2026-06-15 22:21 | iOS CI | ✅ PASS | feat: implement native PTY terminal for iOS Android and Gateway | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27580233232) |
