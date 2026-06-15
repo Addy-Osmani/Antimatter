@@ -1,0 +1,3 @@
+module CoreData {
+    header "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/include/CoreData-Swift.h"
+}

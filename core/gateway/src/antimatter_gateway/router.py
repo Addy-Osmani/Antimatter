@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 from antimatter_crypto.e2ee import E2EESession
+from antimatter_gateway.pty_manager import PtyManager
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +11,7 @@ class MessageRouter:
         self.gateway = gateway
         self.clients = set()
         self.adapters = {} # id -> {"name": str, "ws": websocket}
+        self.pty_manager = PtyManager(self)
 
     def add_client(self, websocket):
         self.clients.add(websocket)
@@ -48,11 +50,41 @@ class MessageRouter:
 
     async def route_to_adapter(self, parsed_cmd: dict, e2ee: E2EESession, websocket):
         """
-        Receives decrypted command from client, routes to local adapter.
+        Receives decrypted command from client, routes to local adapter or handles it internally.
         """
+        cmd_type = parsed_cmd.get("type")
+        
+        # Internal Gateway Commands (no agentId required)
+        if cmd_type == "PTY_START":
+            # For simplicity, session ID is the client websocket id or 'default'
+            session_id = id(websocket)
+            cols = parsed_cmd.get("cols", 80)
+            rows = parsed_cmd.get("rows", 24)
+            await self.pty_manager.start_pty(session_id, cols, rows)
+            return
+            
+        if cmd_type == "PTY_INPUT":
+            session_id = id(websocket)
+            data = parsed_cmd.get("data", "")
+            self.pty_manager.write_input(session_id, data)
+            return
+            
+        if cmd_type == "PTY_RESIZE":
+            session_id = id(websocket)
+            cols = parsed_cmd.get("cols", 80)
+            rows = parsed_cmd.get("rows", 24)
+            self.pty_manager.resize(session_id, cols, rows)
+            return
+            
+        if cmd_type == "PTY_PING":
+            session_id = id(websocket)
+            self.pty_manager.ping(session_id)
+            return
+
+        # Commands routed to specific agents
         agent_id = parsed_cmd.get("agentId")
         if not agent_id:
-            logger.warning(f"No agentId specified in command: {parsed_cmd.get('type')}")
+            logger.warning(f"No agentId specified in command: {cmd_type}")
             return
             
         adapter = self.adapters.get(agent_id)

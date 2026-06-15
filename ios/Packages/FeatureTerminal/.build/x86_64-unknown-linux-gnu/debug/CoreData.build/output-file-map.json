@@ -1,0 +1,33 @@
+{
+  "": {
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/master.swiftdeps"
+  },
+  "/home/saif/antimatter/ios/Packages/CoreData/Sources/CoreData/ConnectionStore.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/ConnectionStore.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/ConnectionStore.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/ConnectionStore~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/ConnectionStore.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/ConnectionStore.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/CoreData/Sources/CoreData/CoreData.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/CoreData.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/CoreData.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/CoreData~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/CoreData.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/CoreData.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/CoreData/Sources/CoreData/KeychainManager.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/KeychainManager.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/KeychainManager.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/KeychainManager~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/KeychainManager.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/KeychainManager.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/CoreData/Sources/CoreData/PersistenceController.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/PersistenceController.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/PersistenceController.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/PersistenceController~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/PersistenceController.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreData.build/PersistenceController.dia"
+  }
+}

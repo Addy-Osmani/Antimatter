@@ -98,6 +98,7 @@ Explore the depths of the ecosystem:
 ## ✨ Core Features
 
 - **Real-Time Streaming**: Watch your agent's thought process character-by-character.
+- **Native Remote PTY Terminal**: Full `os/exec` integration directly to your host machine via `SwiftTerm` (iOS) and `Termux` (Android) with standard Linux shell commands over the secure E2EE tunnel.
 - **Zero Trust Security**: Ed25519 pairing prevents Man-In-The-Middle attacks even on compromised public networks.
 - **Seamless Tunnels**: Free Cloudflare Quick Tunnels provisioned automatically—no firewall configurations required.
 - **Offline History**: The Android app uses a local Room database to cache conversations and artifacts for offline viewing.

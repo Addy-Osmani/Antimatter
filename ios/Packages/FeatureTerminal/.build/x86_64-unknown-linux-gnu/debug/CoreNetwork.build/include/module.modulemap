@@ -1,0 +1,3 @@
+module CoreNetwork {
+    header "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/include/CoreNetwork-Swift.h"
+}

@@ -7,13 +7,14 @@ dependencies = [
     "qrcode>=7.4.2",
     "antimatter-shared-config",
     "antimatter-shared-crypto",
-    "antimatter-shared-protocol"
+    "antimatter-shared-protocol",
+    "ptyprocess>=0.7.0"
 ]
 
 [tool.uv.sources]
-antimatter-shared-config = { path = "../shared-config" }
-antimatter-shared-crypto = { path = "../shared-crypto" }
-antimatter-shared-protocol = { path = "../shared-protocol" }
+antimatter-shared-config = { workspace = true }
+antimatter-shared-crypto = { workspace = true }
+antimatter-shared-protocol = { workspace = true }
 
 [project.scripts]
 antimatter = "antimatter_gateway.server:main"

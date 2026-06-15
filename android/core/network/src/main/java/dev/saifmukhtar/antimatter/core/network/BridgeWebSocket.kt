@@ -199,6 +199,7 @@ class BridgeWebSocket(private val context: Context) {
                             "SYSTEM_NOTIFICATION" -> gson.fromJson(payloadText, InboundMessage.SystemNotification::class.java)
                             "AUTH_RESPONSE" -> gson.fromJson(payloadText, InboundMessage.AuthResponse::class.java)
                             "ARTIFACTS_LIST" -> gson.fromJson(payloadText, InboundMessage.ArtifactsList::class.java)
+                            "pty_output" -> gson.fromJson(payloadText, InboundMessage.PtyOutput::class.java)
                             "ACK" -> gson.fromJson(payloadText, InboundMessage.Ack::class.java)
                             else -> InboundMessage.Unknown
                         }

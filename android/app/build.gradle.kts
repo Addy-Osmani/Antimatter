@@ -150,6 +150,7 @@ dependencies {
     implementation(project(":feature:connect"))
     implementation(project(":feature:chat"))
     implementation(project(":feature:files"))
+    implementation(project(":feature:terminal"))
 
     // Hilt
     implementation(libs.hilt.android)

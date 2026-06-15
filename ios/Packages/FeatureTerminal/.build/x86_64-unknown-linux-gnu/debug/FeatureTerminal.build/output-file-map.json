@@ -1,0 +1,19 @@
+{
+  "": {
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/master.swiftdeps"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/Sources/FeatureTerminal/TerminalScreen.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalScreen.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalScreen.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalScreen~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalScreen.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalScreen.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/Sources/FeatureTerminal/TerminalViewModel.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalViewModel.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalViewModel.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalViewModel~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalViewModel.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/FeatureTerminal.build/TerminalViewModel.dia"
+  }
+}

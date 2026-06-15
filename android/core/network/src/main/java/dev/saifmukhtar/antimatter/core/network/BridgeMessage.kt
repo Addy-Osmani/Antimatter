@@ -101,6 +101,7 @@ sealed class InboundMessage {
     data class ArtifactsList(val artifacts: List<FileNode> = emptyList()) : InboundMessage()
     data class AgentInfo(val id: String, val name: String, val status: String, val workspaceRoot: String? = null)
     data class AvailableAgents(val agents: List<AgentInfo> = emptyList(), @SerializedName("allowed_workspaces") val allowedWorkspaces: List<String> = emptyList()) : InboundMessage()
+    data class PtyOutput(val ptyId: String = "", val data: String = "") : InboundMessage()
 
     data class Ack(val id: String = "") : InboundMessage()
     object Unknown : InboundMessage()
@@ -141,6 +142,11 @@ sealed class OutboundMessage {
     
     data class WriteFile(val path: String, val content: String, val type: String = "WRITE_FILE", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
     data class ChangeWorkspace(val path: String, val type: String = "CHANGE_WORKSPACE", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
+
+    // PTY messages
+    data class PtyStart(val ptyId: String, val cols: Int, val rows: Int, val type: String = "pty_start", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
+    data class PtyInput(val ptyId: String, val data: String, val type: String = "pty_input", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
+    data class PtyResize(val ptyId: String, val cols: Int, val rows: Int, val type: String = "pty_resize", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

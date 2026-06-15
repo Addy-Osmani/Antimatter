@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/ArgumentParserToolInfo-tool.build/master.swiftdeps"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/swift-argument-parser/Sources/ArgumentParserToolInfo/ToolInfo.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/ArgumentParserToolInfo-tool.build/ToolInfo.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/ArgumentParserToolInfo-tool.build/ToolInfo.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/ArgumentParserToolInfo-tool.build/ToolInfo~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/ArgumentParserToolInfo-tool.build/ToolInfo.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/ArgumentParserToolInfo-tool.build/ToolInfo.dia"
+  }
+}

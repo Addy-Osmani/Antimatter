@@ -1,0 +1,89 @@
+{
+  "object" : {
+    "artifacts" : [
+
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "coredata",
+          "kind" : "fileSystem",
+          "location" : "/home/saif/antimatter/ios/Packages/CoreData",
+          "name" : "CoreData"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/home/saif/antimatter/ios/Packages/CoreData"
+        },
+        "subpath" : "coredata"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "corenetwork",
+          "kind" : "fileSystem",
+          "location" : "/home/saif/antimatter/ios/Packages/CoreNetwork",
+          "name" : "CoreNetwork"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/home/saif/antimatter/ios/Packages/CoreNetwork"
+        },
+        "subpath" : "corenetwork"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "coreui",
+          "kind" : "fileSystem",
+          "location" : "/home/saif/antimatter/ios/Packages/CoreUI",
+          "name" : "CoreUI"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/home/saif/antimatter/ios/Packages/CoreUI"
+        },
+        "subpath" : "coreui"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "swift-argument-parser",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/apple/swift-argument-parser",
+          "name" : "swift-argument-parser"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
+            "version" : "1.8.2"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "swift-argument-parser"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "swiftterm",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/migueldeicaza/SwiftTerm.git",
+          "name" : "SwiftTerm"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "8e7a1e154f470e19c709a00a8768df348ba5fc43",
+            "version" : "1.13.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "SwiftTerm"
+      }
+    ],
+    "prebuilts" : [
+
+    ]
+  },
+  "version" : 7
+}

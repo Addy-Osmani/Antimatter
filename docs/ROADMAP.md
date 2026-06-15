@@ -35,6 +35,12 @@ Before establishing the WebSocket connection or waking the app, require local bi
 
 ## :material-rocket-launch: Core Features
 
+### :material-console: Native Remote PTY Terminal
+
+**Status:** :material-check-circle: Shipped
+
+Provides a full interactive shell connection straight from the mobile app (using SwiftTerm on iOS and Termux on Android) to the core Gateway on the host machine. Supports `vim`, `htop`, `ssh`, and full ANSI color rendering seamlessly via the E2EE WebSocket connection without any agent overhead.
+
 ### :material-swap-horizontal: Remote Workspace Switching
 
 **Status:** :material-check-circle: Shipped

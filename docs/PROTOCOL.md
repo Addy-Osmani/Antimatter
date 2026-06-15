@@ -92,6 +92,10 @@ ignored.
 | `READ_FILE` | `path: string` | Read a file's contents. |
 | `WRITE_FILE` | `path: string`, `content: string` | Overwrite a file's contents. |
 | `EXECUTE_COMMAND` | `command: string` | Run a shell command on the host (biometric‑gated on the client). |
+| `PTY_START` | `cols: int`, `rows: int` | Requests a new shell instance. Sends initial screen dimensions. |
+| `PTY_INPUT` | `data: string` (base64) | Raw keystrokes sent to the host shell stdin. |
+| `PTY_RESIZE` | `cols: int`, `rows: int` | Triggered when the user rotates their phone, dynamically resizing the PTY. |
+| `PTY_PING` | — | Keepalive ping for the terminal session. |
 
 ---
 
@@ -115,6 +119,7 @@ Defined by the `OutboundMessage` union in `types.ts`.
 | `HISTORY_LIST` | `conversations: { id: string; timestamp: number; title: string }[]` | Result of `GET_HISTORY`. |
 | `ARTIFACTS_LIST` | `artifacts: any[]` | Result of `GET_ARTIFACTS`. |
 | `COMMAND_OUTPUT` | `text: string`, `isError: boolean` | Streamed output from `EXECUTE_COMMAND`. |
+| `PTY_OUTPUT` | `data: string` (base64) | Raw ANSI escape sequences from the shell streamed to the mobile UI. |
 | `SUCCESS` | `message: string` | Generic success acknowledgement. |
 | `ERROR` | `message: string` | A handler failed or a request was invalid. |
 

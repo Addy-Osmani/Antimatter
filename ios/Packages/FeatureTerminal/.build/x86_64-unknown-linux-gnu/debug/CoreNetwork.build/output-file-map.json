@@ -1,0 +1,33 @@
+{
+  "": {
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/master.swiftdeps"
+  },
+  "/home/saif/antimatter/ios/Packages/CoreNetwork/Sources/CoreNetwork/AgentModels.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentModels.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentModels.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentModels~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentModels.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentModels.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/CoreNetwork/Sources/CoreNetwork/AgentProtocol.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentProtocol.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentProtocol.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentProtocol~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentProtocol.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/AgentProtocol.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/CoreNetwork/Sources/CoreNetwork/CoreNetwork.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/CoreNetwork.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/CoreNetwork.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/CoreNetwork~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/CoreNetwork.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/CoreNetwork.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/CoreNetwork/Sources/CoreNetwork/E2EESession.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/E2EESession.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/E2EESession.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/E2EESession~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/E2EESession.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreNetwork.build/E2EESession.dia"
+  }
+}

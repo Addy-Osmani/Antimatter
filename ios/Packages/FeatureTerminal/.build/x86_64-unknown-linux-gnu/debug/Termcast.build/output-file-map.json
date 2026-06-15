@@ -1,0 +1,33 @@
+{
+  "": {
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/master.swiftdeps"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/Termcast/AsciicastFormat.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/AsciicastFormat.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/AsciicastFormat.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/AsciicastFormat~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/AsciicastFormat.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/AsciicastFormat.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/Termcast/TermcastPlayer.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastPlayer.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastPlayer.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastPlayer~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastPlayer.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastPlayer.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/Termcast/TermcastRecorder.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastRecorder.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastRecorder.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastRecorder~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastRecorder.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/TermcastRecorder.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/Termcast/main.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/main.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/main.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/main~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/main.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/Termcast.build/main.dia"
+  }
+}

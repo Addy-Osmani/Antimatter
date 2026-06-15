@@ -1,0 +1,26 @@
+{
+  "": {
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/master.swiftdeps"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/swift-argument-parser/Tools/generate-docc-reference/Extensions/ArgumentParser+Markdown.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/ArgumentParser+Markdown.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/ArgumentParser+Markdown.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/ArgumentParser+Markdown~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/ArgumentParser+Markdown.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/ArgumentParser+Markdown.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/swift-argument-parser/Tools/generate-docc-reference/Extensions/Process+SimpleAPI.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/Process+SimpleAPI.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/Process+SimpleAPI.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/Process+SimpleAPI~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/Process+SimpleAPI.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/Process+SimpleAPI.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/swift-argument-parser/Tools/generate-docc-reference/GenerateDoccReference.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/GenerateDoccReference.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/GenerateDoccReference.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/GenerateDoccReference~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/GenerateDoccReference.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/generate_docc_reference-tool.build/GenerateDoccReference.dia"
+  }
+}

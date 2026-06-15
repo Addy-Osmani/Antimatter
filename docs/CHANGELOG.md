@@ -11,6 +11,7 @@ Welcome to the Antimatter changelog. Because Antimatter is composed of multiple 
 
 ### Global Milestones
 
+* **v1.2.0** — Native Remote PTY Terminal added to Gateway, Android, and iOS.
 * **v1.1.0** — Decoupled monolithic extension into independent Adapter architecture (Gateway + Adapters).
 * **v1.0.0** — Security Audit completion, Zero Trust Networking, SQLCipher encryption, Biometric Auth.
 * **v0.1.0** — Initial Beta Release.

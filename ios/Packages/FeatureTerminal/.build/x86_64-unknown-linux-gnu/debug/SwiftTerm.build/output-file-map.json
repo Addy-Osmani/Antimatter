@@ -1,0 +1,229 @@
+{
+  "": {
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/master.swiftdeps"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/Buffer.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Buffer.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Buffer.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Buffer~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Buffer.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Buffer.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/BufferLine.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferLine.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferLine.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferLine~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferLine.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferLine.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/BufferSet.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferSet.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferSet.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferSet~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferSet.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/BufferSet.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/CharData.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharData.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharData.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharData~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharData.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharData.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/CharSets.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharSets.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharSets.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharSets~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharSets.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CharSets.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/CircularList.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CircularList.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CircularList.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CircularList~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CircularList.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/CircularList.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/Colors.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Colors.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Colors.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Colors~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Colors.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Colors.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/EscapeSequenceParser.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequenceParser.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequenceParser.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequenceParser~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequenceParser.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequenceParser.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/EscapeSequences.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequences.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequences.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequences~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequences.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/EscapeSequences.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/ExtensionsTerminal.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/ExtensionsTerminal.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/ExtensionsTerminal.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/ExtensionsTerminal~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/ExtensionsTerminal.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/ExtensionsTerminal.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/File.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/File.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/File.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/File~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/File.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/File.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/HeadlessTerminal.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/HeadlessTerminal.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/HeadlessTerminal.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/HeadlessTerminal~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/HeadlessTerminal.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/HeadlessTerminal.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/KittyGraphics.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyGraphics.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyGraphics.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyGraphics~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyGraphics.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyGraphics.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/KittyKeyboardEncoder.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardEncoder.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardEncoder.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardEncoder~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardEncoder.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardEncoder.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/KittyKeyboardProtocol.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardProtocol.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardProtocol.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardProtocol~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardProtocol.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyKeyboardProtocol.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/KittyPlaceholder.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyPlaceholder.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyPlaceholder.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyPlaceholder~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyPlaceholder.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/KittyPlaceholder.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/Line.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Line.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Line.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Line~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Line.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Line.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/LocalProcess.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/LocalProcess.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/LocalProcess.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/LocalProcess~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/LocalProcess.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/LocalProcess.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/Position.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Position.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Position.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Position~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Position.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Position.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/Pty.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Pty.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Pty.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Pty~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Pty.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Pty.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/SearchEngine.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchEngine.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchEngine.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchEngine~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchEngine.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchEngine.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/SearchLineCache.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchLineCache.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchLineCache.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchLineCache~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchLineCache.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchLineCache.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/SearchOptions.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchOptions.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchOptions.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchOptions~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchOptions.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchOptions.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/SearchService.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchService.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchService.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchService~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchService.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchService.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/SearchState.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchState.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchState.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchState~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchState.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SearchState.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/SelectionService.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SelectionService.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SelectionService.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SelectionService~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SelectionService.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SelectionService.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/SixelDcsHandler.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SixelDcsHandler.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SixelDcsHandler.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SixelDcsHandler~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SixelDcsHandler.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/SixelDcsHandler.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/Terminal.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Terminal.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Terminal.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Terminal~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Terminal.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Terminal.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/TerminalOptions.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalOptions.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalOptions.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalOptions~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalOptions.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalOptions.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/TerminalViewSearch.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalViewSearch.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalViewSearch.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalViewSearch~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalViewSearch.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/TerminalViewSearch.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/UnicodeWidthData.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/UnicodeWidthData.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/UnicodeWidthData.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/UnicodeWidthData~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/UnicodeWidthData.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/UnicodeWidthData.dia"
+  },
+  "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/checkouts/SwiftTerm/Sources/SwiftTerm/Utilities.swift": {
+    "dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Utilities.d",
+    "object": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Utilities.swift.o",
+    "swiftmodule": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Utilities~partial.swiftmodule",
+    "swift-dependencies": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Utilities.swiftdeps",
+    "diagnostics": "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/SwiftTerm.build/Utilities.dia"
+  }
+}

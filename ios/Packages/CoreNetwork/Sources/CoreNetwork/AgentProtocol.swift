@@ -235,6 +235,10 @@ public class AgentProtocol: NSObject, URLSessionWebSocketDelegate {
                     let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
                     UNUserNotificationCenter.current().add(request)
                 }
+            case "PTY_OUTPUT":
+                if let base64Data = json["data"] as? String, let decodedData = Data(base64Encoded: base64Data) {
+                    NotificationCenter.default.post(name: Notification.Name("NewPtyOutput"), object: decodedData)
+                }
             default:
                 break
             }

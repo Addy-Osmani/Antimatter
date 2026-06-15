@@ -1,0 +1,3 @@
+module CoreUI {
+    header "/home/saif/antimatter/ios/Packages/FeatureTerminal/.build/x86_64-unknown-linux-gnu/debug/CoreUI.build/include/CoreUI-Swift.h"
+}
