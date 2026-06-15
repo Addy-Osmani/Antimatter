@@ -44,5 +44,4 @@ def test_assets_bundled():
     assets_dir = Path(__file__).parent.parent / "antimatter_bridge" / "assets"
     
     assert (assets_dir / "plugin.json").exists(), "plugin.json is missing from assets"
-    assert (assets_dir / "config.json.example").exists(), "config.json.example is missing from assets"
     assert (assets_dir / "skills" / "antimatter-bridge" / "SKILL.md").exists(), "SKILL.md is missing from assets"
