@@ -1,0 +1,15 @@
+[project]
+version = "0.1.4"
+readme = "README.md"
+name = "antimatter-shared-fs"
+dependencies = [
+    "antimatter-shared-protocol"
+]
+
+[tool.uv.sources]
+antimatter-shared-protocol = { path = "../shared-protocol" }
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

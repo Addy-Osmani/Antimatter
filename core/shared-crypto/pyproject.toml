@@ -1,0 +1,14 @@
+[project]
+version = "0.1.4"
+readme = "README.md"
+name = "antimatter-shared-crypto"
+dependencies = [
+    "cryptography>=41.0.0",
+    "pydantic>=2.0.0",
+    "base58>=2.1.1"
+]
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

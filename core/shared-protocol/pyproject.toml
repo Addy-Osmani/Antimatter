@@ -1,0 +1,12 @@
+[project]
+version = "0.1.4"
+readme = "README.md"
+name = "antimatter-shared-protocol"
+dependencies = [
+    "pydantic>=2.0.0"
+]
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

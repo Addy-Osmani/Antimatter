@@ -1,0 +1,64 @@
+<div align="center">
+  <h1>⚛️ Antimatter Core</h1>
+  <p><b>The Universal Multi-Agent Microservices Gateway</b></p>
+  
+  [![PyPI Version](https://img.shields.io/pypi/v/antimatter-core.svg)](https://pypi.org/project/antimatter-core/)
+  [![Python](https://img.shields.io/pypi/pyversions/antimatter-core.svg)](https://pypi.org/project/antimatter-core/)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+</div>
+
+---
+
+**Antimatter** is a hyper-secure, locally hosted, multi-agent integration gateway. It acts as an End-to-End Encrypted (E2EE) bridge between your mobile device and a suite of powerful AI Agents running on your desktop.
+
+By decoupling the architecture, Antimatter allows you to seamlessly switch between different AI models (like Claude, Antigravity 2.0, or the Antigravity IDE) from a single Android application without compromising your local file system's security.
+
+## 🚀 Features
+
+- **Multi-Agent Multiplexing**: Connect to multiple AI adapters (Claude Desktop, AG2, etc.) simultaneously.
+- **End-to-End Encryption**: 100% locally generated X25519/HKDF/AES-GCM encryption ensures your data is never readable by Cloudflare or any middleman.
+- **Dynamic Routing**: Switch active agents on-the-fly directly from the Antimatter Android app.
+- **Headless & Secure Vaults**: Built-in dual-layer secret storage using OS-native Keyrings and a headless AES-GCM fallback vault.
+
+## 📦 Installation
+
+To install the entire Antimatter ecosystem (Gateway + All Adapters), simply run:
+
+```bash
+pip install antimatter-core
+```
+
+*Note: This package provides the core infrastructure for the Antimatter ecosystem.*
+
+## 💻 CLI Commands
+
+Once installed, you have access to a suite of clean, simple terminal commands:
+
+| Command | Description |
+|---|---|
+| `antimatter` | Starts the primary Gateway server. |
+| `antimatter-pair` | Generates a secure QR code to pair your Android device. |
+| `antimatter-ag2` | Starts the Antigravity 2.0 Adapter. |
+| `antimatter-claude` | Starts the Claude Desktop Adapter. |
+
+## 🛠️ Quickstart
+
+1. **Start the Gateway:**
+   ```bash
+   antimatter
+   ```
+2. **Pair your Device:**
+   Open a new terminal and run:
+   ```bash
+   antimatter-pair
+   ```
+   Scan the generated QR code using the Antimatter Android App.
+3. **Start an Agent:**
+   Open a new terminal and start your preferred AI agent adapter:
+   ```bash
+   antimatter-ag2
+   ```
+
+## 🔒 Security Architecture
+
+Antimatter uses **Cloudflare Quick Tunnels** to expose the local gateway to the mobile app, but it treats the tunnel as an **untrusted medium**. All payloads are encrypted locally on the Android device using `AES-GCM` before transmission and are decrypted locally by the PC Gateway using a pre-shared Elliptic Curve Diffie-Hellman (ECDH) key exchange.

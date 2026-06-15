@@ -1,0 +1,20 @@
+{
+  "name": "antimatter-gateway",
+  "version": "0.1.0",
+  "description": "Antimatter Gateway executable wrapper for Node.js developers",
+  "bin": {
+    "antimatter": "./bin/antimatter.js",
+    "antimatter-pair": "./bin/antimatter-pair.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "antimatter",
+    "gateway",
+    "e2ee",
+    "cli"
+  ],
+  "author": "Antimatter Ecosystem",
+  "license": "MIT"
+}

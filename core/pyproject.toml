@@ -1,0 +1,26 @@
+[project]
+version = "0.1.4"
+readme = "README.md"
+name = "antimatter-core"
+description = "Antimatter Microservices Gateway Workspace"
+requires-python = ">=3.10"
+dependencies = [
+    "antimatter-gateway"
+]
+
+[tool.uv.sources]
+antimatter-gateway = { workspace = true }
+
+[tool.uv.workspace]
+members = [
+    "shared-config",
+    "shared-crypto",
+    "shared-protocol",
+    "shared-fs",
+
+    "gateway"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

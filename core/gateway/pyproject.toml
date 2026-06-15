@@ -1,0 +1,25 @@
+[project]
+version = "0.1.4"
+readme = "README.md"
+name = "antimatter-gateway"
+dependencies = [
+    "websockets>=12.0",
+    "qrcode>=7.4.2",
+    "antimatter-shared-config",
+    "antimatter-shared-crypto",
+    "antimatter-shared-protocol"
+]
+
+[tool.uv.sources]
+antimatter-shared-config = { path = "../shared-config" }
+antimatter-shared-crypto = { path = "../shared-crypto" }
+antimatter-shared-protocol = { path = "../shared-protocol" }
+
+[project.scripts]
+antimatter = "antimatter_gateway.server:main"
+antimatter-pair = "antimatter_gateway.qr:main"
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
