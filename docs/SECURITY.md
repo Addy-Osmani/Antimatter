@@ -1,78 +1,59 @@
-# Security Policy
+# Security & Zero Trust
 
-Operating a remote-control interface for an IDE with terminal access demands enterprise-grade security. The Antimatter project takes the security of your host development environment **extremely seriously**.
+Operating a remote-control interface for an IDE demands enterprise-grade security. The Antimatter project takes the security of your host development environment **extremely seriously**.
+
+Antimatter securely connects your mobile device to your local machine **without opening any firewall ports** or exposing your local IP address. It achieves this using [**Cloudflare Zero Trust**](https://developers.cloudflare.com/cloudflare-one/) (via `cloudflared`).
 
 !!! danger "Reporting a vulnerability"
     If you discover a security vulnerability, please do **NOT** open a public issue. Instead, use [GitHub's private vulnerability reporting](https://github.com/saifmukhtar/antimatter/security/advisories/new) or email the maintainers directly.
 
 ---
 
-## :material-check-decagram: Supported Versions
+## :material-shield-check: Defense-in-Depth Mechanisms
 
-| Version | Supported |
-|---------|-----------|
-| `main` branch | :material-check: |
-| Latest GitHub Release | :material-check: |
-| Older releases | :material-close: |
-
----
-
-## :material-shield-check: Security Mechanisms
-
-Because Antimatter exposes a local WebSocket server that can proxy terminal commands, we implement **multiple overlapping security layers** so that compromising any single layer is not sufficient for an attacker to gain access.
+Because Antimatter exposes a local WebSocket server, we implement **multiple overlapping security layers** so that compromising any single layer is not sufficient for an attacker to gain access.
 
 ### :material-numeric-1-circle: 256-bit Bearer Token + Ed25519 Handshake
 
 <div class="step-card" markdown>
 
-**Token generation:** On first run, the extension generates a 256-bit Bearer Token with `crypto.randomBytes(32)` — equivalent entropy to AES-256. It's stored securely in VS Code `SecretStorage` (OS keychain: Keychain on macOS, Credential Manager on Windows, `libsecret` on Linux) and **persists across IDE restarts, reloads, and even uninstall/reinstall cycles**.
+**Token generation:** On first run, the **Gateway** generates a 256-bit Bearer Token with os-level entropy. It's stored securely in the OS keychain (Keychain on macOS, Credential Manager on Windows, `libsecret` on Linux) and **persists across restarts**.
 
-**Token verification:** Every WebSocket connection must present this token. The server checks it with `crypto.timingSafeEqual` — immune to timing side-channel attacks. Invalid tokens → close code `4001 Unauthorized`.
+**Token verification:** Every WebSocket connection must present this token. The Gateway checks it with timing-safe comparison — immune to timing side-channel attacks. Invalid tokens → close code `4001 Unauthorized`.
 
-**Ed25519 handshake:** After the token check, the client sends an `AUTH_CHALLENGE` nonce. The bridge signs it with its persistent Ed25519 private key and returns `AUTH_RESPONSE`. The client verifies the signature against the public key received during QR pairing — this proves the bridge's identity and prevents Man-in-the-Middle attacks.
+**Ed25519 handshake:** After the token check, the Android client sends an `AUTH_CHALLENGE` nonce. The Gateway signs it with its persistent Ed25519 private key and returns `AUTH_RESPONSE`. The client verifies the signature against the public key received during QR pairing — this proves the Gateway's identity and prevents Man-in-the-Middle attacks.
 
-</div>
-
-!!! info "Full details"
-    See the [WebSocket Protocol Reference](PROTOCOL.md) for the complete handshake flow, message fields, and close codes.
-
-### :material-numeric-2-circle: Biometric Lock (Physical Security)
-
-<div class="step-card" markdown>
-
-The Android app gates sensitive features — particularly the **Remote Terminal** — behind Android's `androidx.biometric` API. The terminal proxy **only** opens after successful fingerprint or face unlock.
-
-Even if your phone is left unlocked on a desk, an unauthorized person cannot execute host commands without passing the biometric check.
+*(Note: Adapters NEVER possess these cryptographic keys or tokens. They are isolated from the security boundary).*
 
 </div>
 
-### :material-numeric-3-circle: Origin Header Validation (CSWSH Protection)
+### :material-numeric-2-circle: Origin Header Validation (CSWSH Protection)
 
 <div class="step-card" markdown>
 
-To protect against **Cross-Site WebSocket Hijacking (CSWSH)**, the bridge enforces strict `Origin` header validation. Only these origins are accepted:
+To protect against **Cross-Site WebSocket Hijacking (CSWSH)**, the Gateway enforces strict `Origin` header validation. Only these origins are accepted:
 
 - `vscode-webview://…` (the extension's own webview)
 - `https://<team>.cloudflareaccess.com` (Cloudflare Access)
 
-Malicious websites in your browser **cannot** silently connect to `ws://localhost:8765`.
+Malicious websites in your browser **cannot** silently connect to the local server.
 
 </div>
 
-### :material-numeric-4-circle: Path Normalization & Sandboxing
+### :material-numeric-3-circle: Gateway vs Adapter Sandboxing
 
 <div class="step-card" markdown>
 
-The app can request file tree data and file contents. To prevent **Local File Arbitrary Read** vulnerabilities (e.g. `../../../../etc/passwd`), the extension strictly sanitizes and normalizes all incoming file paths. Reads are sandboxed to:
+The system strictly divides network ingress from local execution:
 
-- The active VS Code workspace
-- The `.gemini/antigravity-ide` directory
+- **Gateway Layer:** Connects to the internet via Cloudflare. It holds the secrets, terminates the TLS, and performs cryptographic authentication. It CANNOT execute arbitrary code or read files.
+- **Adapter Layer:** Runs locally (e.g., inside VS Code or the Python daemon). It can read files and execute code, but it has ZERO exposure to the internet. It only accepts IPC commands from the locally bound `127.0.0.1:8765` Gateway.
 
-Path traversal attempts are rejected before reaching the filesystem.
+This creates a massive security airgap. If an attacker breaches the Cloudflare tunnel, they must still defeat the 256-bit cryptographic handshake. Even if they defeat that, the Gateway only forwards structured JSON IPC payloads to the adapter, preventing RCE.
 
 </div>
 
-### :material-numeric-5-circle: Payload Size Limits (DoS Mitigation)
+### :material-numeric-4-circle: Payload Size Limits (DoS Mitigation)
 
 <div class="step-card" markdown>
 
@@ -83,46 +64,79 @@ To protect against memory exhaustion attacks and Denial of Service (DoS), the We
 
 </div>
 
-### :material-numeric-6-circle: Strict Terminal Allowlist
+---
 
-<div class="step-card" markdown>
+## :material-tunnel: How the Tunnel Works
 
-The Remote Terminal operates under a strict regex-based allowlist. By default, only safe commands (e.g., `npm`, `yarn`, `git`, `ls`, `cat`, `pwd`) are permitted to execute blindly. 
+```text
+┌──────────────┐      outbound      ┌──────────────────┐      WSS      ┌──────────────┐
+│  Gateway     │ ──────────────────▶│  Cloudflare Edge │◀────────────── │  Android App │
+│  :8765       │  cloudflared conn  │  (TLS termination│  Bearer token  │  (Client)    │
+└──────┬───────┘                    │   + routing)     │  + Ed25519     │              │
+       │                            └──────────────────┘                └──────────────┘
+       ▼
+┌──────────────┐
+│  Adapters    │
+│  (ag, cc)    │
+└──────────────┘
+```
 
-**Destructive Commands:** Commands such as `rm` trigger a synchronous, blocking modal inside the VS Code UI. The host user must explicitly click "Execute" on their desktop before the command runs.
-
-</div>
-
-### :material-numeric-7-circle: Secure Tunnels (Cloudflare)
-
-<div class="step-card" markdown>
-
-We actively discourage unencrypted public tunnels. Antimatter natively supports:
-
-- **Cloudflare Quick Tunnels** — free, auto-provisioned, TLS-encrypted
-- **Cloudflare Zero Trust** — persistent hostname, OAuth/SAML access policies, service auth
-
-The WebSocket server binds exclusively to `127.0.0.1` — it is **never** directly accessible from the network. Only Cloudflare's tunnel connector can reach it.
-
-</div>
+1. The Gateway starts a WebSocket server on `127.0.0.1:8765`.
+2. It downloads (if missing) and launches `cloudflared` in the background.
+3. `cloudflared` creates an **outbound** connection to Cloudflare's edge — no inbound ports needed.
+4. Cloudflare assigns a public URL.
+5. The Android app connects to this URL; Cloudflare routes traffic back through the tunnel.
 
 ---
 
-## :material-layers-triple: Defense-in-Depth Summary
+## :material-auto-fix: Automatic Quick Tunnel (TryCloudflare)
 
-| Layer | Protects against | Mechanism |
-|-------|-----------------|-----------|
-| TLS (Cloudflare) | Network eavesdropping | End-to-end encryption between app ↔ Cloudflare edge |
-| Bearer token | Unauthorized connections | 256-bit random token, timing-safe comparison |
-| Ed25519 handshake | MITM / server spoofing | Cryptographic identity proof |
-| Origin validation | CSWSH attacks | Strict allow-list of Origins |
-| Biometric lock | Physical device theft | Fingerprint/face required for terminal |
-| Path sandboxing | Arbitrary file read | Normalize + restrict to workspace |
-| Localhost binding | LAN snooping | Server only on `127.0.0.1` |
+This is the default — **zero configuration required**.
+
+When the Gateway starts, it spawns a `cloudflared` tunnel, parses the assigned URL, and embeds the URL + pairing token + public key into the QR code. TryCloudflare URLs are ephemeral and change on restart, requiring you to re-scan the QR code.
 
 ---
 
-## :material-arrow-right-bold: Related
+## :material-shield-lock: Manual Cloudflare Zero Trust Setup
 
-- [**Zero Trust Guide**](ZERO_TRUST.md) — setting up Cloudflare Access for double-layered security
-- [**WebSocket Protocol**](PROTOCOL.md) — full auth flow, close codes, and message contract
+For a **persistent, enterprise-grade** setup with your own domain, use Cloudflare Zero Trust.
+
+### 1. Create a Tunnel
+1. Install `cloudflared` on your machine.
+2. Authenticate: `cloudflared tunnel login`
+3. Create: `cloudflared tunnel create antimatter`
+4. Route: `cloudflared tunnel route dns antimatter ide.yourdomain.com`
+
+### 2. Configure Ingress (`~/.cloudflared/config.yml`)
+
+```yaml
+tunnel: <YOUR_TUNNEL_UUID>
+credentials-file: ~/.cloudflared/<YOUR_TUNNEL_UUID>.json
+ingress:
+  - hostname: ide.yourdomain.com
+    service: ws://localhost:8765
+  - service: http_status:404
+```
+
+Run it: `cloudflared tunnel run antimatter`
+
+### 3. Add Cloudflare Access (Enterprise Security)
+
+1. In the [Cloudflare Zero Trust Dashboard](https://one.dash.cloudflare.com/), go to **Access → Applications → Add an application**.
+2. Create a **Self-hosted** app matching `ide.yourdomain.com`.
+3. Add an **Access Policy** (e.g. allow your email domain).
+4. Generate a **Service Auth Client ID and Client Secret**.
+
+### 4. Configure the Gateway & App
+
+**On your desktop:**
+```bash
+antimatter-gateway config set cloudflare_url "wss://ide.yourdomain.com"
+antimatter-gateway config set cloudflare_client_id "YOUR_ID"
+antimatter-gateway config set cloudflare_client_secret "YOUR_SECRET"
+```
+
+**On the Android App:**
+1. Tap **Advanced Options** on the Connect screen.
+2. Enter your custom URL, Client ID, and Client Secret.
+3. Tap **Connect**!

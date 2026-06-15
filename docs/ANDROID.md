@@ -1,8 +1,9 @@
 # Android App Reference
 
 The client half of Antimatter is a native **Android** app built with **Jetpack Compose**,
-**Hilt** (dependency injection), **Room** (local persistence), and **Gson** (JSON). It connects to
-the bridge over WebSocket, renders the live agent trajectory, and sends control messages back.
+**Hilt** (dependency injection), **Room** (local persistence), and **Gson** (JSON).
+
+It connects to the `antimatter-core` Gateway over WebSocket, authenticates via an Ed25519 handshake, and then selects an active adapter to communicate with.
 
 - Source: [`android/`](https://github.com/saifmukhtar/antimatter/tree/main/android)
 - Package: `dev.saifmukhtar.antimatter`
@@ -17,47 +18,20 @@ the bridge over WebSocket, renders the live agent trajectory, and sends control 
 ├── :core:ui             # Compose theme, Markdown renderer, shared UI utils
 ├── :feature:connect     # QR scan + pairing + connection state
 ├── :feature:chat        # Trajectory/chat UI + prompting
-├── :feature:files       # Workspace browser + file viewer
-└── :feature:terminal    # Remote terminal UI
+└── :feature:files       # Workspace browser + file viewer
 ```
 
-`:app` depends on the feature modules; feature modules depend on the `core` modules.
-
-## `:app`
+## :core:network
 | File | Responsibility |
 |------|----------------|
-| `AntimatterApp.kt` | `@HiltAndroidApp` Application; app‑wide setup. |
-| `MainActivity.kt` | Single‑activity host that mounts the Compose navigation graph. |
-| `navigation/AntimatterNavigation.kt` | Declares routes between connect / chat / files / terminal screens. |
-| `utils/LocalCrashHandler.kt` | Captures uncaught exceptions for local crash reporting. |
-
-## `:core:network`
-| File | Responsibility |
-|------|----------------|
-| `BridgeWebSocket.kt` | The WebSocket client: connects with the Bearer token, performs the Ed25519 `AUTH_CHALLENGE`/`AUTH_RESPONSE` handshake, and exposes inbound messages as a flow. |
+| `BridgeWebSocket.kt` | The WebSocket client: connects to the Gateway, performs the Ed25519 `AUTH_CHALLENGE`/`AUTH_RESPONSE` handshake, and exposes inbound messages as a flow. |
 | `BridgeService.kt` | A foreground `Service` that keeps the socket alive in the background and surfaces system alerts as notifications. |
-| `BridgeMessage.kt` | Kotlin model of the wire protocol: `TrajectoryStep`, the `StepCase` enum, and inbound/outbound message types. |
-| `NetworkModule.kt` | Hilt module providing the WebSocket/network singletons. |
 
-See the [WebSocket Protocol](PROTOCOL.md) page for the full message contract shared with the
-extension.
+## Selecting an Adapter
 
-## `:core:data`
-| File | Responsibility |
-|------|----------------|
-| `AppDatabase.kt` | Room database definition. |
-| `AppDao.kt` | Queries for conversations, steps, and artifacts. |
-| `ConversationEntity.kt` / `StepEntity.kt` / `ArtifactEntity.kt` | Room entities mirroring server payloads for offline history. |
-| `UserPreferencesRepository.kt` | DataStore‑backed user preferences. |
-| `GzipUtils.kt` | Compression helpers for stored payloads. |
-| `DatabaseModule.kt` | Hilt module providing the database/DAO singletons. |
+Because Antimatter now uses an **Independent Adapter Model**, the Android app connects to the Gateway first, rather than directly to the agent.
 
-## `:core:ui`
-| File | Responsibility |
-|------|----------------|
-| `theme/Theme.kt`, `theme/Color.kt` | Material 3 theme (deep purple / blue palette). |
-| `MarkdownText.kt` | Renders AI responses as Markdown. |
-| `utils/GrammarLocator.kt` | Syntax‑highlighting grammar lookup for code blocks. |
+Once the `AUTH_RESPONSE` is verified, the Android app sends a `GET_AVAILABLE_AGENTS` payload. The Gateway responds with a list of currently connected adapters (e.g. `["ag", "ag2", "cc"]`). The user selects an adapter in the UI, and all subsequent `SEND_MESSAGE` payloads are stamped with that target so the Gateway can route them appropriately.
 
 ## Feature modules
 Each feature follows a **Screen + ViewModel** (MVVM) pattern with Compose:
@@ -65,17 +39,8 @@ Each feature follows a **Screen + ViewModel** (MVVM) pattern with Compose:
 | Module | Screens | ViewModel |
 |--------|---------|-----------|
 | `:feature:connect` | `ConnectScreen`, `QRScannerScreen` | `ConnectionViewModel` |
-| `:feature:chat` | `ChatScreen`, `ChatBubble`, `ThinkingBubble`, `ToolCallCard`, `MessageInput`, `TypingIndicator` | `ChatViewModel` |
+| `:feature:chat` | `ChatScreen`, `ChatBubble`, `ThinkingBubble`, `ToolCallCard`, `MessageInput` | `ChatViewModel` |
 | `:feature:files` | `FilesScreen`, `FileViewScreen` | `FilesViewModel` |
-| `:feature:terminal` | `TerminalScreen` | `TerminalViewModel` |
-
-- **connect** — scans the pairing QR, stores the URL + token + bridge public key, and tracks
-  connection status.
-- **chat** — subscribes to a conversation and renders each `TrajectoryStep` according to its
-  `StepCase` (text, tool calls, run‑command, approvals, …), and sends prompts / edit decisions.
-- **files** — browses the workspace `FILE_TREE` and opens file contents via `READ_FILE`.
-- **terminal** — runs `EXECUTE_COMMAND`, gated behind a biometric (fingerprint/face) lock, and
-  streams `COMMAND_OUTPUT`.
 
 ## Build
 
@@ -85,5 +50,4 @@ Each feature follows a **Screen + ViewModel** (MVVM) pattern with Compose:
 | Build debug APK | `./gradlew assembleDebug` |
 | Install on device/emulator | `./gradlew installDebug` |
 
-Open the `android/` directory in Android Studio (Koala or newer) and let Gradle sync. Crashlytics
-in debug builds requires a valid `android/app/google-services.json` (optional).
+Open the `android/` directory in Android Studio and let Gradle sync.

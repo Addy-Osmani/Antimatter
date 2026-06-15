@@ -12,13 +12,14 @@ Antimatter is a monorepo with two shippable sub‑projects plus the docs site:
 
 ```text
 antimatter/
-├── extension/   # VS Code / AntiGravity extension (TypeScript)  → see Extension reference
+├── core/        # Gateway / infrastructure daemon
+├── adapters/    # Independent integrations (AG, AG2, CC)
 ├── android/     # Companion Android app (Kotlin / Compose)       → see Android reference
 ├── docs/        # MkDocs Material documentation (this site)
 └── mkdocs.yml   # Docs site configuration
 ```
 
-- [VS Code Extension Reference](EXTENSION.md)
+- [Adapters Reference](ADAPTERS.md)
 - [Android App Reference](ANDROID.md)
 - [WebSocket Protocol Reference](PROTOCOL.md)
 
@@ -28,10 +29,10 @@ antimatter/
 - **Android Studio** (Koala or newer)
 - **Google AntiGravity IDE**
 
-## Setting up the VS Code extension
+## Setting up an adapter (e.g. `ag`)
 
 ```bash
-cd extension
+cd adapters/ag
 npm install        # install dependencies
 npm run watch      # start the esbuild watcher
 ```

@@ -54,18 +54,13 @@ theme:
 
 nav:
   - Home: index.md
-  - Getting Started:
-    - Installation & Setup: INSTALLATION.md
-    - Antigravity 2.0 Integration: ANTIGRAVITY_2_0.md
-    - Features: FEATURES.md
-    - Troubleshooting & FAQ: TROUBLESHOOTING.md
+  - Getting Started: GETTING_STARTED.md
   - Architecture & Security:
     - Architecture: ARCHITECTURE.md
-    - Zero Trust Guide: ZERO_TRUST.md
     - Security Policy: SECURITY.md
+  - Adapters: ADAPTERS.md
   - Reference:
     - WebSocket Protocol: PROTOCOL.md
-    - VS Code Extension: EXTENSION.md
     - Android App: ANDROID.md
   - Project:
     - Contributing & Development: CONTRIBUTING.md

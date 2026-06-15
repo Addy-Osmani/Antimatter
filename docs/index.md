@@ -9,7 +9,7 @@ hide:
 # Antimatter
 
 <p class="hero-subtitle">
-The open-source bridge that connects your phone to the <strong>Google AntiGravity IDE</strong>. Monitor your AI agent, send prompts, execute commands, and browse files — all from your pocket.
+The open-source bridge that connects your phone to the <strong>Google AntiGravity IDE</strong>. Monitor your AI agent, send prompts, and browse files — all from your pocket.
 </p>
 
 <div class="badge-row" markdown>
@@ -23,7 +23,7 @@ The open-source bridge that connects your phone to the <strong>Google AntiGravit
 
 <div class="hero-buttons" markdown>
 
-[Get Started :material-rocket-launch:](INSTALLATION.md){ .md-button .md-button--primary }
+[Get Started :material-rocket-launch:](GETTING_STARTED.md){ .md-button .md-button--primary }
 [Download :material-download:](https://github.com/saifmukhtar/antimatter/releases){ .md-button }
 [API Reference :material-api:](PROTOCOL.md){ .md-button }
 </div>
@@ -47,12 +47,6 @@ The open-source bridge that connects your phone to the <strong>Google AntiGravit
 Developing with autonomous AI agents often means leaving them running for long periods. Antimatter ensures you aren't chained to your desk — monitor, control, and interact with your agent from anywhere using your phone, secured by **enterprise-grade cryptography**.
 
 <div class="grid cards" markdown>
-
--   :material-console-line:{ .lg .middle } **Remote Terminal**
-
-    ---
-
-    Execute shell commands on your host PC, secured by a biometric fingerprint/face lock.
 
 -   :material-broadcast:{ .lg .middle } **Real-Time Streaming**
 
@@ -96,7 +90,7 @@ Developing with autonomous AI agents often means leaving them running for long p
 ![Chat Screen](images/chats.png){ loading=lazy }
 ![Workspace Browser](images/workspace.png){ loading=lazy }
 ![File Viewer](images/file-viewer.png){ loading=lazy }
-![Remote Terminal](images/terminal.png){ loading=lazy }
+
 ![Artifacts](images/artifact.png){ loading=lazy }
 
 </div>
@@ -113,15 +107,15 @@ Developing with autonomous AI agents often means leaving them running for long p
 
     Download, install, set up the tunnel, and pair your phone in minutes.
 
-    [:octicons-arrow-right-24: Installation & Setup](INSTALLATION.md)
+    [:octicons-arrow-right-24: Installation & Setup](GETTING_STARTED.md)
 
 -   :material-puzzle:{ .lg .middle } **Features**
 
     ---
 
-    Explore every capability: chat, terminal, file browsing, diff review, and more.
+    Explore every capability: chat, file browsing, diff review, and more.
 
-    [:octicons-arrow-right-24: Feature Breakdown](FEATURES.md)
+    [:octicons-arrow-right-24: Feature Breakdown](GETTING_STARTED.md#features-overview)
 
 -   :material-cog:{ .lg .middle } **Architecture**
 
@@ -143,9 +137,9 @@ Developing with autonomous AI agents often means leaving them running for long p
 
     ---
 
-    Zero Trust tunnels, Ed25519 handshakes, biometric locks, and more.
+    Zero Trust tunnels, Ed25519 handshakes, and more.
 
-    [:octicons-arrow-right-24: Security & Zero Trust](ZERO_TRUST.md)
+    [:octicons-arrow-right-24: Security & Zero Trust](SECURITY.md#manual-cloudflare-zero-trust-setup)
 
 -   :material-source-pull:{ .lg .middle } **Contributing**
 
