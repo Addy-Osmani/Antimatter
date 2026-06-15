@@ -107,6 +107,9 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
+    // Biometrics
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+
     // Room Database
     val roomVersion = "2.7.0-alpha11"
     implementation("androidx.room:room-runtime:$roomVersion")
@@ -147,7 +150,6 @@ dependencies {
     implementation(project(":feature:connect"))
     implementation(project(":feature:chat"))
     implementation(project(":feature:files"))
-    implementation(project(":feature:terminal"))
 
     // Hilt
     implementation(libs.hilt.android)

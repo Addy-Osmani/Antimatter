@@ -22,8 +22,15 @@ import dev.saifmukhtar.antimatter.core.data.ConversationEntity
 import dev.saifmukhtar.antimatter.core.data.toEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import android.content.Context
+import android.net.Uri
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import java.io.ByteArrayOutputStream
 
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import dev.saifmukhtar.antimatter.core.data.AppDao
 
@@ -40,13 +47,19 @@ data class ChatUiState(
     val currentModel: String = "gemini-2.5-pro",
     val error: String? = null,
     val history: List<dev.saifmukhtar.antimatter.core.network.ConversationSummary> = emptyList(),
-    val terminalOutput: String = "",
+    val searchQuery: String = "",
+    val searchResults: List<dev.saifmukhtar.antimatter.core.network.ConversationSummary>? = null,
     val artifacts: List<dev.saifmukhtar.antimatter.core.network.FileNode> = emptyList(),
-    val activeArtifactContent: String? = null
+    val activeArtifactContent: String? = null,
+    val activeAgentId: String? = null,
+    val availableAgents: List<dev.saifmukhtar.antimatter.core.network.InboundMessage.AgentInfo> = emptyList(),
+    val allowedWorkspaces: List<String> = emptyList(),
+    val selectedImageUri: Uri? = null
 )
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val webSocket: BridgeWebSocket,
     val userPrefs: UserPreferencesRepository,
     private val appDao: AppDao
@@ -58,6 +71,12 @@ class ChatViewModel @Inject constructor(
     private val scrollStateFlow = MutableSharedFlow<Pair<Int, Int>>(extraBufferCapacity = 1, onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST)
 
     init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val localAgents = appDao.getAllAgentsFlow().firstOrNull() ?: emptyList()
+            val agentInfos = localAgents.map { dev.saifmukhtar.antimatter.core.network.InboundMessage.AgentInfo(it.id, it.name, "offline") }
+            _uiState.update { it.copy(availableAgents = agentInfos, activeAgentId = agentInfos.firstOrNull()?.id) }
+        }
+
         @OptIn(kotlinx.coroutines.FlowPreview::class)
         viewModelScope.launch {
             scrollStateFlow.debounce(500).collect { (index, offset) ->
@@ -79,6 +98,32 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             webSocket.messages.collect { message ->
                 handleInboundMessage(message)
+            }
+        }
+    }
+
+    fun updateSearchQuery(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
+        if (query.isBlank()) {
+            _uiState.update { it.copy(searchResults = null) }
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Use prefix match syntax for FTS
+                val ftsQuery = query.split(" ").joinToString(" ") { "$it*" }
+                val matchingSteps = appDao.searchSteps(ftsQuery)
+                val matchingIds = matchingSteps.map { it.conversationId }.toSet()
+                
+                val history = _uiState.value.history
+                val results = history.filter { it.id in matchingIds || it.title.contains(query, ignoreCase = true) }
+                
+                _uiState.update { it.copy(searchResults = results) }
+            } catch (e: Exception) {
+                // Fallback to title only if FTS fails
+                val history = _uiState.value.history
+                val results = history.filter { it.title.contains(query, ignoreCase = true) }
+                _uiState.update { it.copy(searchResults = results) }
             }
         }
     }
@@ -130,7 +175,7 @@ class ChatViewModel @Inject constructor(
                     }
                     var stillGenerating = state.isGenerating
                     when (message.step.stepCase) {
-                        StepCase.PLANNER_RESPONSE, StepCase.TOOL_CALL, StepCase.RUN_COMMAND -> stillGenerating = true
+                        StepCase.PLANNER_RESPONSE, StepCase.TOOL_CALL -> stillGenerating = true
                         StepCase.TEXT, StepCase.MARKDOWN_CHUNK, StepCase.ERROR_MESSAGE, 
                         StepCase.APPROVAL_INTERACTION, StepCase.ASK_QUESTION, StepCase.ELICITATION -> stillGenerating = false
                         else -> {}
@@ -153,7 +198,7 @@ class ChatViewModel @Inject constructor(
                         }
                         // Self-regulate generating state based on step types
                         when (batchStep.step.stepCase) {
-                            StepCase.PLANNER_RESPONSE, StepCase.TOOL_CALL, StepCase.RUN_COMMAND -> stillGenerating = true
+                            StepCase.PLANNER_RESPONSE, StepCase.TOOL_CALL -> stillGenerating = true
                             StepCase.TEXT, StepCase.MARKDOWN_CHUNK, StepCase.ERROR_MESSAGE, 
                             StepCase.APPROVAL_INTERACTION, StepCase.ASK_QUESTION, StepCase.ELICITATION -> stillGenerating = false
                             else -> {}
@@ -198,9 +243,6 @@ class ChatViewModel @Inject constructor(
                     }
                 }
                 _uiState.update { it.copy(history = message.conversations) }
-            }
-            is InboundMessage.TerminalOutput -> {
-                _uiState.update { it.copy(terminalOutput = it.terminalOutput + message.content) }
             }
             is InboundMessage.ArtifactsList -> {
                 _uiState.update { it.copy(artifacts = message.artifacts) }
@@ -247,28 +289,80 @@ class ChatViewModel @Inject constructor(
                     _uiState.update { if (it.error == message.message) it.copy(error = null) else it }
                 }
             }
+            is InboundMessage.AvailableAgents -> {
+                _uiState.update { it.copy(availableAgents = message.agents, allowedWorkspaces = message.allowedWorkspaces) }
+                viewModelScope.launch(Dispatchers.IO) {
+                    message.agents.forEach { info ->
+                        appDao.insertAgent(dev.saifmukhtar.antimatter.core.data.AgentEntity(id = info.id, name = info.name, status = info.status, lastSeen = System.currentTimeMillis()))
+                    }
+                }
+            }
             else -> {} // Handle FileTree, FileContent etc in a separate ViewModel or UI state
         }
     }
 
     // --- Actions ---
 
+    fun selectImage(uri: Uri?) {
+        _uiState.update { it.copy(selectedImageUri = uri) }
+    }
+
     fun sendMessage(text: String) {
-        if (text.isBlank()) return
+        if (text.isBlank() && _uiState.value.selectedImageUri == null) return
+        
+        val imageUri = _uiState.value.selectedImageUri
+        val textToSend = text.ifBlank { "Attached an image." }
         
         // Optimistically add user step
         _uiState.update { state ->
             val newSteps = state.steps.toMutableList()
-            newSteps.add(TrajectoryStep(case = "userInput", value = text))
-            state.copy(steps = newSteps, isGenerating = true)
+            newSteps.add(TrajectoryStep(case = "userInput", value = textToSend))
+            state.copy(steps = newSteps, isGenerating = true, selectedImageUri = null) // Clear selection
         }
 
-        webSocket.sendMessage(OutboundMessage.SendMessage(text))
+        if (imageUri != null) {
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    val inputStream = context.contentResolver.openInputStream(imageUri)
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+                    
+                    if (bitmap != null) {
+                        // Scale down to max 1024x1024
+                        val maxDim = 1024f
+                        val scale = minOf(maxDim / bitmap.width, maxDim / bitmap.height)
+                        val scaledBitmap = if (scale < 1f) {
+                            Bitmap.createScaledBitmap(bitmap, (bitmap.width * scale).toInt(), (bitmap.height * scale).toInt(), true)
+                        } else {
+                            bitmap
+                        }
+                        
+                        val outputStream = ByteArrayOutputStream()
+                        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+                        val base64 = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
+                        val dataUri = "data:image/jpeg;base64,$base64"
+                        
+                        webSocket.sendMessage(OutboundMessage.SendMessage(textToSend, images = listOf(dataUri), agentId = _uiState.value.activeAgentId))
+                        
+                        if (scaledBitmap != bitmap) {
+                            scaledBitmap.recycle()
+                        }
+                        bitmap.recycle()
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("ChatViewModel", "Failed to process image", e)
+                    _uiState.update { it.copy(error = "Failed to process image") }
+                    webSocket.sendMessage(OutboundMessage.SendMessage(textToSend, agentId = _uiState.value.activeAgentId))
+                }
+            }
+        } else {
+            webSocket.sendMessage(OutboundMessage.SendMessage(textToSend, agentId = _uiState.value.activeAgentId))
+        }
     }
 
     fun startNewConversation() {
         _uiState.update { it.copy(steps = emptyList(), conversationId = null, isGenerating = false) }
-        webSocket.sendMessage(OutboundMessage.NewConversation())
+        webSocket.sendMessage(OutboundMessage.NewConversation(agentId = _uiState.value.activeAgentId))
         requestHistory() // Refresh history after starting new conversation
     }
 
@@ -283,12 +377,12 @@ class ChatViewModel @Inject constructor(
             _uiState.update { it.copy(steps = initialSteps, conversationId = id, isGenerating = false) }
             
             // Send delta sync request with lastKnownStepCount
-            webSocket.sendMessage(OutboundMessage.SubscribeConversation(id, lastKnownStepCount = initialSteps.size))
+            webSocket.sendMessage(OutboundMessage.SubscribeConversation(id, lastKnownStepCount = initialSteps.size, agentId = _uiState.value.activeAgentId))
         }
     }
 
     fun requestHistory() {
-        webSocket.sendMessage(OutboundMessage.GetHistory())
+        webSocket.sendMessage(OutboundMessage.GetHistory(agentId = _uiState.value.activeAgentId))
     }
 
     fun requestArtifacts() {
@@ -303,7 +397,7 @@ class ChatViewModel @Inject constructor(
                     }
                     _uiState.update { it.copy(artifacts = converted) }
                 }
-                webSocket.sendMessage(OutboundMessage.GetArtifacts(cid))
+                webSocket.sendMessage(OutboundMessage.GetArtifacts(cid, agentId = _uiState.value.activeAgentId))
             }
         }
     }
@@ -323,7 +417,7 @@ class ChatViewModel @Inject constructor(
                         android.util.Log.e("ChatViewModel", "Failed to decompress artifact", e)
                     }
                 }
-                webSocket.sendMessage(OutboundMessage.ReadFile(path))
+                webSocket.sendMessage(OutboundMessage.ReadFile(path, agentId = _uiState.value.activeAgentId))
             }
         }
     }
@@ -333,25 +427,36 @@ class ChatViewModel @Inject constructor(
     }
 
     fun cancelResponse() {
-        webSocket.sendMessage(OutboundMessage.CancelResponse())
+        webSocket.sendMessage(OutboundMessage.CancelResponse(agentId = _uiState.value.activeAgentId))
         _uiState.update { it.copy(isGenerating = false) }
     }
     
     fun acceptEdits() {
-        webSocket.sendMessage(OutboundMessage.AcceptEdits())
+        webSocket.sendMessage(OutboundMessage.AcceptEdits(agentId = _uiState.value.activeAgentId))
     }
     
     fun rejectEdits() {
-        webSocket.sendMessage(OutboundMessage.RejectEdits())
+        webSocket.sendMessage(OutboundMessage.RejectEdits(agentId = _uiState.value.activeAgentId))
     }
     
     fun changeModel() {
-        webSocket.sendMessage(OutboundMessage.ChangeModel())
+        webSocket.sendMessage(OutboundMessage.ChangeModel(agentId = _uiState.value.activeAgentId))
     }
     
     
     fun dismissError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    fun switchAgent(agentId: String) {
+        if (_uiState.value.activeAgentId == agentId) return
+        _uiState.update { it.copy(activeAgentId = agentId) }
+        startNewConversation()
+        viewModelScope.launch(Dispatchers.IO) {
+            val localHistory = appDao.getConversationsForAgentFlow(agentId).firstOrNull() ?: emptyList()
+            val summaries = localHistory.map { dev.saifmukhtar.antimatter.core.network.ConversationSummary(id = it.id, timestamp = it.timestamp, title = it.title) }
+            _uiState.update { it.copy(history = summaries) }
+        }
     }
 
     fun updateScrollState(index: Int, offset: Int) {

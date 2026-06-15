@@ -25,6 +25,12 @@ class ConnectionViewModel @Inject constructor(
         initialValue = dev.saifmukhtar.antimatter.core.data.Credentials(null, null, null, null, null)
     )
 
+    val profilesFlow = userPrefs.profilesFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
     init {
         viewModelScope.launch {
             userPrefs.savedCredentialsFlow.collect { creds ->
@@ -43,10 +49,32 @@ class ConnectionViewModel @Inject constructor(
         }
     }
 
+    fun connectNamedProfile(name: String, url: String, cfId: String?, cfSecret: String?, token: String?, pubKey: String?) {
+        viewModelScope.launch {
+            val creds = dev.saifmukhtar.antimatter.core.data.Credentials(url, cfId ?: "", cfSecret ?: "", token, pubKey)
+            userPrefs.saveProfile(name, creds)
+            webSocket.connect(url, cfId, cfSecret, token, pubKey)
+        }
+    }
+
     fun disconnectManually() {
+        // Disconnect simply drops the websocket connection and clears active credentials,
+        // it no longer deletes the profiles.
         viewModelScope.launch {
             userPrefs.clearCredentials()
         }
         webSocket.disconnect()
+    }
+
+    fun switchProfile(id: String) {
+        viewModelScope.launch {
+            userPrefs.setActiveProfile(id)
+        }
+    }
+
+    fun deleteProfile(id: String) {
+        viewModelScope.launch {
+            userPrefs.deleteProfile(id)
+        }
     }
 }

@@ -8,7 +8,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.WifiFind
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.saifmukhtar.antimatter.core.network.BridgeWebSocket
+import dev.saifmukhtar.antimatter.core.data.GatewayProfile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,14 +27,18 @@ fun ConnectScreen(
     savedUrl: String? = null,
     savedClientId: String? = null,
     savedClientSecret: String? = null,
+    profiles: List<GatewayProfile> = emptyList(),
     onConnectClick: (String, String?, String?) -> Unit,
-    onScanQRClick: () -> Unit
+    onScanQRClick: () -> Unit,
+    onProfileSelected: (String) -> Unit,
+    onProfileDeleted: (String) -> Unit
 ) {
     var ipAddress by remember { mutableStateOf(savedUrl ?: "") }
     var pairingToken by remember { mutableStateOf("") }
     var clientId by remember { mutableStateOf(savedClientId ?: "") }
     var clientSecret by remember { mutableStateOf(savedClientSecret ?: "") }
     var showAdvanced by remember { mutableStateOf(clientId.isNotBlank() || clientSecret.isNotBlank()) }
+    var expanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -63,7 +69,7 @@ fun ConnectScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "Connect to Bridge",
+                text = "Connect to Gateway",
                 style = MaterialTheme.typography.headlineMedium
             )
             
@@ -71,7 +77,7 @@ fun ConnectScreen(
             
             Text(
                 text = when (connectionState) {
-                    BridgeWebSocket.ConnectionState.DISCONNECTED -> "Disconnected. Enter Cloudflare URL and Pair Token."
+                    BridgeWebSocket.ConnectionState.DISCONNECTED -> "Select a profile or scan a new QR code."
                     BridgeWebSocket.ConnectionState.CONNECTING -> "Connecting..."
                     BridgeWebSocket.ConnectionState.CONNECTED -> "Connected!"
                     else -> ""
@@ -82,6 +88,42 @@ fun ConnectScreen(
             )
             
             Spacer(modifier = Modifier.height(32.dp))
+
+            if (profiles.isNotEmpty()) {
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = "Saved Profiles (${profiles.size})",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        profiles.forEach { profile ->
+                            DropdownMenuItem(
+                                text = { Text(profile.name) },
+                                onClick = {
+                                    expanded = false
+                                    onProfileSelected(profile.id)
+                                    // Also auto-connect? Yes, triggering state change will auto-connect in ViewModel
+                                },
+                                trailingIcon = {
+                                    IconButton(onClick = { onProfileDeleted(profile.id) }) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete Profile")
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+            }
             
             Button(
                 onClick = onScanQRClick,
@@ -90,7 +132,7 @@ fun ConnectScreen(
             ) {
                 Icon(Icons.Default.QrCodeScanner, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Scan Pairing QR", style = MaterialTheme.typography.titleMedium)
+                Text("Scan New Pairing QR", style = MaterialTheme.typography.titleMedium)
             }
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -110,7 +152,7 @@ fun ConnectScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "Manual Connection", 
+                        "Manual Override", 
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -131,29 +173,6 @@ fun ConnectScreen(
                         label = { Text("Pairing Token") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    TextButton(onClick = { showAdvanced = !showAdvanced }) {
-                        Text(if (showAdvanced) "Hide Advanced Options" else "Show Advanced Options")
-                    }
-                    
-                    if (showAdvanced) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = clientId,
-                            onValueChange = { clientId = it },
-                            label = { Text("Cloudflare Client ID (Optional for Zero Trust)") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = clientSecret,
-                            onValueChange = { clientSecret = it },
-                            label = { Text("Cloudflare Client Secret (Optional for Zero Trust)") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     

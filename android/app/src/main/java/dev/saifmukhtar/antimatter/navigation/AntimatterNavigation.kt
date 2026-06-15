@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,8 +23,6 @@ import dev.saifmukhtar.antimatter.feature.connect.QRScannerScreen
 import dev.saifmukhtar.antimatter.feature.files.FileViewScreen
 import dev.saifmukhtar.antimatter.feature.files.FilesScreen
 import dev.saifmukhtar.antimatter.feature.files.FilesViewModel
-import dev.saifmukhtar.antimatter.feature.terminal.TerminalScreen
-import dev.saifmukhtar.antimatter.feature.terminal.TerminalViewModel
 import dev.saifmukhtar.antimatter.core.ui.utils.LocalCrashHandler
 
 @Composable
@@ -35,12 +32,10 @@ fun AntimatterNavigation(
     val chatViewModel: ChatViewModel = hiltViewModel()
     val filesViewModel: FilesViewModel = hiltViewModel()
     val connectionViewModel: ConnectionViewModel = hiltViewModel()
-    val terminalViewModel: TerminalViewModel = hiltViewModel()
 
     val chatUiState by chatViewModel.uiState.collectAsState()
     val filesUiState by filesViewModel.uiState.collectAsState()
     val connectionState by connectionViewModel.connectionState.collectAsState()
-    val terminalUiState by terminalViewModel.uiState.collectAsState()
     val savedCredentials by connectionViewModel.savedCredentialsFlow.collectAsState()
     val savedUrl = savedCredentials.url
     
@@ -138,6 +133,51 @@ fun AntimatterNavigation(
         )
     }
 
+    var scannedProfileData by remember { mutableStateOf<Map<String, String?>?>(null) }
+    
+    if (scannedProfileData != null) {
+        var profileName by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { scannedProfileData = null },
+            title = { Text("Name this Connection") },
+            text = { 
+                OutlinedTextField(
+                    value = profileName,
+                    onValueChange = { profileName = it },
+                    label = { Text("Profile Name (e.g., Work PC)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val data = scannedProfileData!!
+                        // We need a new method in ConnectionViewModel to save a NAMED profile
+                        // We will add `saveProfileAndConnect` next. For now, use connectManually but it doesn't take a name.
+                        // Wait, we need to add `connectNamedProfile` to ConnectionViewModel.
+                        connectionViewModel.connectNamedProfile(
+                            profileName.ifBlank { "Gateway Connection" },
+                            data["url"] ?: "",
+                            data["cfId"],
+                            data["cfSecret"],
+                            data["token"],
+                            data["pubKey"]
+                        )
+                        scannedProfileData = null
+                    }
+                ) {
+                    Text("Save & Connect")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { scannedProfileData = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     if (isScanningQR) {
         BackHandler {
             isScanningQR = false
@@ -145,7 +185,13 @@ fun AntimatterNavigation(
         QRScannerScreen(
             onQRScanned = { url, token, cfId, cfSecret, pubKey ->
                 isScanningQR = false
-                connectionViewModel.connectManually(url, cfId, cfSecret, token, pubKey)
+                scannedProfileData = mapOf(
+                    "url" to url,
+                    "token" to token,
+                    "cfId" to cfId,
+                    "cfSecret" to cfSecret,
+                    "pubKey" to pubKey
+                )
             },
             onNavigateBack = { isScanningQR = false }
         )
@@ -180,13 +226,6 @@ fun AntimatterNavigation(
                             onClick = { currentTab = 1 },
                             alwaysShowLabel = false
                         )
-                        NavigationBarItem(
-                            icon = { Icon(Icons.Default.Terminal, contentDescription = "Terminal") },
-                            selected = currentTab == 2,
-                            onClick = { currentTab = 2 },
-                            enabled = chatUiState.environment != "2.0",
-                            alwaysShowLabel = false
-                        )
                     }
                 }
             ) { paddingValues ->
@@ -209,35 +248,42 @@ fun AntimatterNavigation(
                             onLoadScrollState = { id -> chatViewModel.getScrollState(id) },
                             onRequestArtifacts = { chatViewModel.requestArtifacts() },
                             onRequestArtifactContent = { path -> chatViewModel.requestArtifactContent(path) },
-                            onClearArtifactContent = { chatViewModel.clearActiveArtifact() }
+                            onClearArtifactContent = { chatViewModel.clearActiveArtifact() },
+                            onSwitchAgent = { id -> chatViewModel.switchAgent(id) },
+                            onSearchHistory = { query -> chatViewModel.updateSearchQuery(query) },
+                            onSelectImage = { uri -> chatViewModel.selectImage(uri) }
                         )
                     } else if (currentTab == 1) {
                         FilesScreen(
                             uiState = filesUiState,
                             onRefresh = { filesViewModel.loadFileTree() },
-                            onOpenFile = { path -> filesViewModel.openFile(path) }
-                        )
-                    } else if (currentTab == 2) {
-                        TerminalScreen(
-                            uiState = terminalUiState,
-                            onUnlock = { terminalViewModel.unlockTerminal() },
-                            onExecuteCommand = { terminalViewModel.executeCommand(it) },
-                            onClearTerminal = { terminalViewModel.clearTerminal() }
+                            onOpenFile = { path -> filesViewModel.openFile(path) },
+                            onChangeWorkspace = { path ->
+                                (context as? MainActivity)?.showBiometricPrompt { success ->
+                                    if (success) {
+                                        filesViewModel.changeWorkspace(path)
+                                    }
+                                }
+                            }
                         )
                     }
                 }
             }
         }
     } else {
+        val profiles by connectionViewModel.profilesFlow.collectAsState()
         ConnectScreen(
             connectionState = connectionState,
             savedUrl = savedUrl,
             savedClientId = savedCredentials.clientId,
             savedClientSecret = savedCredentials.clientSecret,
+            profiles = profiles,
             onConnectClick = { url, clientId, clientSecret -> 
                 connectionViewModel.connectManually(url, clientId, clientSecret) 
             },
-            onScanQRClick = { isScanningQR = true }
+            onScanQRClick = { isScanningQR = true },
+            onProfileSelected = { id -> connectionViewModel.switchProfile(id) },
+            onProfileDeleted = { id -> connectionViewModel.deleteProfile(id) }
         )
     }
 }

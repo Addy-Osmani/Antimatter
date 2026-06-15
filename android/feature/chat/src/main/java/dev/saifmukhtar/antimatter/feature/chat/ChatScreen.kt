@@ -127,7 +127,10 @@ fun ChatScreen(
     onLoadScrollState: suspend (conversationId: String) -> Pair<Int, Int>?,
     onRequestArtifacts: () -> Unit,
     onRequestArtifactContent: (String) -> Unit,
-    onClearArtifactContent: () -> Unit
+    onClearArtifactContent: () -> Unit,
+    onSwitchAgent: (String) -> Unit,
+    onSearchHistory: (String) -> Unit,
+    onSelectImage: (android.net.Uri?) -> Unit
 ) {
     val listState = rememberLazyListState()
     val context = LocalContext.current
@@ -194,18 +197,30 @@ fun ChatScreen(
             ModalDrawerSheet(modifier = Modifier.width(300.dp)) {
                 Text(
                     "Chat History",
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.titleLarge
+                )
+                OutlinedTextField(
+                    value = uiState.searchQuery,
+                    onValueChange = onSearchHistory,
+                    placeholder = { Text("Search offline history...") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.medium
                 )
                 HorizontalDivider()
                 LazyColumn(modifier = Modifier.weight(1f)) {
-                    items(uiState.history) { conversation ->
+                    val displayList = uiState.searchResults ?: uiState.history
+                    items(displayList) { conversation ->
                         NavigationDrawerItem(
                             label = { Text(conversation.title, maxLines = 1) },
                             selected = conversation.id == uiState.conversationId,
                             onClick = {
                                 onSubscribeConversation(conversation.id)
                                 scope.launch { drawerState.close() }
+                                onSearchHistory("") // Clear search
                             },
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                         )
@@ -230,8 +245,53 @@ fun ChatScreen(
     ) {
         Scaffold(
             topBar = {
+                var expanded by remember { mutableStateOf(false) }
                 TopAppBar(
-                    title = { Text("Antimatter") },
+                    title = {
+                        Box {
+                            Row(
+                                modifier = Modifier
+                                    .clickable { expanded = true }
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                val currentAgent = uiState.availableAgents.find { it.id == uiState.activeAgentId }
+                                Text(
+                                    text = currentAgent?.name ?: "Select Agent",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(Icons.Default.ArrowDownward, contentDescription = "Switch Agent", modifier = Modifier.size(16.dp))
+                            }
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                uiState.availableAgents.forEach { agent ->
+                                    DropdownMenuItem(
+                                        text = { 
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(8.dp)
+                                                        .background(
+                                                            color = if (agent.status == "online") androidx.compose.ui.graphics.Color.Green else androidx.compose.ui.graphics.Color.Red,
+                                                            shape = androidx.compose.foundation.shape.CircleShape
+                                                        )
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(agent.name)
+                                            }
+                                        },
+                                        onClick = {
+                                            onSwitchAgent(agent.id)
+                                            expanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Default.Menu, contentDescription = "Menu")
@@ -265,11 +325,31 @@ fun ChatScreen(
             )
         },
         bottomBar = {
-            MessageInput(
-                isGenerating = uiState.isGenerating,
-                onSend = onSendPrompt,
-                onCancel = onCancel
-            )
+            val currentAgent = uiState.availableAgents.find { it.id == uiState.activeAgentId }
+            val isOnline = currentAgent?.status == "online" && uiState.connectionState == BridgeWebSocket.ConnectionState.CONNECTED
+            if (isOnline) {
+                MessageInput(
+                    isGenerating = uiState.isGenerating,
+                    onSend = onSendPrompt,
+                    onCancel = onCancel,
+                    selectedImageUri = uiState.selectedImageUri,
+                    onSelectImage = onSelectImage
+                )
+            } else {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text(
+                        text = "Agent is offline. Input disabled.",
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
         }
     ) { padding ->
         Column(

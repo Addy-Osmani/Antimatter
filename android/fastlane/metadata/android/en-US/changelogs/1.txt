@@ -1,6 +1,6 @@
 # Antimatter 1.0.0 Release
 
-* New: Remote Terminal Execution with full Biometric (Fingerprint/Face) Security Locks.
+
 * New: Added Partial Text Selection and Copy support to Chat and Code blocks.
 * Enhancement: Migrated icons and UI elements for better RTL support.
 * Enhancement: Standardized Android build variants and fully upgraded documentation.

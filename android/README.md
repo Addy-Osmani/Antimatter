@@ -19,12 +19,12 @@ This Android app connects via WebSocket to the Antimatter Bridge server on your 
 </p>
 <p align="center">
   <img src="../docs/images/file-viewer.png" width="200" alt="File Viewer">
-  <img src="../docs/images/terminal.png" width="200" alt="Remote Terminal">
+
   <img src="../docs/images/artifact.png" width="200" alt="Artifacts UI">
 </p>
 
 ## Features
-- **Remote Terminal**: Execute shell commands on your host PC via a secure Biometric (Fingerprint/Face) lock.
+
 - **Real-Time Agent Mirroring**: Watch your agent's thought process, tool executions, and file edits in real-time as they happen in your IDE.
 - **Remote Control**: Send chat messages to your agent without being at your computer.
 - **Partial Text Selection**: Long-press messages to select specific text and use native Android copy/share options.

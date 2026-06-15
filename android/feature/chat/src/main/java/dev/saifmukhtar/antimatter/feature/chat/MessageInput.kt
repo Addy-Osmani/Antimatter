@@ -23,6 +23,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.ui.platform.LocalContext
 
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Close
+import android.net.Uri
+import androidx.activity.result.PickVisualMediaRequest
+
 val slashCommands = listOf("/goal", "/schedule", "/grill-me")
 
 @Composable
@@ -30,6 +35,8 @@ fun MessageInput(
     isGenerating: Boolean,
     onSend: (String) -> Unit,
     onCancel: () -> Unit,
+    selectedImageUri: Uri? = null,
+    onSelectImage: (Uri?) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var text by remember { mutableStateOf("") }
@@ -49,6 +56,14 @@ fun MessageInput(
         }
     }
 
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            onSelectImage(uri)
+        }
+    }
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
@@ -59,6 +74,26 @@ fun MessageInput(
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .imePadding()
         ) {
+            if (selectedImageUri != null) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(Icons.Default.Image, contentDescription = "Image attached", tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Image attached", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(onClick = { onSelectImage(null) }, modifier = Modifier.size(16.dp)) {
+                            Icon(Icons.Default.Close, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                        }
+                    }
+                }
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -76,7 +111,17 @@ fun MessageInput(
                     )
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+
+                IconButton(
+                    onClick = {
+                        photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    }
+                ) {
+                    Icon(Icons.Default.Image, contentDescription = "Attach image", tint = MaterialTheme.colorScheme.secondary)
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
 
                 if (isGenerating) {
                     FilledIconButton(
@@ -88,7 +133,7 @@ fun MessageInput(
                     ) {
                         Icon(Icons.Default.Stop, contentDescription = "Cancel")
                     }
-                } else if (text.isNotBlank()) {
+                } else if (text.isNotBlank() || selectedImageUri != null) {
                     FilledIconButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)

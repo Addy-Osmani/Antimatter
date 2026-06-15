@@ -25,7 +25,8 @@ import dev.saifmukhtar.antimatter.feature.files.FilesUiState
 fun FilesScreen(
     uiState: FilesUiState,
     onRefresh: () -> Unit,
-    onOpenFile: (String) -> Unit
+    onOpenFile: (String) -> Unit,
+    onChangeWorkspace: (String) -> Unit
 ) {
     var expandedFolders by remember { mutableStateOf(setOf<String>()) }
 
@@ -40,6 +41,28 @@ fun FilesScreen(
             TopAppBar(
                 title = { Text("Workspace") },
                 actions = {
+                    if (uiState.allowedWorkspaces.isNotEmpty()) {
+                        var expanded by remember { mutableStateOf(false) }
+                        Box {
+                            TextButton(onClick = { expanded = true }) {
+                                Text(uiState.currentWorkspace?.substringAfterLast("/") ?: "Switch")
+                            }
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                uiState.allowedWorkspaces.forEach { ws ->
+                                    DropdownMenuItem(
+                                        text = { Text(ws) },
+                                        onClick = {
+                                            expanded = false
+                                            onChangeWorkspace(ws)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
                     IconButton(onClick = onRefresh) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                     }

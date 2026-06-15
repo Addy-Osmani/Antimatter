@@ -5,7 +5,7 @@ Because the AntiGravity IDE does not expose a public API for external control, A
 Features:
 * Real-Time Mirroring: See exactly what your AI agent is doing on your phone.
 * Remote Control: Send chat messages directly to your agent.
-* Remote Terminal Execution: Full remote shell execution secured by Biometric Fingerprint locks.
+
 * Partial Text Selection: Long-press AI chats or code blocks to trigger native copy/share selection tools.
 * Diff Review: Review code modifications and accept/reject them remotely.
 * 100% Tracker Free: The entire app is 100% free of proprietary trackers.

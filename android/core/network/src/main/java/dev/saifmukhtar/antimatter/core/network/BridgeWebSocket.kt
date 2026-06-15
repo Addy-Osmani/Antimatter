@@ -6,6 +6,11 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import android.util.Log
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.pm.PackageManager
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import kotlinx.coroutines.CoroutineScope
@@ -51,6 +56,7 @@ class BridgeWebSocket(private val context: Context) {
 
     private var pendingChallenge: ByteArray? = null
     private var authTimeoutJob: Job? = null
+    private var e2eeSession: E2EESession? = null
 
     private data class PendingMessage(
         val id: String,
@@ -161,26 +167,39 @@ class BridgeWebSocket(private val context: Context) {
                 scope.launch {
                     try {
                         val jsonObject = JsonParser.parseString(text).asJsonObject
-                        val type = jsonObject.get("type").asString
+                        
+                        val payloadText = if (jsonObject.has("iv") && jsonObject.has("ct") && jsonObject.has("aad")) {
+                            e2eeSession?.decrypt(
+                                jsonObject.get("iv").asString,
+                                jsonObject.get("ct").asString,
+                                jsonObject.get("aad").asString,
+                                "output:"
+                            ) ?: throw java.lang.IllegalStateException("Received encrypted packet but E2EE session is not initialized")
+                        } else {
+                            text
+                        }
+
+                        val payloadObj = JsonParser.parseString(payloadText).asJsonObject
+                        val type = payloadObj.get("type").asString
                         val message = when (type) {
                             "PONG" -> InboundMessage.Pong()
-                            "SESSION_STATE" -> gson.fromJson(text, InboundMessage.SessionState::class.java)
-                            "STEP" -> gson.fromJson(text, InboundMessage.Step::class.java)
-                            "STEP_BATCH" -> gson.fromJson(text, InboundMessage.StepBatch::class.java)
-                            "GENERATING" -> gson.fromJson(text, InboundMessage.Generating::class.java)
-                            "RESPONSE_COMPLETE" -> gson.fromJson(text, InboundMessage.ResponseComplete::class.java)
-                            "ACTIVE_FILE" -> gson.fromJson(text, InboundMessage.ActiveFile::class.java)
-                            "FILE_CONTENT" -> gson.fromJson(text, InboundMessage.FileContent::class.java)
-                            "FILE_TREE" -> gson.fromJson(text, InboundMessage.FileTree::class.java)
-                            "CLOUDFLARE_URL" -> gson.fromJson(text, InboundMessage.CloudflareUrl::class.java)
-                            "TERMINAL_OUTPUT" -> gson.fromJson(text, InboundMessage.TerminalOutput::class.java)
-                            "HISTORY_LIST" -> gson.fromJson(text, InboundMessage.HistoryList::class.java)
-                            "ERROR" -> gson.fromJson(text, InboundMessage.Error::class.java)
-                            "SYSTEM_ALERT" -> gson.fromJson(text, InboundMessage.SystemAlert::class.java)
-                            "AUTH_RESPONSE" -> gson.fromJson(text, InboundMessage.AuthResponse::class.java)
-                            "ARTIFACTS_LIST" -> gson.fromJson(text, InboundMessage.ArtifactsList::class.java)
-                            "COMMAND_OUTPUT" -> gson.fromJson(text, InboundMessage.CommandOutput::class.java)
-                            "ACK" -> gson.fromJson(text, InboundMessage.Ack::class.java)
+                            "SESSION_STATE" -> gson.fromJson(payloadText, InboundMessage.SessionState::class.java)
+                            "STEP" -> gson.fromJson(payloadText, InboundMessage.Step::class.java)
+                            "STEP_BATCH" -> gson.fromJson(payloadText, InboundMessage.StepBatch::class.java)
+                            "GENERATING" -> gson.fromJson(payloadText, InboundMessage.Generating::class.java)
+                            "RESPONSE_COMPLETE" -> gson.fromJson(payloadText, InboundMessage.ResponseComplete::class.java)
+                            "ACTIVE_FILE" -> gson.fromJson(payloadText, InboundMessage.ActiveFile::class.java)
+                            "FILE_CONTENT" -> gson.fromJson(payloadText, InboundMessage.FileContent::class.java)
+                            "FILE_TREE" -> gson.fromJson(payloadText, InboundMessage.FileTree::class.java)
+                            "CLOUDFLARE_URL" -> gson.fromJson(payloadText, InboundMessage.CloudflareUrl::class.java)
+                            "HISTORY_LIST" -> gson.fromJson(payloadText, InboundMessage.HistoryList::class.java)
+                            "AVAILABLE_AGENTS" -> gson.fromJson(payloadText, InboundMessage.AvailableAgents::class.java)
+                            "ERROR" -> gson.fromJson(payloadText, InboundMessage.Error::class.java)
+                            "SYSTEM_ALERT" -> gson.fromJson(payloadText, InboundMessage.SystemAlert::class.java)
+                            "SYSTEM_NOTIFICATION" -> gson.fromJson(payloadText, InboundMessage.SystemNotification::class.java)
+                            "AUTH_RESPONSE" -> gson.fromJson(payloadText, InboundMessage.AuthResponse::class.java)
+                            "ARTIFACTS_LIST" -> gson.fromJson(payloadText, InboundMessage.ArtifactsList::class.java)
+                            "ACK" -> gson.fromJson(payloadText, InboundMessage.Ack::class.java)
                             else -> InboundMessage.Unknown
                         }
                         
@@ -210,8 +229,22 @@ class BridgeWebSocket(private val context: Context) {
                                     val isValid = verifier.verify(signatureBytes)
                                     
                                     if (isValid) {
-                                        Log.d("BridgeWebSocket", "Ed25519 Handshake Verified. Securing connection.")
-                                        updateConnectionState(ConnectionState.CONNECTED)
+                                        Log.d("BridgeWebSocket", "Ed25519 Handshake Verified. Initializing E2EE.")
+                                        try {
+                                            val e2ee = E2EESession()
+                                            e2ee.deriveSessionKeys(pubKeyStr)
+                                            e2eeSession = e2ee
+                                            
+                                            val helloMsg = OutboundMessage.Hello(e2ee.publicKeyBase64)
+                                            webSocket.send(gson.toJson(helloMsg))
+                                            Log.d("BridgeWebSocket", "Sent HELLO X25519 payload. E2EE Established.")
+                                            
+                                            updateConnectionState(ConnectionState.CONNECTED)
+                                        } catch (e: Exception) {
+                                            Log.e("BridgeWebSocket", "E2EE Handshake failed", e)
+                                            webSocket.close(4003, "Crypto Error")
+                                            updateConnectionState(ConnectionState.DISCONNECTED)
+                                        }
                                     } else {
                                         Log.e("BridgeWebSocket", "Ed25519 Signature INVALID. Aborting connection.")
                                         webSocket.close(4003, "Invalid Signature")
@@ -228,6 +261,9 @@ class BridgeWebSocket(private val context: Context) {
                             val pending = pendingAcks.remove(message.id)
                             pending?.timeoutJob?.cancel()
                             Log.d("BridgeWebSocket", "ACK received for ${message.id}")
+                            return@launch
+                        } else if (message is InboundMessage.SystemNotification) {
+                            showSystemNotification(message.title, message.body)
                             return@launch
                         }
 
@@ -282,8 +318,14 @@ class BridgeWebSocket(private val context: Context) {
 
     fun sendMessage(message: OutboundMessage) {
         val json = gson.toJson(message)
-        Log.d("BridgeWebSocket", "Sending: ${json.take(100)}")
-        webSocket?.send(json)
+        val payload = if (e2eeSession != null && message !is OutboundMessage.AuthChallenge && message !is OutboundMessage.Hello) {
+            val env = e2eeSession!!.encrypt(json, "cmd:")
+            gson.toJson(env)
+        } else {
+            json
+        }
+        Log.d("BridgeWebSocket", "Sending: ${payload.take(100)}")
+        webSocket?.send(payload)
     }
 
     fun sendWithRetry(messageBuilder: (String) -> OutboundMessage) {
@@ -312,5 +354,46 @@ class BridgeWebSocket(private val context: Context) {
                 }
             }
         }
+    }
+
+    private fun showSystemNotification(title: String, body: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                Log.w("BridgeWebSocket", "Missing POST_NOTIFICATIONS permission")
+                return
+            }
+        }
+
+        val channelId = "antimatter_system_notifications"
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                "System Notifications",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Just use an implicit intent or a simple launch intent
+        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            context,
+            0,
+            launchIntent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
 }

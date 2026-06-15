@@ -5,8 +5,18 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AppDao {
+    @Query("SELECT * FROM conversations WHERE agentId = :agentId ORDER BY timestamp DESC")
+    fun getConversationsForAgentFlow(agentId: String): Flow<List<ConversationEntity>>
+
     @Query("SELECT * FROM conversations ORDER BY timestamp DESC")
     fun getAllConversationsFlow(): Flow<List<ConversationEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAgent(agent: AgentEntity)
+
+    @Query("SELECT * FROM agents")
+    fun getAllAgentsFlow(): Flow<List<AgentEntity>>
+
 
     @Query("SELECT * FROM conversations WHERE id = :id")
     suspend fun getConversation(id: String): ConversationEntity?
@@ -37,4 +47,11 @@ interface AppDao {
 
     @Query("SELECT * FROM artifacts WHERE conversationId = :conversationId AND path = :path")
     suspend fun getArtifact(conversationId: String, path: String): ArtifactEntity?
+
+    @Query("""
+        SELECT steps.* FROM steps 
+        JOIN steps_fts ON steps.conversationId = steps_fts.conversationId AND steps.stepIndex = steps_fts.stepIndex
+        WHERE steps_fts MATCH :query
+    """)
+    suspend fun searchSteps(query: String): List<StepEntity>
 }

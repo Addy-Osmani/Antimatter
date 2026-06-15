@@ -67,7 +67,7 @@ fun QRScannerScreen(
                     var cfId = uri.getQueryParameter("cfid")
                     var cfSecret = uri.getQueryParameter("cfsec")
                     val cfEnc = uri.getQueryParameter("cfenc")
-                    val pubKey = uri.getQueryParameter("pubkey")
+                    val pubKey = uri.getQueryParameter("x25519_pub")
 
                     if (cfEnc != null && token != null) {
                         try {

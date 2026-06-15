@@ -20,7 +20,9 @@ data class FilesUiState(
     val viewedFilePath: String? = null,
     val viewedFileContent: String? = null,
     val viewedFileLanguage: String? = null,
-    val isLoadingFile: Boolean = false
+    val isLoadingFile: Boolean = false,
+    val allowedWorkspaces: List<String> = emptyList(),
+    val currentWorkspace: String? = null
 )
 
 @HiltViewModel
@@ -51,6 +53,13 @@ class FilesViewModel @Inject constructor(
                     is InboundMessage.Error -> {
                         _uiState.update { it.copy(isLoadingTree = false, isLoadingFile = false) }
                     }
+                    is InboundMessage.AvailableAgents -> {
+                        _uiState.update { it.copy(allowedWorkspaces = message.allowedWorkspaces) }
+                        // Also grab the current workspace from the active agent if any
+                        message.agents.firstOrNull()?.workspaceRoot?.let { root ->
+                            _uiState.update { it.copy(currentWorkspace = root) }
+                        }
+                    }
                     else -> {}
                 }
             }
@@ -76,5 +85,10 @@ class FilesViewModel @Inject constructor(
         webSocket.sendMessage(OutboundMessage.WriteFile(path, content))
         // Optimistically update viewed content
         _uiState.update { it.copy(viewedFileContent = content) }
+    }
+
+    fun changeWorkspace(path: String) {
+        webSocket.sendMessage(OutboundMessage.ChangeWorkspace(path))
+        _uiState.update { it.copy(currentWorkspace = path, isLoadingTree = true) }
     }
 }
