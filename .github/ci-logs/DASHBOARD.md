@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-64%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-48-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-63%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-49-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 48 |
+| **Total Runs** | 49 |
 | **Passed** | 31 |
-| **Failed** | 14 |
-| **Pass Rate** | 64% |
+| **Failed** | 15 |
+| **Pass Rate** | 63% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-15 22:39 | npm_and_yarn in /adapters/ag for js-yaml - Update #1414813015 | ❌ FAIL | chore: update workflow dashboard | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27581033614) |
 | 2026-06-15 22:38 | Deploy Documentation | ✅ PASS | docs: integrate custom logo Mermaid diagram support and update feature highlights | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27581014431) |
 | 2026-06-15 22:38 | iOS CI | ✅ PASS | docs: integrate custom logo Mermaid diagram support and update feature highlights | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27581014182) |
 | 2026-06-15 22:36 | npm_and_yarn in /adapters/ag for js-yaml - Update #1414808737 | ⚠️ CANCEL | Merge pull request #3 from saifmukhtar/dependabot/npm_and_yarn/adapters/ag/form-data-4.0.6 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27580911135) |
