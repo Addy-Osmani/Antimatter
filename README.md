@@ -3,22 +3,73 @@
 [![F-Droid](https://img.shields.io/badge/F--Droid-Get_it_on-blue.svg)](https://f-droid.org/packages/dev.saifmukhtar.antimatter/)
 [![GitHub Sponsor](https://img.shields.io/badge/Sponsor-❤️-blue.svg)](https://github.com/sponsors/saifmukhtar)
 [![Docs](https://img.shields.io/badge/docs-Website-deep_purple.svg)](https://antimatter.saifmukhtar.dev)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/saifmukhtar/antimatter)
-[![Author Website](https://img.shields.io/badge/Author-saifmukhtar.dev-black.svg)](https://saifmukhtar.dev)
 [![GitHub Stars](https://img.shields.io/github/stars/saifmukhtar/antimatter.svg?style=social)](https://github.com/saifmukhtar/antimatter/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Discord](https://img.shields.io/badge/Discord-Join_Community-7289da.svg)](https://discord.gg/saifmukhtar)
 
 > [!WARNING]
 > **Community Project Disclaimer**
-> Antimatter is an unofficial, community-driven, open-source project. It is **NOT** an official product of Google, nor is it officially affiliated with the Google AntiGravity IDE project.
+> Antimatter is an unofficial, community-driven, open-source project. It is **NOT** an official product of Google, Anthropic, or any AI provider.
 
-Antimatter is an open-source bridge ecosystem that connects your mobile device directly to the local **Google AntiGravity IDE** running on your host machine.
+**Antimatter** is the ultimate open-source bridge ecosystem that securely connects your mobile device directly to your local AI agents (Google Antigravity, Claude Code, and more).
 
-By connecting your phone to the IDE, you can view your active AI agent's trajectory, monitor its thought process, read logs in real-time, send new prompts, execute terminal commands, and browse your workspace files—all from your mobile device.
+By securely tunneling your phone to your local host machine, you can view your active AI agent's trajectory, monitor its thought process, read logs in real-time, send new prompts, and browse your workspace files—all from your mobile device.
 
-## 📊 CI/CD Status
-[View Workflow Dashboard](.github/ci-logs/DASHBOARD.md)
+---
+
+## ⚡ The Independent Adapter Model
+
+Antimatter is built on a massive architectural breakthrough: **The Independent Adapter Model**.
+
+```mermaid
+flowchart LR
+    Mobile[Mobile App] -- E2EE Ciphertext --> CF[Cloudflare Tunnel]
+    CF -- TLS Terminated --> Gateway[Antimatter Gateway]
+    
+    subgraph GatewayNode[Local Machine]
+        Gateway
+        
+        Gateway == Plaintext IPC ==> AG[AG IDE Adapter]
+        Gateway == Plaintext IPC ==> AG2[AG 2.0 Adapter]
+        Gateway == Plaintext IPC ==> CC[Claude Adapter]
+    end
+```
+
+Instead of packing complex security and tunneling code into every single AI integration, Antimatter splits the ecosystem into two distinct layers, ensuring absolute stability and security.
+
+### 1. The Gateway (`antimatter-core`)
+The brain of the operation. This is a highly secure Python daemon that runs in the background. It manages **Cloudflare Tunnels**, generates 256-bit cryptographic keys, and handles the **Ed25519 Handshake** with your Android device. It hosts a secure local IPC router at `127.0.0.1:8765`.
+
+### 2. The Adapters (`adapters/`)
+Lightweight, "dumb" IPC clients that connect to the Gateway. Because they don't have to worry about security or networking, they are extremely modular and custom-built for specific AI environments.
+
+We currently officially support:
+- **[Antigravity IDE Adapter (`ag`)](docs/AG.md)** - A TypeScript VS Code extension.
+- **[Antigravity 2.0 Adapter (`ag2`)](docs/AG2.md)** - A standalone Python daemon.
+- **[Claude Code Adapter (`cc`)](docs/CC.md)** - A Node.js streaming integration.
+
+*Want to connect a brand new AI agent? Just write a simple WebSocket IPC script and connect it to the Gateway!*
+
+---
+
+## 🚀 Quick Start (v0.1.4)
+
+Getting started is easier than ever with the new PyPI structure.
+
+### 1. Install the Gateway
+Install the core infrastructure using `uv` (or `pip`):
+```bash
+uv tool install antimatter-core
+antimatter-gateway start
+```
+
+### 2. Install Your Adapter
+Install the adapter for the AI you are using. For example, for the Antigravity IDE:
+- Download the `.vsix` from our [GitHub Releases](https://github.com/saifmukhtar/antimatter/releases) and install it in VS Code. It will automatically connect to your running Gateway!
+
+### 3. Pair Your Phone
+1. Download the **Antimatter Android App** from F-Droid or GitHub Releases.
+2. In your terminal running the gateway, type `antimatter-gateway pair` to generate a secure QR code.
+3. Scan the code with the app. You are now cryptographically paired!
 
 ---
 
@@ -27,87 +78,29 @@ By connecting your phone to the IDE, you can view your active AI agent's traject
 **We have a dedicated documentation website!**  
 👉 **[Read the Official Antimatter Documentation Here](https://antimatter.saifmukhtar.dev)**
 
-Because this repository contains multiple sub-projects, we have split the source documentation files into the `docs/` folder for clarity:
+Explore the depths of the ecosystem:
 
 **Getting Started**
-- [**Installation & Setup**](docs/INSTALLATION.md) - End-to-end: install, tunnel, and pair your phone.
-- [**Antigravity 2.0 Integration**](docs/ANTIGRAVITY_2_0.md) - Learn how to install and use the native Antigravity Plugin.
-- [**Feature Breakdown**](docs/FEATURES.md) - A detailed list of everything Antimatter can do.
-- [**Troubleshooting & FAQ**](docs/TROUBLESHOOTING.md) - Fix common connection, tunnel, and pairing issues.
+- [**Installation & Setup**](docs/INSTALLATION.md) - End-to-end quickstart.
+- [**Features Breakdown**](docs/FEATURES.md) - A detailed list of everything Antimatter can do.
 
 **Architecture & Security**
-- [**Architecture Deep Dive**](docs/ARCHITECTURE.md) - Understand how we reverse-engineered the IDE hooks without official APIs.
-- [**Zero Trust Guide**](docs/ZERO_TRUST.md) - Learn how to set up Cloudflare Zero Trust (UI & CLI guides).
-- [**Security Policy**](docs/SECURITY.md) - Read about our Biometric locks, Cryptographic Handshakes, and protections.
+- [**Architecture Deep Dive**](docs/ARCHITECTURE.md) - Learn exactly how the Gateway routes IPC payloads.
+- [**Security Policy**](docs/SECURITY.md) - Read about our Biometric locks, Cryptographic Handshakes, and sandboxing.
+- [**Zero Trust Guide**](docs/ZERO_TRUST.md) - Add a secondary enterprise authentication layer with Cloudflare Access.
 
 **Reference**
-- [**WebSocket Protocol**](docs/PROTOCOL.md) - The complete message contract between the extension and the app.
-- [**VS Code Extension Reference**](docs/EXTENSION.md) - Module map, commands, and settings.
-- [**Android App Reference**](docs/ANDROID.md) - Module/screen/ViewModel map.
-
-**Project**
-- [**Contributing & Development**](docs/CONTRIBUTING.md) - Local setup, lint/build commands, and docs preview.
-- [**Roadmap**](docs/ROADMAP.md) - Future plans for E2EE and Terminal isolation.
-- [**Changelog**](docs/CHANGELOG.md) - Detailed technical tracking of all project updates.
-
-### Sub-Project Documentation
-- [**VS Code Extension README**](extension/README.md)
-- [**Android App README**](android/README.md)
-
----
-
-## 🚀 Quick Start & Download
-
-You do not need to compile the code yourself to use Antimatter. 
-
-1. **Download the Extension**: Go to our [GitHub Releases](https://github.com/saifmukhtar/antimatter/releases) page and download the latest `.vsix` file.
-2. **Install in AntiGravity**: Open your AntiGravity IDE, go to the Extensions panel, click the `...` menu, and select **"Install from VSIX..."**.
-3. **Download the Android App**: Also on the [GitHub Releases](https://github.com/saifmukhtar/antimatter/releases) page, download the latest `.apk` file and install it on your Android device. 
-4. **Setup the Tunnel**: Follow the **Tunnel Setup** section below.
-5. **Connect**: Open the VS Code Command Palette (`Ctrl+Shift+P`) and type `Antimatter: Show Pairing QR Code`. Scan this code with the Android app to securely transfer the WebSocket URL and Pairing Token.
-
-### 🌐 Tunnel Setup
-Antimatter securely bridges your desktop and phone. You can expose the server securely in two ways:
-
-#### Method 1: TryCloudflare (No Domain Required)
-1. Run `cloudflared tunnel --url localhost:8080` on your desktop.
-2. Cloudflare will give you a temporary URL (e.g., `wss://funny-words.trycloudflare.com`).
-3. Paste this URL into the VS Code extension settings, then scan the generated QR code.
-> **Note:** TryCloudflare URLs are public. However, Antimatter generates a 256-bit cryptographic **Pairing Token**. Without this token, unauthorized users who guess your URL are mathematically blocked from connecting.
-
-#### Method 2: Cloudflare Zero Trust (Domain Required - Recommended)
-If you own a domain, this provides double-layered security.
-1. Point a Cloudflare Zero Trust tunnel (e.g., `ide.yourdomain.com`) to `localhost:8080`.
-2. Protect it with a Cloudflare Access App, generating a **Service Auth Client ID and Secret**.
-3. In the Android App, tap **Advanced Options** and input your Client ID and Secret alongside your URL.
+- [**WebSocket Protocol**](docs/PROTOCOL.md) - The complete message contract between the Gateway and the app.
+- [**Android App**](docs/ANDROID.md) - Learn how the Jetpack Compose app dynamically selects active adapters.
 
 ---
 
 ## ✨ Core Features
-> See the [**Detailed Features Document**](docs/FEATURES.md) for a full breakdown.
 
-- **Remote Terminal Execution**: Full remote shell execution secured by Biometric Fingerprint locks.
 - **Real-Time Streaming**: Watch your agent's thought process character-by-character.
-- **Partial Text Selection**: Long-press AI chats or code blocks to trigger native copy/share selection tools.
-- **Zero Trust Security**: Cloudflare Tunnel integration + 256-bit Pairing Tokens ensure impenetrable local security.
-
----
-
-## 📦 Repository Structure
-
-This is a monorepo containing multiple sub-projects and a documentation site:
-
-```text
-antimatter/
-├── plugin/ # Native Antigravity 2.0 bridge daemon (Python)
-├── extension/         # VS Code / AntiGravity IDE extension (TypeScript)
-├── android/           # Companion Android app (Kotlin / Jetpack Compose)
-├── docs/              # MkDocs Material documentation
-└── mkdocs.yml         # Documentation site configuration
-```
-
-The extension and app communicate over an authenticated WebSocket — see the
-[**WebSocket Protocol Reference**](docs/PROTOCOL.md) for the full message contract.
+- **Zero Trust Security**: Ed25519 pairing prevents Man-In-The-Middle attacks even on compromised public networks.
+- **Seamless Tunnels**: Free Cloudflare Quick Tunnels provisioned automatically—no firewall configurations required.
+- **Offline History**: The Android app uses a local Room database to cache conversations and artifacts for offline viewing.
 
 ---
 
@@ -115,20 +108,8 @@ The extension and app communicate over an authenticated WebSocket — see the
 
 We love contributions! Antimatter is built by developers, for developers.
 
-- **[Contributing Guidelines](CONTRIBUTING.md)**: Read this to learn how to set up the Android and VS Code extension environments locally, run linting, and submit PRs.
-- **[Code of Conduct](CODE_OF_CONDUCT.md)**: Please review our community interaction guidelines to ensure a welcoming environment for everyone.
-- **[Contributors List](CONTRIBUTORS.md)**: A massive thank you to everyone who has helped build this ecosystem!
+- **[Contributing Guidelines](CONTRIBUTING.md)**: Learn how to set up the environments locally and submit PRs.
+- **[Code of Conduct](CODE_OF_CONDUCT.md)**: Please review our community interaction guidelines.
 
----
-
-## 🛠️ Tech Stack & Credits
-
-This project leverages several modern open-source technologies:
-- **Android App**: Kotlin, Jetpack Compose, OkHttp (WebSockets), Markwon (Markdown rendering).
-- **Barcode Scanning**: Pure-Java `com.google.zxing:core` ensuring 100% FOSS compliance for F-Droid.
-- **VS Code Extension**: Node.js, TypeScript, `ws` (WebSocket server), `node-pty` (Planned for terminal).
-- **Antigravity 2.0 Daemon**: Python, `asyncio`, Google Antigravity SDK.
-- **Secure Networking**: Cloudflare Zero Trust (`cloudflared`) and free automatic Quick Tunnels.
-
-## License
+### License
 MIT License
