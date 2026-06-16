@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 
 data class FilesUiState(
     val fileTree: List<FileNode>? = null,
@@ -34,7 +35,7 @@ class FilesViewModel @Inject constructor(
     val uiState: StateFlow<FilesUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Unconfined) {
             webSocket.messages.collect { message ->
                 when (message) {
                     is InboundMessage.FileTree -> {

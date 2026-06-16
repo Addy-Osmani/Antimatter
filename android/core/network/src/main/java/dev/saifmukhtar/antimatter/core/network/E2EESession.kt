@@ -15,8 +15,14 @@ import kotlin.math.ceil
 class E2EESession {
     private val keyPair = KeyPairGenerator.getInstance("X25519").generateKeyPair()
     
-    // We send this to the Python gateway in the HELLO message
-    val publicKeyBase64: String = Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
+    // We send this to the Python gateway in the HELLO message.
+    // In Java, X25519 public key encoded is 44 bytes (12-byte SPKI prefix + 32-byte raw key).
+    // The Python gateway expects the raw 32 bytes.
+    val publicKeyBase64: String = run {
+        val encoded = keyPair.public.encoded
+        val rawBytes = if (encoded.size == 44) encoded.copyOfRange(12, 44) else encoded
+        Base64.encodeToString(rawBytes, Base64.NO_WRAP)
+    }
 
     private var c2sKey: ByteArray? = null
     private var s2cKey: ByteArray? = null
@@ -32,8 +38,9 @@ class E2EESession {
         // In Java/Android, X25519 keys must be X.509 encoded. The Python cryptography library
         // public_bytes_raw() returns raw 32 bytes. We must wrap it in the X.509 SubjectPublicKeyInfo prefix.
         val x509Bytes = if (pubKeyBytes.size == 32) {
+            // SPKI prefix for X25519 (OID 1.3.101.110 = 2B 65 6E)
             val prefix = byteArrayOf(
-                0x30, 0x2A, 0x30, 0x05, 0x06, 0x03, 0x2B, 0x65, 0x70, 0x03, 0x21, 0x00
+                0x30, 0x2A, 0x30, 0x05, 0x06, 0x03, 0x2B, 0x65, 0x6E, 0x03, 0x21, 0x00
             )
             prefix + pubKeyBytes
         } else {

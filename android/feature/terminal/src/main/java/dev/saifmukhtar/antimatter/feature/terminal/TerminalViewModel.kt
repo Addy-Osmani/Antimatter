@@ -14,6 +14,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -31,6 +32,9 @@ class TerminalViewModel @Inject constructor(
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
+    private val _redrawEvent = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val redrawEvent = _redrawEvent.asSharedFlow()
+
     val terminalSession: TerminalSession = TerminalSession(this)
     private var ptyId: String? = null
 
@@ -39,9 +43,12 @@ class TerminalViewModel @Inject constructor(
 
     private var ioJob: Job? = null
 
+    // Buffer for early PTY output before TerminalView creates the emulator
+    private val pendingOutput = mutableListOf<ByteArray>()
+
     init {
         // Observe WebSocket events
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Unconfined) {
             webSocket.connectionState.collect { state ->
                 val connected = state == BridgeWebSocket.ConnectionState.CONNECTED
                 _isConnected.value = connected
@@ -53,7 +60,7 @@ class TerminalViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Unconfined) {
             webSocket.messages.collect { message ->
                 if (message is InboundMessage.PtyOutput) {
                     handleMessage(message)
@@ -92,8 +99,8 @@ class TerminalViewModel @Inject constructor(
                     // Send input over websocket
                     val id = ptyId
                     if (id != null) {
-                        val dataStr = String(buffer, 0, bytesRead)
-                        val inputMsg = OutboundMessage.PtyInput(id, dataStr)
+                        val dataB64 = android.util.Base64.encodeToString(buffer, 0, bytesRead, android.util.Base64.NO_WRAP)
+                        val inputMsg = OutboundMessage.PtyInput(id, dataB64)
                         webSocket.sendMessage(inputMsg)
                     }
                 } else {
@@ -104,9 +111,14 @@ class TerminalViewModel @Inject constructor(
     }
 
     private suspend fun handleMessage(message: InboundMessage.PtyOutput) {
-        val bytes = message.data.toByteArray()
+        // The gateway base64-encodes all PTY output. We must decode before feeding the emulator.
+        val bytes = android.util.Base64.decode(message.data, android.util.Base64.DEFAULT)
         withContext(Dispatchers.Main) {
-            terminalSession.appendToEmulator(bytes, bytes.size)
+            if (terminalSession.emulator != null) {
+                terminalSession.appendToEmulator(bytes, bytes.size)
+            } else {
+                pendingOutput.add(bytes)
+            }
         }
     }
 
@@ -115,14 +127,23 @@ class TerminalViewModel @Inject constructor(
         ioJob?.cancel()
     }
 
-    // Called by TerminalView when its size changes
+    // Called by TerminalView when its size changes or emulator is first set
     fun onResize(cols: Int, rows: Int) {
         resizeChannel.trySend(Pair(cols, rows))
+        
+        // Flush any buffered output if emulator is now ready
+        if (pendingOutput.isNotEmpty() && terminalSession.emulator != null) {
+            val allBytes = pendingOutput.reduce { acc, bytes -> acc + bytes }
+            terminalSession.appendToEmulator(allBytes, allBytes.size)
+            pendingOutput.clear()
+        }
     }
 
     // --- TerminalSessionClient implementation ---
     
-    override fun onTextChanged(session: TerminalSession) {}
+    override fun onTextChanged(session: TerminalSession) {
+        _redrawEvent.tryEmit(Unit)
+    }
 
     override fun onTitleChanged(session: TerminalSession) {}
 

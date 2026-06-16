@@ -181,6 +181,8 @@ class BridgeWebSocket(private val context: Context) {
 
                         val payloadObj = JsonParser.parseString(payloadText).asJsonObject
                         val type = payloadObj.get("type").asString
+                        Log.d("BridgeWebSocket", "Decrypted and parsed message type: $type")
+                        
                         val message = when (type) {
                             "PONG" -> InboundMessage.Pong()
                             "SESSION_STATE" -> gson.fromJson(payloadText, InboundMessage.SessionState::class.java)
@@ -199,10 +201,12 @@ class BridgeWebSocket(private val context: Context) {
                             "SYSTEM_NOTIFICATION" -> gson.fromJson(payloadText, InboundMessage.SystemNotification::class.java)
                             "AUTH_RESPONSE" -> gson.fromJson(payloadText, InboundMessage.AuthResponse::class.java)
                             "ARTIFACTS_LIST" -> gson.fromJson(payloadText, InboundMessage.ArtifactsList::class.java)
-                            "pty_output" -> gson.fromJson(payloadText, InboundMessage.PtyOutput::class.java)
+                            "PTY_OUTPUT" -> gson.fromJson(payloadText, InboundMessage.PtyOutput::class.java)
                             "ACK" -> gson.fromJson(payloadText, InboundMessage.Ack::class.java)
                             else -> InboundMessage.Unknown
                         }
+                        
+                        Log.d("BridgeWebSocket", "Mapped to message class: ${message.javaClass.simpleName}")
                         
                         if (message is InboundMessage.AuthResponse) {
                             authTimeoutJob?.cancel()
@@ -233,7 +237,7 @@ class BridgeWebSocket(private val context: Context) {
                                         Log.d("BridgeWebSocket", "Ed25519 Handshake Verified. Initializing E2EE.")
                                         try {
                                             val e2ee = E2EESession()
-                                            e2ee.deriveSessionKeys(pubKeyStr)
+                                            e2ee.deriveSessionKeys(message.pubkey)
                                             e2eeSession = e2ee
                                             
                                             val helloMsg = OutboundMessage.Hello(e2ee.publicKeyBase64)
@@ -267,7 +271,8 @@ class BridgeWebSocket(private val context: Context) {
                             showSystemNotification(message.title, message.body)
                             return@launch
                         }
-
+                        
+                        Log.d("BridgeWebSocket", "Emitting message to flow: ${message.javaClass.simpleName}")
                         _messages.emit(message)
                     } catch (e: Exception) {
                         Log.e("BridgeWebSocket", "Failed to parse message: $text", e)
