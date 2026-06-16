@@ -228,6 +228,10 @@ def main():
     
     subparsers = parser.add_subparsers(dest="command")
     
+    # Interactive Setup Command
+    setup_parser = subparsers.add_parser("setup", help="Interactive setup for Cloudflare Zero Trust")
+    
+    # Config Command
     config_parser = subparsers.add_parser("config", help="Manage gateway configuration")
     config_sub = config_parser.add_subparsers(dest="config_command")
     
@@ -237,6 +241,35 @@ def main():
     
     args = parser.parse_args()
     
+    if args.command == "setup":
+        import getpass
+        config = load_config()
+        print("="*50)
+        print("ANTIMATTER GATEWAY SETUP")
+        print("="*50)
+        
+        # URL
+        url_prompt = f"Enter Cloudflare WebSocket URL (current: {config.cloudflare_url or 'None'}): "
+        url_input = input(url_prompt).strip()
+        if url_input:
+            config.cloudflare_url = url_input
+            
+        # Client ID
+        id_prompt = f"Enter Cloudflare Client ID (current: {config.cloudflare_client_id or 'None'}): "
+        id_input = input(id_prompt).strip()
+        if id_input:
+            config.cloudflare_client_id = id_input
+            
+        # Client Secret (hidden)
+        sec_prompt = "Enter Cloudflare Client Secret (hidden) [leave blank to keep current]: "
+        sec_input = getpass.getpass(sec_prompt).strip()
+        if sec_input:
+            config.cloudflare_client_secret = sec_input
+            
+        save_config(config)
+        print("\n✅ Configuration saved securely!")
+        return
+
     if args.command == "config":
         if args.config_command == "set":
             config = load_config()
