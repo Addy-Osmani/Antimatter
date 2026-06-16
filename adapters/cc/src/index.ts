@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
 import * as ws from 'ws';
+import { randomUUID } from 'crypto';
 import { handleClaudeMessage } from './router';
 
 // IPC port for the Gateway
 const GATEWAY_URL = 'ws://127.0.0.1:8765';
+// Stable adapter ID for this daemon process
+const ADAPTER_ID = randomUUID();
 
 async function main() {
     console.log(`[Claude Adapter] Connecting to Gateway at ${GATEWAY_URL}...`);
@@ -16,9 +19,11 @@ async function main() {
 
         client.on('open', () => {
             console.log('[Claude Adapter] Connected to Gateway IPC.');
-            // Register as the cc adapter
+            // Register as the cc adapter with a stable UUID so the Gateway
+            // can correctly key this adapter for targeted IPC routing.
             client.send(JSON.stringify({
                 type: 'REGISTER_ADAPTER',
+                id: ADAPTER_ID,
                 name: 'cc'
             }));
         });

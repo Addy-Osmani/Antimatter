@@ -11,8 +11,9 @@ export class MessageRouter {
     this.handlers.set(type, handler as any);
   }
 
-  async route(raw: string, ws: WebSocket) {
-    if (Buffer.byteLength(raw, 'utf8') > 5 * 1024 * 1024) {
+  async route(raw: unknown, ws: WebSocket) {
+    const serialized = typeof raw === 'string' ? raw : JSON.stringify(raw);
+    if (Buffer.byteLength(serialized, 'utf8') > 5 * 1024 * 1024) {
       console.error(`Payload too large. Dropping message.`);
       ws.send(JSON.stringify({ type: 'ERROR', message: 'Payload exceeds 5MB limit' }));
       return;
@@ -20,9 +21,9 @@ export class MessageRouter {
 
     let msg: InboundMessage;
     try {
-      msg = JSON.parse(raw);
+      msg = typeof raw === 'string' ? JSON.parse(raw) : (raw as InboundMessage);
     } catch {
-      console.error(`Bad JSON from client: ${raw.slice(0, 100)}`);
+      console.error(`Bad JSON from client: ${serialized.slice(0, 100)}`);
       return;
     }
 

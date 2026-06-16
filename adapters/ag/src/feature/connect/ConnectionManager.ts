@@ -12,12 +12,8 @@ export class ConnectionManager {
             return;
         }
 
-        // We wrap the payload in an IPC envelope so the Gateway knows this is an 
-        // outbound message that needs to be E2EE encrypted and sent to the mobile client
-        const ipcMessage = {
-            type: 'ADAPTER_OUTBOUND',
-            payload: payload
-        };
-        this.gatewayClient.send(JSON.stringify(ipcMessage));
+        // Send the payload directly — the Gateway's _adapter_loop picks up whatever
+        // the adapter sends and forwards it verbatim (E2EE encrypted) to mobile clients.
+        this.gatewayClient.send(JSON.stringify(payload));
     }
 }

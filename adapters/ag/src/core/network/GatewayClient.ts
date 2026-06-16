@@ -1,10 +1,13 @@
 import WebSocket from 'ws';
+import { randomUUID } from 'crypto';
 import { ConnectionManager } from '../../feature/connect/ConnectionManager';
 import { MessageRouter } from './MessageRouter';
 
 export class GatewayClient {
     private client: WebSocket | null = null;
     private readonly gatewayUrl = 'ws://127.0.0.1:8765';
+    // Stable ID for this adapter instance — generated once per VS Code session
+    private readonly adapterId: string = randomUUID();
 
     constructor(
         private connectionManager: ConnectionManager,
@@ -23,12 +26,17 @@ export class GatewayClient {
 
         this.client.on('open', () => {
             this.log('Connected to Gateway IPC.');
-            // Register as the ag adapter
+            // Register as the ag adapter, sending a stable UUID so the Gateway
+            // can correctly key this adapter for targeted IPC routing.
             this.client!.send(JSON.stringify({
                 type: 'REGISTER_ADAPTER',
+                id: this.adapterId,
                 name: 'ag',
                 workspaceRoot: this.workspaceRoot
             }));
+            // Update the ConnectionManager with the fresh socket after every
+            // (re)connect so broadcasts never use a stale reference.
+            this.connectionManager.setGatewayClient(this.client as any);
         });
 
         this.client.on('message', async (data: WebSocket.RawData) => {
@@ -51,9 +59,6 @@ export class GatewayClient {
         this.client.on('error', (err) => {
             this.log(`IPC Connection Error: ${err.message}`);
         });
-
-        // Bind connection manager to broadcast back to Gateway
-        this.connectionManager.setGatewayClient(this.client as any);
     }
 
     public stop() {
