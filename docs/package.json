@@ -1,0 +1,21 @@
+{
+  "name": "antimatter-docs",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "prebuild": "node -e \"const fs=require('fs'); fs.writeFileSync('src/content/docs/testing-status.md', '---\\ntitle: Testing Status\\ndescription: Live tracking of tested features and connectivity.\\n---\\n\\n' + fs.readFileSync('../TESTING.md'))\"",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.33.0",
+    "astro": "^5.0.0",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@astrojs/starlight-tailwind": "^3.0.0"
+  }
+}

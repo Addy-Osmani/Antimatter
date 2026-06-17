@@ -1,0 +1,193 @@
+---
+title: Adapters
+description: Reference for the Antimatter adapter ecosystem — Antigravity IDE (ag), Antigravity 2.0 (ag2), Claude Code (cc), and custom adapter development.
+sidebar:
+  order: 5
+---
+
+import AuthorCard from '../../components/AuthorCard.astro';
+
+The Antimatter ecosystem is built on an **Independent Adapter Architecture**. The central Gateway handles all security, routing, cryptography, and Cloudflare tunneling — adapters are lightweight IPC clients that bridge the Gateway to specific AI agents.
+
+---
+
+## The Adapter Model
+
+```
+┌─────────────────────────────────────────────────────┐
+│                antimatter-core Gateway              │
+│         (Security · Routing · Cryptography)         │
+└──────────────────────┬──────────────────────────────┘
+                       │ ws://127.0.0.1:8765 (IPC)
+          ┌────────────┴────────────────────┐
+          │                                 │
+    ┌─────▼──────┐  ┌─────────────┐  ┌─────▼──────┐
+    │ AG Adapter │  │ AG2 Adapter │  │ CC Adapter │
+    │TypeScript  │  │   Python    │  │  Node.js   │
+    └────────────┘  └─────────────┘  └────────────┘
+```
+
+Each adapter:
+1. Connects to `ws://127.0.0.1:8765` on startup.
+2. Sends `REGISTER_ADAPTER` with its name.
+3. Listens for forwarded messages from the Gateway.
+4. Interacts with its AI agent and sends `STEP` events back.
+
+---
+
+## Antigravity IDE Adapter (`ag`)
+
+The `ag` adapter bridges the Gateway with the official **Google Antigravity IDE** (VS Code extension).
+
+- **Source:** [`adapters/ag/`](https://github.com/saifmukhtar/antimatter/tree/main/adapters/ag)
+- **Technology:** TypeScript, VS Code Extension (`.vsix`)
+- **Install:** Download `.vsix` from [GitHub Releases](https://github.com/saifmukhtar/antimatter/releases) → Install in VS Code
+
+### How It Works
+
+When the extension activates, it:
+1. Instantiates a `GatewayClient` that connects to `ws://127.0.0.1:8765`.
+2. Registers as `"name": "ag"`.
+3. Watches the local `transcript.jsonl` file for new trajectory steps.
+4. Streams each new step to the Gateway as a `STEP` message.
+5. Listens for `SEND_MESSAGE` payloads and translates them into `vscode.commands.executeCommand` calls to inject prompts into the active agent.
+
+### Development
+
+```bash
+cd adapters/ag/
+npm install
+npm run watch          # Start esbuild watcher
+# Press F5 in VS Code to launch Extension Development Host
+
+npm run lint           # TypeScript type-check
+npm run build          # Production build
+npm run package        # Package .vsix
+```
+
+---
+
+## Antigravity 2.0 Adapter (`ag2`)
+
+The `ag2` adapter integrates the Gateway with the **standalone Google Antigravity 2.0** desktop application.
+
+- **Source:** [`adapters/ag2/`](https://github.com/saifmukhtar/antimatter/tree/main/adapters/ag2)
+- **Technology:** Python daemon
+- **Install:**
+  ```bash
+  uv tool install antimatter-ag2
+  antimatter-ag2 start
+  ```
+
+### How It Works
+
+This lightweight Python daemon:
+1. Monitors `.system_generated/logs/transcript.jsonl` for agent activity.
+2. Acts as an IPC bridge — passes prompts from the mobile app into the local Antigravity 2.0 SDK subprocess.
+3. Exposes an **agent Skill** allowing natural language control (e.g., *"Start my Antimatter bridge"*).
+
+### Development
+
+```bash
+cd adapters/ag2/
+uv sync                # Install dependencies
+uv run antimatter-ag2  # Run in dev mode
+```
+
+---
+
+## Claude Code Adapter (`cc`)
+
+The `cc` adapter is the integration layer between the Gateway and **Anthropic's Claude Code CLI**.
+
+- **Source:** [`adapters/cc/`](https://github.com/saifmukhtar/antimatter/tree/main/adapters/cc)
+- **Technology:** Node.js, `@anthropic-ai/claude-agent-sdk`
+- **Install:**
+  ```bash
+  npm install -g antimatter-cc
+  antimatter-cc start
+  ```
+
+### How It Works
+
+This adapter uses the official Claude Agent SDK to:
+1. Stream all events and logs from a running Claude Code session.
+2. Convert each event (tool call, text, thinking) to a `STEP` message forwarded to the Gateway.
+3. On `SEND_MESSAGE` from the mobile app, inject the prompt directly into the running Claude session.
+
+### Development
+
+```bash
+cd adapters/cc/
+npm install
+npm run dev            # Start in watch mode
+```
+
+---
+
+## Writing a Custom Adapter
+
+Any program that can open a WebSocket connection can become an Antimatter adapter. Here's the minimum viable implementation:
+
+### Protocol
+
+1. **Connect** to `ws://127.0.0.1:8765`
+2. **Register** immediately after connection:
+   ```json
+   { "type": "REGISTER_ADAPTER", "name": "my-agent" }
+   ```
+3. **Listen** for forwarded messages:
+   ```json
+   { "type": "SEND_MESSAGE", "content": "..." }
+   { "type": "GET_FILES", "path": "/" }
+   { "type": "READ_FILE", "path": "/some/file.py" }
+   ```
+4. **Reply** with appropriate response messages:
+   ```json
+   { "type": "STEP", "stepType": "text", "content": "..." }
+   { "type": "FILE_TREE", "entries": [...] }
+   { "type": "FILE_CONTENT", "content": "..." }
+   ```
+
+### Example — Go Adapter
+
+```go title="minimal_adapter.go"
+package main
+
+import (
+    "encoding/json"
+    "github.com/gorilla/websocket"
+    "log"
+)
+
+func main() {
+    conn, _, err := websocket.DefaultDialer.Dial("ws://127.0.0.1:8765", nil)
+    if err != nil { log.Fatal(err) }
+    defer conn.Close()
+
+    // Register
+    conn.WriteJSON(map[string]string{
+        "type": "REGISTER_ADAPTER",
+        "name": "my-go-agent",
+    })
+
+    for {
+        _, raw, err := conn.ReadMessage()
+        if err != nil { break }
+        var msg map[string]interface{}
+        json.Unmarshal(raw, &msg)
+
+        switch msg["type"] {
+        case "SEND_MESSAGE":
+            log.Printf("Received: %v", msg["content"])
+            // ... process with your AI agent
+        }
+    }
+}
+```
+
+See the [WebSocket Protocol Reference](/protocol) for the complete message schema.
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

@@ -1,0 +1,204 @@
+---
+title: Contributing Guide
+description: Set up the Antimatter development environment, understand the monorepo layout, run linting and tests, and submit pull requests.
+sidebar:
+  order: 8
+---
+
+import AuthorCard from '../../components/AuthorCard.astro';
+
+Welcome to the Antimatter project! Antimatter is a **community-driven, open-source** project and we warmly welcome contributions of all kinds — bug fixes, features, documentation, and adapter integrations.
+
+:::caution[Community Project]
+Antimatter is **not** affiliated with, endorsed by, or supported by Google or Anthropic.
+:::
+
+---
+
+## Repository Layout
+
+Antimatter is a **monorepo** with independent sub-projects:
+
+```
+antimatter/
+├── core/             # antimatter-core Gateway (Python)
+├── adapters/
+│   ├── ag/           # Antigravity IDE adapter (TypeScript)
+│   ├── ag2/          # Antigravity 2.0 adapter (Python)
+│   └── cc/           # Claude Code adapter (Node.js)
+├── android/          # Android companion app (Kotlin/Compose)
+├── ios/              # iOS companion app (Swift/SwiftUI)
+├── docs-site/        # Documentation site (Astro/Starlight)
+└── reports/          # Audit reports and security analysis
+```
+
+---
+
+## Prerequisites
+
+| Tool | Version | Purpose |
+|---|---|---|
+| **Python** | 3.11+ | Gateway + ag2 adapter |
+| **Node.js** | 22+ | ag, cc adapters + docs site |
+| **uv** | Latest | Python package management |
+| **Android Studio** | Koala or newer | Android app development |
+| **Xcode** | 16+ | iOS app development (macOS only) |
+| **Java** | 17+ | Android build toolchain |
+
+---
+
+## Setting Up the Gateway (`core/`)
+
+```bash
+cd core/
+uv sync                    # Install dependencies
+uv run antimatter-gateway start   # Run in dev mode
+```
+
+### Gateway Dev Commands
+
+| Command | Purpose |
+|---|---|
+| `uv run antimatter-gateway start` | Start gateway |
+| `uv run antimatter-gateway pair` | Generate pairing QR |
+| `uv run antimatter-gateway status` | Check status |
+| `uv run pytest` | Run tests |
+| `uv run ruff check .` | Lint |
+| `uv run mypy .` | Type check |
+
+---
+
+## Setting Up Adapters
+
+### AG Adapter (TypeScript)
+
+```bash
+cd adapters/ag/
+npm install
+npm run watch     # esbuild watcher
+# Press F5 in VS Code to launch Extension Development Host
+```
+
+| Command | Purpose |
+|---|---|
+| `npm run lint` | TypeScript type-check (`tsc --noEmit`) |
+| `npm run build` | Production bundle |
+| `npm run package` | Package `.vsix` |
+
+### AG2 Adapter (Python)
+
+```bash
+cd adapters/ag2/
+uv sync
+uv run antimatter-ag2     # Dev mode
+```
+
+### CC Adapter (Node.js)
+
+```bash
+cd adapters/cc/
+npm install
+npm run dev       # Watch mode
+```
+
+---
+
+## Setting Up the Android App
+
+1. Open the `android/` directory in **Android Studio Koala** or newer.
+2. Wait for Gradle sync to complete.
+3. Select the `app` run configuration.
+4. Run on a connected device or emulator (API 26+).
+
+### Android Commands
+
+```bash
+cd android/
+
+# Lint
+./gradlew lintDebug
+
+# Unit tests
+./gradlew testDebugUnitTest
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Install on connected device
+./gradlew installDebug
+```
+
+---
+
+## Setting Up the iOS App
+
+```bash
+cd ios/
+open AntimatterApp.xcworkspace    # Xcode 16+
+# ⌘R to build and run
+```
+
+SPM packages are resolved automatically by Xcode.
+
+---
+
+## Working on the Documentation
+
+The docs site is an **Astro/Starlight** project in `docs-site/`:
+
+```bash
+cd docs-site/
+npm install
+npm run dev       # Live preview at http://localhost:4321
+npm run build     # Production build
+npm run preview   # Preview production build
+```
+
+Documentation pages are in `src/content/docs/` as `.mdx` files. Navigation is defined in `astro.config.mjs`.
+
+---
+
+## Submitting a Pull Request
+
+1. **Fork** the repository and clone your fork.
+2. Create a **feature branch** from `main`:
+   ```bash
+   git checkout -b feat/my-feature
+   ```
+3. Make your changes and ensure:
+   - **Android:** `./gradlew lintDebug` passes with no new errors.
+   - **TypeScript adapters:** `npm run lint` passes.
+   - **Python:** `ruff check .` and `mypy .` pass.
+4. Write a clear PR description explaining **what** changed and **why**.
+5. Open the pull request against `main`.
+
+---
+
+## Code Style
+
+| Component | Tool | Config |
+|---|---|---|
+| TypeScript | ESLint + Prettier | `adapters/ag/.eslintrc.js` |
+| Python | Ruff + Mypy | `core/pyproject.toml` |
+| Kotlin | Ktlint | `android/` (enforced by Gradle plugin) |
+| Swift | SwiftFormat | `ios/.swiftformat` |
+
+Please configure your IDE to respect these rules. PRs that fail linting will not be merged.
+
+---
+
+## Code of Conduct
+
+All contributors are expected to follow our [Code of Conduct](https://github.com/saifmukhtar/antimatter/blob/main/CODE_OF_CONDUCT.md). Be respectful, inclusive, and constructive.
+
+---
+
+## Getting Help
+
+- **Open an issue** on GitHub for bugs or feature requests.
+- **Start a Discussion** for architecture questions or ideas.
+- **Security vulnerabilities** → use GitHub's private vulnerability reporting.
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

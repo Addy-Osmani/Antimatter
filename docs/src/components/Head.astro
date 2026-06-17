@@ -1,0 +1,23 @@
+---
+// Head.astro — Custom head override for meta tags, fonts, and analytics
+import type { Props } from '@astrojs/starlight/props';
+import Default from '@astrojs/starlight/components/Head.astro';
+---
+
+<Default {...Astro.props}><slot /></Default>
+
+<!-- Google Fonts: Inter + JetBrains Mono -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+  rel="stylesheet"
+/>
+
+<!-- Open Graph -->
+<meta property="og:title" content="Antimatter — AI Agent Bridge" />
+<meta property="og:description" content="Open-source bridge connecting your mobile device to your local AI agents. Secured by zero-trust cryptography." />
+<meta property="og:image" content="https://antimatter.saifmukhtar.dev/og.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:creator" content="@saifmukhtar" />

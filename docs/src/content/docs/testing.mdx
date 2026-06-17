@@ -1,0 +1,140 @@
+---
+title: Testing Guide
+description: Testing strategies, test commands, and testing philosophy for the Antimatter codebase.
+sidebar:
+  order: 9
+---
+
+import AuthorCard from '../../components/AuthorCard.astro';
+
+This guide covers the testing strategies across the Antimatter monorepo — Gateway, adapters, and mobile apps.
+
+---
+
+## Philosophy
+
+Antimatter follows a **pragmatic testing pyramid**:
+
+- **Unit tests** for business logic — protocol parsing, message routing, crypto verification.
+- **Integration tests** for WebSocket protocol flows — auth handshake, message forwarding, PTY lifecycle.
+- **End-to-end tests** for critical paths — QR pairing, agent prompt round-trip.
+
+---
+
+## Gateway Tests (`core/`)
+
+```bash
+cd core/
+uv run pytest                         # All tests
+uv run pytest tests/unit/             # Unit tests only
+uv run pytest tests/integration/      # Integration tests
+uv run pytest -v --tb=short           # Verbose output
+uv run pytest --cov=antimatter_core   # With coverage
+```
+
+### Key Test Areas
+
+| Module | Tests |
+|---|---|
+| `auth.py` | Token verification, Ed25519 handshake, timing-safe compare |
+| `router.py` | Message routing to correct adapter, unknown type handling |
+| `tunnel.py` | Cloudflare tunnel lifecycle, reconnect logic |
+| `pty.py` | PTY session spawn, I/O forwarding, resize |
+
+---
+
+## Android Tests (`android/`)
+
+```bash
+cd android/
+
+# Unit tests (JVM, no device needed)
+./gradlew testDebugUnitTest
+
+# Instrumented tests (requires connected device/emulator)
+./gradlew connectedDebugAndroidTest
+
+# Single module tests
+./gradlew :core:network:testDebugUnitTest
+./gradlew :feature:terminal:testDebugUnitTest
+
+# Coverage report
+./gradlew testDebugUnitTest jacocoTestReport
+```
+
+### Key Test Areas
+
+| Module | Tests |
+|---|---|
+| `:core:network` | `BridgeWebSocket` auth flow, message deserialization |
+| `:core:data` | Room DAO queries, FTS search |
+| `:feature:chat` | `ChatViewModel` state transitions, step rendering |
+| `:feature:terminal` | `TerminalViewModel` PTY lifecycle |
+| `:feature:connect` | QR parsing, connection state machine |
+
+---
+
+## iOS Tests (`ios/`)
+
+Open the project in Xcode and use **⌘U** to run all tests, or via CLI:
+
+```bash
+xcodebuild test \
+  -workspace ios/AntimatterApp.xcworkspace \
+  -scheme AntimatterApp \
+  -destination 'platform=iOS Simulator,name=iPhone 16'
+```
+
+### Key Test Areas
+
+| Module | Tests |
+|---|---|
+| `Crypto` | Ed25519 verification, AES-GCM decrypt |
+| `WebSocket` | Auth challenge flow, message deserialization |
+| `Terminal` | PTY session lifecycle, SwiftTerm integration |
+
+---
+
+## Adapter Tests
+
+### AG Adapter (TypeScript)
+
+```bash
+cd adapters/ag/
+npm test               # Jest unit tests
+npm run lint           # Type-check only
+```
+
+### AG2 Adapter (Python)
+
+```bash
+cd adapters/ag2/
+uv run pytest
+```
+
+### CC Adapter (Node.js)
+
+```bash
+cd adapters/cc/
+npm test
+```
+
+---
+
+## Manual Testing Checklist
+
+Before submitting a PR that touches the auth flow or protocol, verify these scenarios manually:
+
+- [ ] Fresh QR pairing completes successfully
+- [ ] Re-pairing (scan new QR) correctly replaces the old session
+- [ ] Invalid token produces close code `4001`
+- [ ] App reconnects cleanly after Gateway restart
+- [ ] PTY terminal: start session, type commands, resize, close
+- [ ] File browser loads workspace tree
+- [ ] Prompt injection reaches active agent
+- [ ] Push notification fires on agent task completion
+- [ ] Biometric gate blocks connection until authenticated
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

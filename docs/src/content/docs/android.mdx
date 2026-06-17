@@ -1,0 +1,216 @@
+---
+title: Android App
+description: Complete reference for the Antimatter Android app — Kotlin, Jetpack Compose, multi-module architecture, terminal, biometric auth, and more.
+sidebar:
+  order: 3
+---
+
+import AuthorCard from '../../components/AuthorCard.astro';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The Antimatter Android app is a native companion application built with **Kotlin** and **Jetpack Compose**. It connects to the `antimatter-core` Gateway over an encrypted WebSocket tunnel, and provides a full-featured interface to monitor, control, and interact with your AI agent remotely.
+
+- **Source:** [`android/`](https://github.com/saifmukhtar/antimatter/tree/main/android)
+- **Package:** `dev.saifmukhtar.antimatter`
+- **Min SDK:** Android 8.0 (API 26)
+- **Target SDK:** Android 15 (API 35)
+- **Architecture:** Multi-module Gradle, MVVM + Hilt DI
+
+---
+
+## Module Graph
+
+```
+:app                       # MainActivity, Hilt Application, NavHost
+├── :core:network          # WebSocket client, BridgeService, protocol types
+├── :core:data             # Room DB, DAOs, Entities, DataStore preferences
+├── :core:ui               # Material 3 theme, Markdown renderer, shared composables
+├── :feature:connect       # QR scanner, pairing flow, connection state
+├── :feature:chat          # Trajectory/chat UI, prompting, artifact viewer
+├── :feature:files         # Workspace file browser, file viewer
+├── :feature:terminal      # Native PTY terminal (Termux-based)
+├── :terminal-emulator     # JNI NDK terminal emulator (Termux fork)
+└── :terminal-view         # TerminalView composable bridge
+```
+
+---
+
+## Core Modules
+
+### `:core:network`
+
+The networking heart of the app.
+
+| File | Responsibility |
+|---|---|
+| `BridgeWebSocket.kt` | OkHttp WebSocket client — connects to Gateway, performs `AUTH_CHALLENGE`/`AUTH_RESPONSE` Ed25519 handshake, decrypts E2EE payloads, emits `Flow<InboundMessage>` |
+| `BridgeService.kt` | Foreground `Service` that keeps the WebSocket alive when the app is backgrounded; surfaces push notifications for agent events |
+| `OutboundMessage.kt` | Sealed Kotlin class hierarchy for all outbound message types (`SendMessage`, `PtyStart`, `PtyInput`, `PtyResize`, `GetFiles`, etc.) |
+| `InboundMessage.kt` | Sealed class hierarchy for all inbound messages from the Gateway |
+
+### `:core:data`
+
+Offline persistence layer.
+
+| Component | Technology | Purpose |
+|---|---|---|
+| Room Database | `AppDatabase.kt` | SQLite persistence for conversations, steps, artifacts |
+| FTS Table | Room FTS4 extension | Full-text search across all trajectory data |
+| DataStore | Jetpack DataStore | User settings, selected adapter, connection preferences |
+| `StepDao` | Room DAO | CRUD + FTS queries for agent trajectory steps |
+| `ArtifactDao` | Room DAO | CRUD for file artifacts created by the agent |
+
+### `:core:ui`
+
+Shared design system and UI utilities.
+
+| Component | Purpose |
+|---|---|
+| `AntimatterTheme` | Material 3 `MaterialTheme` wrapper with dynamic color support (Android 12+) |
+| `MarkdownText` | Custom Composable that renders Markdown with syntax highlighting |
+| `Color.kt` | Brand color tokens (`AntiPrimary`, `TermuxBlack`, `AntiBackground`, etc.) |
+| `Typography.kt` | Inter + JetBrains Mono type scale |
+
+---
+
+## Feature Modules
+
+### `:feature:connect` — Pairing & Connection
+
+Handles the full QR pairing and connection flow.
+
+| Screen | ViewModel | Purpose |
+|---|---|---|
+| `ConnectScreen` | `ConnectionViewModel` | Connection dashboard — status, adapter selection, disconnect |
+| `QRScannerScreen` | `ConnectionViewModel` | Camera QR scanner with CameraX |
+
+**Connection flow:**
+1. User scans QR code → URL, token, and Ed25519 public key extracted.
+2. `BridgeWebSocket` opens connection with `Authorization: Bearer <token>`.
+3. `AUTH_CHALLENGE` nonce received → Gateway signs with Ed25519 private key.
+4. App verifies signature against paired public key.
+5. Sends `GET_AVAILABLE_AGENTS` → user selects adapter.
+
+### `:feature:chat` — AI Chat Interface
+
+The primary interaction screen.
+
+| Component | Purpose |
+|---|---|
+| `ChatScreen` | Main chat UI — message list, input, agent status |
+| `ChatViewModel` | Business logic — sends prompts, processes streaming trajectory, manages Room inserts |
+| `ThinkingBubble` | Animated indicator when agent is generating |
+| `ToolCallCard` | Expandable card rendering tool calls (bash, file edit, search, etc.) |
+| `ArtifactCard` | Renders file artifacts with diff preview |
+| `MessageInput` | Multi-line input with image attachment support |
+
+**Streaming:** Messages are received as `STEP` events from the Gateway. Each step is a trajectory entry (thinking, tool_call, tool_result, text) rendered live as it arrives.
+
+### `:feature:files` — Workspace Browser
+
+| Screen | ViewModel | Purpose |
+|---|---|
+| `FilesScreen` | `FilesViewModel` | Tree view of workspace files |
+| `FileViewScreen` | `FilesViewModel` | File content viewer with syntax highlighting |
+
+Sends `GET_FILES` and `READ_FILE` WebSocket messages to the Gateway, which forwards them to the active adapter.
+
+### `:feature:terminal` — Native PTY Terminal
+
+The most advanced feature — a full interactive terminal shell connected to the host machine via the encrypted WebSocket tunnel.
+
+| Component | Purpose |
+|---|---|
+| `TerminalScreen` | Full-screen Compose UI embedding `TerminalView` |
+| `TerminalViewModel` | Manages PTY session lifecycle — `PtyStart`, `PtyInput`, `PtyResize`, `PtyOutput` |
+| `TerminalView` | Native Android `View` from the `terminal-view` module (Termux-based) |
+| `:terminal-emulator` | JNI NDK library — actual VT100/xterm terminal emulation in native code |
+
+**How it works:**
+1. `TerminalViewModel` sends `PTY_START` to the Gateway.
+2. Gateway spawns a PTY process on the host (`/bin/bash`).
+3. All keystrokes from `TerminalView` → `PTY_INPUT` → Gateway → PTY stdin.
+4. PTY stdout → Gateway → `PTY_OUTPUT` → `TerminalView` renders output.
+5. Pinch-to-zoom adjusts font size via `TerminalViewClient.onScale()`.
+6. Extra keys bar provides Termux-style utility keys (ESC, TAB, CTRL, ALT, arrows, `/`, `-`).
+
+---
+
+## Security: Biometric Authentication
+
+Before the app establishes any WebSocket connection, it requires **local biometric authentication**:
+
+```kotlin title="Biometric auth flow (simplified)"
+val promptInfo = BiometricPrompt.PromptInfo.Builder()
+    .setTitle("Unlock Antimatter")
+    .setSubtitle("Verify your identity to connect to your agent")
+    .setAllowedAuthenticators(
+        BiometricManager.Authenticators.BIOMETRIC_STRONG
+        or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+    )
+    .build()
+
+biometricPrompt.authenticate(promptInfo)
+```
+
+Supported: Fingerprint, Face Unlock, PIN/Pattern fallback.
+
+---
+
+## Building the App
+
+<Tabs>
+  <TabItem label="Android Studio">
+    1. Open the `android/` directory in **Android Studio Koala** or newer.
+    2. Let Gradle sync and download dependencies.
+    3. Select the `app` run configuration.
+    4. Run on a connected device or emulator (API 26+).
+  </TabItem>
+  <TabItem label="Command Line">
+    ```bash
+    cd android/
+
+    # Lint check
+    ./gradlew lintDebug
+
+    # Build debug APK
+    ./gradlew assembleDebug
+
+    # Install on connected device
+    ./gradlew installDebug
+
+    # Build release APK (requires keystore)
+    ./gradlew assembleRelease
+    ```
+  </TabItem>
+</Tabs>
+
+### Gradle Tasks Reference
+
+| Task | Command |
+|---|---|
+| Lint | `./gradlew lintDebug` |
+| Unit tests | `./gradlew testDebugUnitTest` |
+| Build debug APK | `./gradlew assembleDebug` |
+| Install debug | `./gradlew installDebug` |
+| Build release APK | `./gradlew assembleRelease` |
+
+---
+
+## Tech Stack Summary
+
+| Category | Library / Tool | Version |
+|---|---|---|
+| Language | Kotlin | 2.0+ |
+| UI | Jetpack Compose + Material 3 | Latest |
+| DI | Hilt | 2.51+ |
+| Networking | OkHttp | 4.x |
+| Persistence | Room + DataStore | Latest |
+| Terminal | Termux terminal-emulator (NDK) | Fork |
+| Camera | CameraX | Latest |
+| Biometrics | AndroidX Biometric | Latest |
+| Build | Gradle (Kotlin DSL) | 8.x |
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

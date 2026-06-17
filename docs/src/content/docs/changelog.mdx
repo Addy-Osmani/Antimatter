@@ -1,0 +1,83 @@
+---
+title: Changelog
+description: Visual timeline of all Antimatter releases — Gateway, Android app, iOS app, and adapters.
+sidebar:
+  order: 9
+---
+
+import AuthorCard from '../../components/AuthorCard.astro';
+
+A complete history of changes across the Antimatter ecosystem. Because Antimatter is a monorepo with multiple independent packages, major milestones are documented here, with component-level changelogs in each sub-project.
+
+---
+
+## Release Timeline
+
+<div class="timeline">
+
+  <div class="timeline-item">
+    <div class="timeline-version">v1.2.0 · 2026</div>
+    <h3>🖥️ Native Remote PTY Terminal</h3>
+    <p>Added full interactive PTY terminal to both Android (Termux-based) and iOS (SwiftTerm) apps, and the Gateway. Supports vim, htop, ssh, full ANSI/256-color rendering, pinch-to-zoom, and extra keys bar. All terminal I/O is end-to-end encrypted.</p>
+  </div>
+
+  <div class="timeline-item">
+    <div class="timeline-version">v1.1.0 · 2025</div>
+    <h3>🔐 End-to-End Encryption (E2EE)</h3>
+    <p>Implemented true E2EE using Diffie-Hellman key exchange + AES-GCM. All WebSocket payloads are now encrypted before leaving the device — zero-knowledge routing through Cloudflare and any intermediaries.</p>
+  </div>
+
+  <div class="timeline-item">
+    <div class="timeline-version">v1.0.0 · 2025</div>
+    <h3>🛡️ Security Audit + Zero Trust + Biometric Auth</h3>
+    <p>Completed security audit. Implemented Cloudflare Zero Trust support, SQLCipher database encryption, and biometric authentication gate (Fingerprint/Face ID) before any agent connection is established.</p>
+  </div>
+
+  <div class="timeline-item">
+    <div class="timeline-version">v0.5.0 · 2025</div>
+    <h3>🧩 Independent Adapter Model</h3>
+    <p>Major architectural refactor — decoupled the monolithic VS Code extension into the Independent Adapter Model. The antimatter-core Gateway now handles all security and routing, while adapters (ag, ag2, cc) are lightweight IPC clients. Multi-agent support added.</p>
+  </div>
+
+  <div class="timeline-item">
+    <div class="timeline-version">v0.4.0 · 2025</div>
+    <h3>🤖 Claude Code (cc) Adapter</h3>
+    <p>Added official adapter for Anthropic Claude Code CLI using the @anthropic-ai/claude-agent-sdk. Supports streaming events, prompt injection, and full trajectory rendering in the app.</p>
+  </div>
+
+  <div class="timeline-item">
+    <div class="timeline-version">v0.3.0 · 2025</div>
+    <h3>🐍 Antigravity 2.0 (ag2) Adapter</h3>
+    <p>Added Python daemon adapter for the standalone Google Antigravity 2.0 application. Includes agent Skill for natural language control of the adapter.</p>
+  </div>
+
+  <div class="timeline-item">
+    <div class="timeline-version">v0.2.0 · 2025</div>
+    <h3>📲 Push Notifications + FTS Search + Multimodal</h3>
+    <p>Added: local push notifications when agent completes tasks or needs approval; Full-Text Search across conversation history (Room FTS4); multimodal image attachment support in prompts.</p>
+  </div>
+
+  <div class="timeline-item">
+    <div class="timeline-version">v0.1.0 · 2025</div>
+    <h3>🚀 Initial Beta Release</h3>
+    <p>First public release of the Antimatter ecosystem. Included the Antigravity IDE VS Code extension adapter, Android companion app with QR pairing and Ed25519 cryptography, and Cloudflare tunnel integration.</p>
+  </div>
+
+</div>
+
+---
+
+## Component Changelogs
+
+For detailed, per-commit change history:
+
+| Component | Changelog |
+|---|---|
+| Gateway (`antimatter-core`) | [core/CHANGELOG.md](https://github.com/saifmukhtar/antimatter/blob/main/core/CHANGELOG.md) |
+| Android App | [android/CHANGELOG.md](https://github.com/saifmukhtar/antimatter/blob/main/android/CHANGELOG.md) |
+| iOS App | [ios/CHANGELOG.md](https://github.com/saifmukhtar/antimatter/blob/main/ios/CHANGELOG.md) |
+| All Adapters | [adapters/CHANGELOG.md](https://github.com/saifmukhtar/antimatter/blob/main/adapters/CHANGELOG.md) |
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

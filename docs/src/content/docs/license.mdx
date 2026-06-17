@@ -1,0 +1,42 @@
+---
+title: License
+description: Antimatter's multi-licensing strategy (AGPLv3, GPLv3, and MIT)
+---
+
+Antimatter uses a **multi-licensing strategy** to balance open-source freedom, upstream compliance, and protection of the core infrastructure. 
+
+Depending on which part of the repository you are looking at, different licenses apply. If no specific `LICENSE` file is present in a sub-directory, it inherits the license of its closest parent directory.
+
+---
+
+## Core Infrastructure
+**License**: [GNU Affero General Public License v3.0 (AGPLv3)](https://www.gnu.org/licenses/agpl-3.0.html)  
+**Applies to**: The root repository, `core/`, and gateway components.
+
+The core tunneling and encryption infrastructure is protected by the AGPLv3. This ensures that anyone who modifies the gateway and hosts it as a network service (SaaS) **must** open-source their modifications. This protects the project from being exploited as a closed-source proprietary service while guaranteeing the code remains free and open for the community.
+
+---
+
+## Mobile Apps
+**License**: [GNU General Public License v3.0 (GPLv3)](https://www.gnu.org/licenses/gpl-3.0.html)  
+**Applies to**: `android/` and `ios/`
+
+Because the mobile apps include advanced terminal emulation modules (`terminal-emulator` and `terminal-view`) originally derived from [Termux](https://termux.dev/), the entirety of the mobile application source code and compiled binaries are distributed under the GPLv3 to strictly comply with upstream requirements. 
+
+If you distribute a modified version of the Antimatter mobile app, you must also distribute your source code under the GPLv3.
+
+---
+
+## Adapters & SDK
+**License**: [MIT License](https://opensource.org/licenses/MIT)  
+**Applies to**: `adapters/`
+
+To encourage maximum adoption and flexibility, the adapter integrations and SDKs are permissively licensed. This allows individuals and corporations to build proprietary, closed-source integrations linking their own AI agents (like Claude Code or internal company bots) to Antimatter **without** being legally forced to open-source their proprietary agents.
+
+---
+
+## Documentation
+**License**: [MIT License](https://opensource.org/licenses/MIT)  
+**Applies to**: `docs-site/`
+
+The documentation site and its contents are freely available under the MIT license.

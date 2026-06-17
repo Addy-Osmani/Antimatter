@@ -1,0 +1,345 @@
+---
+title: WebSocket Protocol
+description: Complete WebSocket message contract between the Antimatter Gateway and mobile clients — auth flow, message types, and close codes.
+sidebar:
+  order: 6
+---
+
+import AuthorCard from '../../components/AuthorCard.astro';
+
+This is the complete message contract between the **Antimatter Gateway** and the **mobile client** (Android or iOS). All frames are UTF-8 JSON text objects with a `type` discriminator field.
+
+- **Compression:** `permessage-deflate` enabled
+- **Max payload:** 10 MiB
+- **Binding:** Gateway binds to `127.0.0.1:8765` (IPC) and is exposed via Cloudflare tunnel
+
+---
+
+## Connection Lifecycle
+
+```
+Mobile App                              Antimatter Gateway
+    │                                          │
+    │  WSS upgrade (Authorization: Bearer)     │
+    │ ────────────────────────────────────────►│  Origin check + token verify
+    │  ◄────────── 101 Switching Protocols ─────│  (or 401/403/close 4001)
+    │                                          │
+    │  AUTH_CHALLENGE { challenge: base64 }    │
+    │ ────────────────────────────────────────►│  Sign nonce with Ed25519 key
+    │  ◄────── AUTH_RESPONSE { signature } ────│  Client marked authenticated
+    │                                          │
+    │  GET_AVAILABLE_AGENTS                    │
+    │ ────────────────────────────────────────►│
+    │  ◄────── AVAILABLE_AGENTS { agents[] } ──│
+    │                                          │
+    │  ←──── Bidirectional message exchange ───►│
+    │  SEND_MESSAGE / GET_FILES / PTY_* ...     │
+```
+
+### 1. Transport & Origin Validation
+
+The Gateway rejects WebSocket upgrades unless the `Origin` header matches the allow-list:
+- `vscode-webview://…` (extension webview)
+- `https://<team>.cloudflareaccess.com` (Cloudflare Access)
+- Mobile app origins (dynamic — derived from platform)
+
+Rejected origins → **HTTP 403 Forbidden** (Cross-Site WebSocket Hijacking prevention).
+
+### 2. Bearer Token Authentication
+
+The mobile client presents the 256-bit pairing token, checked in priority order:
+
+1. `Authorization: Bearer <token>` header
+2. First `Sec-WebSocket-Protocol` value
+3. `?token=<token>` URL query parameter
+
+The token is compared with **timing-safe equality** (`crypto.timingSafeEqual`). Invalid token → close code **`4001 Unauthorized`**.
+
+### 3. Ed25519 Handshake
+
+After the socket opens, the client sends `AUTH_CHALLENGE` with a random base64 nonce. The Gateway signs the raw nonce bytes with its persistent Ed25519 private key (stored in OS keychain) and returns `AUTH_RESPONSE`. The client verifies the signature against the Ed25519 public key received during QR pairing — proving the Gateway's identity and preventing MITM attacks.
+
+---
+
+## WebSocket Close Codes
+
+| Code | Meaning | Cause |
+|---|---|---|
+| `1000` | Normal closure | Clean disconnect |
+| `4000` | Rate limited | Too many failed token attempts (60s ban) |
+| `4001` | Unauthorized | Missing or invalid pairing token |
+| `403` | Forbidden Origin (HTTP) | `Origin` header not in allow-list |
+
+---
+
+## Inbound Messages (App → Gateway)
+
+These are sent **from the mobile client** to the Gateway.
+
+### `AUTH_CHALLENGE`
+
+Begin the Ed25519 cryptographic handshake.
+
+```json
+{
+  "type": "AUTH_CHALLENGE",
+  "challenge": "base64-encoded-random-nonce"
+}
+```
+
+### `GET_AVAILABLE_AGENTS`
+
+Request the list of currently connected adapters.
+
+```json
+{
+  "type": "GET_AVAILABLE_AGENTS"
+}
+```
+
+### `SEND_MESSAGE`
+
+Inject a prompt into the target AI agent.
+
+```json
+{
+  "type": "SEND_MESSAGE",
+  "target": "ag",
+  "content": "Refactor the authentication module"
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `target` | `string` | ✓ | Adapter name (`"ag"`, `"ag2"`, `"cc"`) |
+| `content` | `string` | ✓ | Text prompt to inject |
+| `images` | `string[]` | — | Base64-encoded image attachments |
+
+### `GET_FILES`
+
+Request the workspace file tree from the target adapter.
+
+```json
+{
+  "type": "GET_FILES",
+  "target": "ag",
+  "path": "/"
+}
+```
+
+### `READ_FILE`
+
+Read the contents of a specific file.
+
+```json
+{
+  "type": "READ_FILE",
+  "target": "ag",
+  "path": "/src/main/App.kt"
+}
+```
+
+### `WRITE_FILE`
+
+Write content to a file in the workspace.
+
+```json
+{
+  "type": "WRITE_FILE",
+  "target": "ag",
+  "path": "/src/main/App.kt",
+  "content": "package com.example\n..."
+}
+```
+
+### `SUBSCRIBE_CONVERSATION`
+
+Subscribe to real-time trajectory updates for a specific conversation.
+
+```json
+{
+  "type": "SUBSCRIBE_CONVERSATION",
+  "conversationId": "uuid-string"
+}
+```
+
+### PTY Messages
+
+Control a remote terminal session.
+
+```json title="Start a PTY session"
+{
+  "type": "PTY_START",
+  "id": "session-uuid",
+  "cols": 80,
+  "rows": 24
+}
+```
+
+```json title="Send keystrokes"
+{
+  "type": "PTY_INPUT",
+  "id": "session-uuid",
+  "data": "ls -la\n"
+}
+```
+
+```json title="Resize terminal"
+{
+  "type": "PTY_RESIZE",
+  "id": "session-uuid",
+  "cols": 120,
+  "rows": 40
+}
+```
+
+### `PING`
+
+Keepalive ping to prevent Cloudflare from closing idle connections.
+
+```json
+{ "type": "PING" }
+```
+
+---
+
+## Outbound Messages (Gateway → App)
+
+These are sent **from the Gateway** to the mobile client.
+
+### `AUTH_RESPONSE`
+
+Reply to `AUTH_CHALLENGE` with the Ed25519 signature.
+
+```json
+{
+  "type": "AUTH_RESPONSE",
+  "signature": "base64-encoded-ed25519-signature"
+}
+```
+
+### `AVAILABLE_AGENTS`
+
+List of currently registered and connected adapters.
+
+```json
+{
+  "type": "AVAILABLE_AGENTS",
+  "agents": ["ag", "ag2", "cc"]
+}
+```
+
+### `STEP`
+
+A single trajectory step from the AI agent — streamed in real-time.
+
+```json
+{
+  "type": "STEP",
+  "conversationId": "uuid-string",
+  "stepIndex": 42,
+  "stepType": "tool_call",
+  "content": "...",
+  "toolName": "bash",
+  "toolInput": { "command": "git status" },
+  "toolResult": "On branch main..."
+}
+```
+
+| `stepType` | Description |
+|---|---|
+| `thinking` | Agent internal reasoning (may be truncated) |
+| `text` | Agent text response |
+| `tool_call` | Agent invokes a tool |
+| `tool_result` | Tool execution result |
+| `artifact` | File artifact created by agent |
+
+### `FILE_TREE`
+
+Response to `GET_FILES`.
+
+```json
+{
+  "type": "FILE_TREE",
+  "path": "/",
+  "entries": [
+    { "name": "src", "isDirectory": true },
+    { "name": "README.md", "isDirectory": false, "size": 4096 }
+  ]
+}
+```
+
+### `FILE_CONTENT`
+
+Response to `READ_FILE`.
+
+```json
+{
+  "type": "FILE_CONTENT",
+  "path": "/src/main/App.kt",
+  "content": "package com.example\n...",
+  "encoding": "utf-8"
+}
+```
+
+### `PTY_OUTPUT`
+
+Terminal output from the remote PTY session.
+
+```json
+{
+  "type": "PTY_OUTPUT",
+  "id": "session-uuid",
+  "data": "base64-encoded-bytes"
+}
+```
+
+### `PONG`
+
+Reply to `PING`.
+
+```json
+{ "type": "PONG" }
+```
+
+### `ERROR`
+
+Returned when a handler throws or an unknown message type is received.
+
+```json
+{
+  "type": "ERROR",
+  "code": "UNKNOWN_TYPE",
+  "message": "Unrecognized message type: FOO"
+}
+```
+
+---
+
+## Writing a Custom Adapter
+
+Any adapter that speaks this IPC protocol can integrate with Antimatter. Here's a minimal example:
+
+```python title="Minimal Python adapter"
+import asyncio, websockets, json
+
+async def main():
+    async with websockets.connect("ws://127.0.0.1:8765") as ws:
+        # Register with the Gateway
+        await ws.send(json.dumps({
+            "type": "REGISTER_ADAPTER",
+            "name": "my-custom-agent"
+        }))
+
+        async for message in ws:
+            msg = json.loads(message)
+            if msg["type"] == "SEND_MESSAGE":
+                print(f"Received prompt: {msg['content']}")
+                # Process and respond...
+
+asyncio.run(main())
+```
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

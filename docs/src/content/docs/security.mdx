@@ -1,0 +1,180 @@
+---
+title: Security & Zero Trust
+description: Defense-in-depth security architecture — Ed25519 cryptography, Cloudflare Zero Trust, E2EE, biometric auth, and sandboxing.
+sidebar:
+  order: 7
+---
+
+import AuthorCard from '../../components/AuthorCard.astro';
+
+Operating a remote-control interface for an AI development environment demands **enterprise-grade security**. Antimatter connects your mobile device to your local machine **without opening any firewall ports** or exposing your local IP address, using **multiple overlapping layers** of protection.
+
+:::danger[Reporting Vulnerabilities]
+If you discover a security vulnerability, do **NOT** open a public GitHub issue. Use [GitHub's private vulnerability reporting](https://github.com/saifmukhtar/antimatter/security/advisories/new) or email the maintainers directly. We aim to respond within 48 hours.
+:::
+
+---
+
+## Defense-in-Depth Architecture
+
+Compromising any single layer is **not sufficient** to gain access to your agent or machine.
+
+```
+LAYER 1  ──  Cloudflare Tunnel (TLS + origin validation)
+LAYER 2  ──  256-bit Bearer Token (timing-safe comparison)
+LAYER 3  ──  Ed25519 Cryptographic Handshake (MITM prevention)
+LAYER 4  ──  End-to-End Encryption (zero-knowledge routing)
+LAYER 5  ──  Biometric Authentication Gate (device owner verification)
+LAYER 6  ──  Gateway/Adapter Sandboxing (execution isolation)
+LAYER 7  ──  Payload Size Limits (DoS mitigation)
+```
+
+---
+
+## Layer 1: Cloudflare Tunnel
+
+The Gateway uses `cloudflared` to expose the WebSocket server through a Cloudflare tunnel. This means:
+
+- **No open firewall ports** — your machine's local WebSocket server is never directly reachable from the internet.
+- **No static IP required** — the tunnel URL changes with every restart (unless using a persistent Zero Trust domain).
+- **TLS termination at Cloudflare** — all traffic between mobile and Cloudflare edge is TLS-encrypted.
+
+### Origin Header Validation (CSWSH Protection)
+
+To prevent **Cross-Site WebSocket Hijacking**, the Gateway enforces strict `Origin` header validation on every WebSocket upgrade request. Only these origins are accepted:
+
+- `vscode-webview://…` (Antigravity IDE webview)
+- `https://<team>.cloudflareaccess.com` (Cloudflare Access)
+- Mobile app origins
+
+Anything else → **HTTP 403 Forbidden**. This prevents malicious websites in your browser from silently connecting to the local server.
+
+---
+
+## Layer 2: 256-bit Bearer Token
+
+On first run, the Gateway generates a **256-bit (32-byte) cryptographic pairing token** using OS-level entropy:
+
+- Stored **permanently in the OS keychain** (macOS Keychain, Windows Credential Manager, Linux `libsecret`).
+- Never written to plain-text config files.
+- Persists across restarts.
+
+Every WebSocket connection must present this token. The Gateway verifies it using **`crypto.timingSafeEqual`** — immune to timing side-channel attacks. Invalid token → close code **`4001 Unauthorized`**.
+
+---
+
+## Layer 3: Ed25519 Cryptographic Handshake
+
+After token verification, the **Ed25519 handshake** proves the Gateway's identity:
+
+```
+Client                             Gateway
+  │                                  │
+  │  AUTH_CHALLENGE { nonce }        │
+  │ ────────────────────────────────►│
+  │                                  │  sign(nonce) with Ed25519 private key
+  │  AUTH_RESPONSE { signature }     │
+  │ ◄────────────────────────────────│
+  │                                  │
+  │  verify(signature, public_key)   │
+  │  ✓ proven genuine Gateway        │
+```
+
+The Ed25519 **private key** is stored in the OS keychain. The **public key** is transferred to the mobile client only during QR pairing. After pairing, the client uses the stored public key to verify every future connection — making Man-in-the-Middle attacks impossible even if the Cloudflare tunnel is compromised.
+
+---
+
+## Layer 4: End-to-End Encryption (E2EE)
+
+Beyond TLS (handled by Cloudflare) and token auth, Antimatter implements **true E2EE** using a Diffie-Hellman key exchange:
+
+```
+Pairing time:
+  Phone generates ephemeral DH keypair → shares public key via QR
+  Gateway generates ephemeral DH keypair → shares public key in response
+  Both sides derive identical 256-bit shared secret (ECDH)
+
+Runtime:
+  Sender: AES-GCM encrypt(payload, sharedSecret, randomNonce)
+  Transport: only ciphertext traverses Cloudflare
+  Receiver: AES-GCM decrypt(ciphertext, sharedSecret, nonce)
+```
+
+**Zero-knowledge routing:** Cloudflare, proxies, and any other intermediary can only see encrypted bytes. Only the device and Gateway can decrypt.
+
+### Platform Implementations
+
+| Platform | Crypto Library |
+|---|---|
+| Android | `javax.crypto.Cipher` (AES/GCM/NoPadding) + JCA Ed25519 |
+| iOS | `CryptoKit` — `AES.GCM.seal/open` + `Curve25519.Signing` |
+| Gateway | Node.js `crypto` — `createCipheriv` / `verify` |
+
+---
+
+## Layer 5: Biometric Authentication
+
+Before the mobile app establishes any WebSocket connection, it requires the **device owner's biometric verification**:
+
+- **Android:** `BiometricPrompt` — Fingerprint, Face Unlock, or PIN fallback.
+- **iOS:** `LocalAuthentication` — Face ID, Touch ID, or passcode fallback.
+
+This ensures that even if someone physically picks up your phone, they cannot issue commands to your agent without authenticating as you.
+
+---
+
+## Layer 6: Gateway/Adapter Sandboxing
+
+The system creates a strict **security airgap** between network ingress and local execution:
+
+| Layer | Internet Access | Local Execution | Holds Secrets |
+|---|---|---|---|
+| **Gateway** | ✅ (via Cloudflare) | ❌ | ✅ (keys, tokens) |
+| **Adapters** | ❌ | ✅ | ❌ |
+
+**If an attacker breaches the Cloudflare tunnel**, they still need to defeat the 256-bit token + Ed25519 handshake.
+
+**If they defeat the handshake**, the Gateway only forwards structured JSON payloads to adapters via `127.0.0.1:8765`. Adapters have zero internet exposure.
+
+**If they compromise an adapter**, they can only send structured IPC messages — not execute arbitrary code on the Gateway.
+
+---
+
+## Layer 7: Payload Size Limits
+
+To mitigate memory exhaustion (DoS) attacks:
+
+- Maximum WebSocket payload size: **10 MiB**
+- Oversized frames → immediate connection close
+- Per-IP connection limits enforced at the Gateway level
+
+---
+
+## Optional: Cloudflare Zero Trust (Enterprise)
+
+For the strongest security posture, configure a persistent **Cloudflare Zero Trust** tunnel with an Application Policy:
+
+1. Create a [Cloudflare Zero Trust](https://one.dash.cloudflare.com) account.
+2. Create a Tunnel and point it to `localhost:8765`.
+3. Add an **Application Policy** that requires your email/SSO to access the tunnel URL.
+4. Update your `antimatter-gateway` config with the `CLOUDFLARE_TUNNEL_TOKEN`.
+
+This adds a **secondary authentication layer** before any WebSocket connection is even attempted — your mobile must be logged in to Cloudflare Access first.
+
+---
+
+## Threat Model Summary
+
+| Threat | Mitigation |
+|---|---|
+| Network MITM (Cloudflare compromised) | E2EE + Ed25519 handshake |
+| Stolen QR code / pairing token | Ed25519 identity proof on every connection |
+| CSWSH (malicious website) | Origin header validation → 403 |
+| Brute force token | Timing-safe comparison + rate limiting |
+| Physical phone theft | Biometric auth gate before any connection |
+| Adapter RCE escalation | Gateway/adapter sandboxing + payload size limits |
+| DoS via large payloads | 10 MiB payload cap |
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

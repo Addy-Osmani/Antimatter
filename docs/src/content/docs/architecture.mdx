@@ -1,0 +1,176 @@
+---
+title: Architecture
+description: Deep dive into the Antimatter Independent Adapter Model — Gateway, Adapters, Mobile Client, and message routing.
+sidebar:
+  order: 2
+---
+
+import ArchDiagram from '../../components/ArchDiagram.astro';
+import AuthorCard from '../../components/AuthorCard.astro';
+
+:::note[TL;DR]
+A central **Gateway** (`antimatter-core`) runs in the background, managing the secure Cloudflare tunnel and Ed25519 cryptography. Lightweight **Adapters** (`ag`, `ag2`, `cc`) connect to it locally over WebSocket IPC. When your mobile app sends a message through the tunnel, the Gateway routes it to the correct adapter, which interacts with its AI agent.
+:::
+
+---
+
+## Interactive Architecture Diagram
+
+<ArchDiagram />
+
+*Hover over any node to learn what it does.*
+
+---
+
+## The Independent Adapter Model
+
+Instead of baking security, networking, and tunneling logic into every agent integration, Antimatter cleanly separates the system into two independent layers:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    Independent Adapters                      │
+│                                                              │
+│  ┌─────────────┐   ┌──────────────┐   ┌──────────────────┐  │
+│  │  AG Adapter  │   │  AG2 Adapter │   │   CC Adapter     │  │
+│  │ (TypeScript) │   │   (Python)   │   │    (Node.js)     │  │
+│  └──────┬───────┘   └──────┬───────┘   └────────┬─────────┘  │
+│         │                 │                     │            │
+└─────────┼─────────────────┼─────────────────────┼────────────┘
+          │  IPC ws://127.0.0.1:8765              │
+          ▼                 ▼                     ▼
+┌──────────────────────────────────────────────────────────────┐
+│              antimatter-core Gateway                         │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │         Security & Infrastructure Layer                  │ │
+│  │  ├─ Ed25519 Keypair (OS Keychain)                       │ │
+│  │  ├─ 256-bit Bearer Token (OS Keychain)                  │ │
+│  │  ├─ Cloudflare Tunnel Manager                           │ │
+│  │  └─ IPC Router (ws://127.0.0.1:8765)                   │ │
+│  └───────────────────────────────────────────────────────  ┘ │
+└─────────────────────────────────┬────────────────────────────┘
+                                  │ Cloudflare Tunnel (wss://)
+                                  ▼
+┌──────────────────────────────────────────────────────────────┐
+│                   Mobile App (Client)                        │
+│                                                              │
+│  Android (Kotlin/Compose)   iOS (SwiftUI/Swift)             │
+│  ├─ BridgeWebSocket (OkHttp)  ├─ BridgeWebSocket (URLSession│
+│  ├─ Ed25519 verify            ├─ Ed25519 verify (CryptoKit) │
+│  ├─ E2EE decrypt              ├─ E2EE decrypt                │
+│  └─ Feature Screens           └─ Feature Screens             │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Layer 1: The Gateway (`core/`)
+
+The Gateway is the **brain of the operation**. It runs as a background process and handles everything complex so adapters don't have to:
+
+### Cloudflare Tunnel
+
+The Gateway spawns `cloudflared` to expose a secure `wss://` endpoint — no firewall rules, no port forwarding, no static IP required. TryCloudflare generates a free random URL; a custom domain via Cloudflare Zero Trust provides the strongest security.
+
+### Ed25519 Cryptography
+
+On first run, the Gateway generates:
+- A persistent **Ed25519 keypair** — private key stored in OS keychain
+- A **256-bit random bearer token** — stored in OS keychain
+
+During QR pairing, the public key and token are encoded into the QR code. On every WebSocket connection, the mobile client presents the token and then verifies the Gateway's identity via an `AUTH_CHALLENGE` / `AUTH_RESPONSE` handshake. This prevents Man-in-the-Middle attacks even on compromised networks.
+
+### IPC Router
+
+The Gateway hosts a local WebSocket server at `ws://127.0.0.1:8765`. Adapters connect here and register with a name. When the mobile app sends a message targeting `"ag"`, the Gateway forwards it to the correct adapter connection.
+
+---
+
+## Layer 2: Adapters (`adapters/`)
+
+Adapters are **lightweight, stateless IPC clients**. Because they don't handle security or tunneling, they can be:
+- Written in any language
+- Contain AI-specific "hacks" (e.g., file watching, SDK integration)
+- Easily swapped or added without touching the Gateway
+
+### Registration Protocol
+
+When an adapter boots, it connects to `ws://127.0.0.1:8765` and sends:
+
+```json title="Adapter registration message"
+{
+  "type": "REGISTER_ADAPTER",
+  "name": "ag"
+}
+```
+
+The Gateway registers this connection. Any message from the mobile app targeting `"ag"` is forwarded to this socket.
+
+---
+
+## Layer 3: Message Routing
+
+The **MessageRouter** inside the Gateway dispatches each inbound JSON frame:
+
+| Message Type | Target | Action |
+|---|---|---|
+| `AUTH_CHALLENGE` | Gateway | Sign nonce → `AUTH_RESPONSE` |
+| `GET_AVAILABLE_AGENTS` | Gateway | Reply with list of connected adapters |
+| `GET_FILES`, `READ_FILE` | Target Adapter | Forward to adapter's IPC socket |
+| `SEND_MESSAGE` | Target Adapter | Inject prompt into the AI agent |
+| `PTY_START`, `PTY_INPUT`, `PTY_RESIZE` | Gateway PTY | Spawn/control remote terminal |
+| `PING` | Gateway | Reply `PONG` to keep tunnel alive |
+
+---
+
+## Layer 4: Mobile Client
+
+### Android
+
+Built with **Kotlin** and **Jetpack Compose**, following a multi-module MVVM architecture:
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| Networking | OkHttp + `BridgeWebSocket.kt` | WebSocket client, Ed25519 auth, E2EE |
+| Background | `BridgeService` (Foreground Service) | Keeps socket alive when backgrounded |
+| Persistence | Room + DataStore | Offline trajectory/artifact caching |
+| UI | Jetpack Compose + Material 3 | Declarative UI, dynamic theming |
+| Terminal | Termux terminal-emulator + terminal-view | Native PTY with ANSI rendering |
+| Markdown | Custom `MarkdownText` composable | Syntax-highlighted AI responses |
+
+### iOS
+
+Built with **SwiftUI** and **Swift 6**, targeting iOS 16+:
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| Networking | URLSession WebSocket + async/await | WebSocket client, Ed25519 auth |
+| Crypto | CryptoKit | Ed25519 verification, E2EE decryption |
+| Terminal | SwiftTerm | Native PTY terminal with ANSI rendering |
+| UI | SwiftUI | Declarative UI, Dark Mode support |
+| Persistence | CoreData / SwiftData | Local conversation caching |
+
+---
+
+## End-to-End Encryption (E2EE)
+
+Beyond TLS (provided by Cloudflare) and token authentication, Antimatter implements **true E2EE** using a Diffie-Hellman key exchange:
+
+1. During pairing, phone and Gateway exchange ephemeral DH public keys.
+2. Both sides derive the same 256-bit shared secret.
+3. All WebSocket payloads are **AES-GCM encrypted on the sender** before leaving the device.
+4. Decryption happens only on the receiving device — Cloudflare and any intermediaries only see ciphertext.
+
+This provides **zero-knowledge routing** — even if the Cloudflare tunnel is compromised, the attacker cannot read the plaintext.
+
+---
+
+## Next Steps
+
+- [WebSocket Protocol Reference](/protocol) — the full message contract
+- [Security & Zero Trust](/security) — detailed security architecture
+- [Adapters](/adapters) — how to write a custom adapter
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

@@ -1,0 +1,136 @@
+---
+title: Antimatter
+description: Open-source bridge connecting your mobile device to your local AI agents.
+template: splash
+---
+
+import HeroCanvas from '../../components/HeroCanvas.astro';
+import AuthorCard from '../../components/AuthorCard.astro';
+
+<HeroCanvas />
+
+<hr class="gradient-divider" />
+
+<div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem;">
+  <a href="https://f-droid.org/packages/dev.saifmukhtar.antimatter/"><img src="https://img.shields.io/badge/F--Droid-Get_it_on-blue.svg" alt="F-Droid" /></a>
+  <a href="https://github.com/sponsors/saifmukhtar"><img src="https://img.shields.io/badge/Sponsor-❤️-blue.svg" alt="GitHub Sponsor" /></a>
+  <a href="https://github.com/saifmukhtar/antimatter/stargazers"><img src="https://img.shields.io/github/stars/saifmukhtar/antimatter.svg?style=social" alt="GitHub Stars" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+  <a href="https://deepwiki.com/saifmukhtar/antimatter"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" /></a>
+</div>
+
+<div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem;">
+  <a href="https://github.com/saifmukhtar/antimatter/actions/workflows/android-ci.yml"><img src="https://github.com/saifmukhtar/antimatter/actions/workflows/android-ci.yml/badge.svg" alt="Android CI" /></a>
+  <a href="https://github.com/saifmukhtar/antimatter/actions/workflows/ios-ci.yml"><img src="https://github.com/saifmukhtar/antimatter/actions/workflows/ios-ci.yml/badge.svg" alt="iOS CI" /></a>
+  <a href="https://github.com/saifmukhtar/antimatter/actions/workflows/core-ci.yml"><img src="https://github.com/saifmukhtar/antimatter/actions/workflows/core-ci.yml/badge.svg" alt="Core CI" /></a>
+  <a href="https://github.com/saifmukhtar/antimatter/actions/workflows/adapters-ci.yml"><img src="https://github.com/saifmukhtar/antimatter/actions/workflows/adapters-ci.yml/badge.svg" alt="Adapters CI" /></a>
+  <a href="https://github.com/saifmukhtar/antimatter/actions/workflows/docs.yml"><img src="https://github.com/saifmukhtar/antimatter/actions/workflows/docs.yml/badge.svg" alt="Docs CI" /></a>
+</div>
+
+## Why Antimatter?
+
+Developing with autonomous AI agents often means leaving them running for hours. Antimatter ensures you aren't chained to your desk — **monitor, control, and interact with your agent from anywhere** using your phone, secured by enterprise-grade cryptography.
+
+<div class="features-grid">
+  <div class="feature-card">
+    <span class="feature-icon">📡</span>
+    <h3>Real-Time Streaming</h3>
+    <p>Watch your agent's thought process, tool calls, and file edits character-by-character as they happen.</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">🔐</span>
+    <h3>Zero Trust Security</h3>
+    <p>256-bit pairing tokens + Ed25519 handshakes + Cloudflare tunnels. No open ports. No static IPs.</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">📸</span>
+    <h3>QR Pairing</h3>
+    <p>One scan transfers the WebSocket URL, token, and Ed25519 public key. Cryptographically paired in seconds.</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">🗂️</span>
+    <h3>Workspace Browser</h3>
+    <p>Browse your IDE workspace files in real-time and view or edit any file directly from your phone.</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">💬</span>
+    <h3>Remote Prompting</h3>
+    <p>Send multimodal prompts (text + images) directly to your AI agent and start new conversations on the go.</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">🖥️</span>
+    <h3>Native PTY Terminal</h3>
+    <p>Full interactive shell with ANSI rendering. Supports vim, htop, ssh. Powered by Termux (Android) & SwiftTerm (iOS).</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">🔒</span>
+    <h3>Biometric Auth Gate</h3>
+    <p>Fingerprint or Face Unlock required before the app establishes any connection to your agent.</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">🔍</span>
+    <h3>Full-Text Search</h3>
+    <p>FTS across your entire local SQLite trajectory database — find past commands and agent responses instantly.</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">📲</span>
+    <h3>Push Notifications</h3>
+    <p>Get notified when your agent completes a task, needs approval, or encounters an error — even when backgrounded.</p>
+  </div>
+</div>
+
+<hr class="gradient-divider" />
+
+## Supported AI Agents
+
+Antimatter's **Independent Adapter Model** means it works with any AI agent — not just one.
+
+| Adapter | Agent | Technology | Status |
+|---|---|---|---|
+| `ag` | Google Antigravity IDE | TypeScript · VS Code Extension | <span class="badge badge-shipped">✓ Shipped</span> |
+| `ag2` | Google Antigravity 2.0 | Python daemon | <span class="badge badge-shipped">✓ Shipped</span> |
+| `cc` | Claude Code (Anthropic) | Node.js · Claude SDK | <span class="badge badge-shipped">✓ Shipped</span> |
+| custom | Any Agent | Any Language (WebSocket IPC) | <span class="badge badge-planned">Open</span> |
+
+## Quick Navigation
+
+<div class="nav-grid">
+  <a href="/getting-started" class="nav-card">
+    <div class="nav-card-icon">🚀</div>
+    <div class="nav-card-title">Getting Started</div>
+    <div class="nav-card-desc">Install, configure and pair your phone in minutes.</div>
+  </a>
+  <a href="/android" class="nav-card">
+    <div class="nav-card-icon">🤖</div>
+    <div class="nav-card-title">Android App</div>
+    <div class="nav-card-desc">Kotlin · Compose · Terminal · Biometric Auth</div>
+  </a>
+  <a href="/ios" class="nav-card">
+    <div class="nav-card-icon">🍎</div>
+    <div class="nav-card-title">iOS App</div>
+    <div class="nav-card-desc">SwiftUI · SwiftTerm · CryptoKit · Face ID</div>
+  </a>
+  <a href="/architecture" class="nav-card">
+    <div class="nav-card-icon">🏗️</div>
+    <div class="nav-card-title">Architecture</div>
+    <div class="nav-card-desc">Interactive diagram of the full adapter model.</div>
+  </a>
+  <a href="/security" class="nav-card">
+    <div class="nav-card-icon">🛡️</div>
+    <div class="nav-card-title">Security</div>
+    <div class="nav-card-desc">Zero Trust · Ed25519 · E2EE · Cloudflare</div>
+  </a>
+  <a href="/protocol" class="nav-card">
+    <div class="nav-card-icon">📋</div>
+    <div class="nav-card-title">Protocol Reference</div>
+    <div class="nav-card-desc">Complete WebSocket API message contract.</div>
+  </a>
+</div>
+
+:::caution[Community Project Disclaimer]
+Antimatter is an **unofficial**, community-driven, open-source project. It is **NOT** an official product of Google, Anthropic, or any AI provider. All trademarks belong to their respective owners.
+:::
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

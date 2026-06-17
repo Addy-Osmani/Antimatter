@@ -1,0 +1,207 @@
+---
+title: Getting Started
+description: Install the Antimatter Gateway, configure your adapter, install the mobile app, and pair your phone in minutes.
+sidebar:
+  order: 1
+---
+
+import AuthorCard from '../../components/AuthorCard.astro';
+
+Antimatter is split into two halves — the **Gateway + Adapter** running on your desktop, and the **Mobile App** in your pocket — linked by a secure, encrypted WebSocket tunnel.
+
+:::note[New to Antimatter?]
+Start here and follow the steps in order. The whole setup takes less than 5 minutes.
+:::
+
+## Prerequisites
+
+| Requirement | Details |
+|---|---|
+| **Python 3.11+** | Required by the `antimatter-core` Gateway |
+| **Node.js 22+** | Required if using the `ag` or `cc` adapters |
+| **Android 8.0+** or **iOS 16+** | Mobile companion app |
+| **`uv`** (recommended) | Modern Python package manager — faster installs |
+
+---
+
+## Step 1 — Install the Gateway
+
+The **Antimatter Gateway** (`antimatter-core`) is the secure infrastructure daemon. It manages Cloudflare tunnels, cryptographic keys, and routes messages between your phone and your AI adapters.
+
+```bash title="Install via uv (recommended)"
+uv tool install antimatter-core
+```
+
+```bash title="Or via pip"
+pip install antimatter-core
+```
+
+Then start the Gateway:
+
+```bash title="Start the gateway"
+antimatter-gateway start
+```
+
+The Gateway will:
+- Start a local IPC server at `ws://127.0.0.1:8765`
+- Spawn a Cloudflare tunnel to expose a public `wss://` endpoint
+- Generate and persist an Ed25519 keypair and 256-bit pairing token to your OS keychain
+
+:::tip[Run as a background service]
+On Linux/macOS you can run `antimatter-gateway start --daemon` to run it as a background process. Use `antimatter-gateway status` to check it's alive.
+:::
+
+---
+
+## Step 2 — Install an Adapter
+
+The Gateway alone doesn't do anything without an adapter. Install the one matching your AI agent.
+
+:::note[What's an adapter?]
+Adapters are lightweight scripts that connect to the Gateway via local IPC and bridge it to a specific AI agent. See [Adapters](/adapters) for the full reference.
+:::
+
+### Antigravity IDE (`ag`) — VS Code Extension
+
+1. Download the latest `.vsix` from [GitHub Releases](https://github.com/saifmukhtar/antimatter/releases).
+2. In VS Code → Extensions panel → `···` → **Install from VSIX**.
+3. The extension automatically connects to the running Gateway on activation.
+
+### Antigravity 2.0 (`ag2`) — Python Daemon
+
+```bash
+uv tool install antimatter-ag2
+antimatter-ag2 start
+```
+
+### Claude Code (`cc`) — Node.js Daemon
+
+```bash
+npm install -g antimatter-cc
+antimatter-cc start
+```
+
+---
+
+## Step 3 — Install the Mobile App
+
+### Android
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Tabs>
+  <TabItem label="GitHub Releases (Recommended)">
+    1. Go to [GitHub Releases](https://github.com/saifmukhtar/antimatter/releases).
+    2. Download the latest `antimatter-vX.X.X.apk`.
+    3. Enable **Install from Unknown Sources** on your Android device.
+    4. Open the APK to install.
+  </TabItem>
+  <TabItem label="F-Droid">
+    1. Open [F-Droid](https://f-droid.org/packages/dev.saifmukhtar.antimatter/).
+    2. Search for **Antimatter** and tap Install.
+    3. 100% FOSS — no proprietary dependencies.
+  </TabItem>
+</Tabs>
+
+### iOS
+
+The iOS app is in active development and mirrors the full Android feature set. Build from source:
+
+```bash
+cd ios/
+open AntimatterApp.xcworkspace  # Open in Xcode 16+
+```
+
+See the [iOS App](/ios) page for detailed build instructions.
+
+---
+
+## Step 4 — Pair Your Phone
+
+With the Gateway running, generate a QR pairing code:
+
+```bash title="Terminal on your desktop"
+antimatter-gateway pair
+```
+
+A QR code will appear in the terminal. It encodes:
+- The WebSocket URL (`wss://xxxx.trycloudflare.com`)
+- Your 256-bit pairing token (hex-encoded)
+- The Gateway's Ed25519 public key
+
+Then in the **Antimatter app**:
+1. Tap the **Scan QR Code** button.
+2. Point your camera at the code.
+3. The app performs an Ed25519 handshake with the Gateway.
+4. ✅ You're paired and ready to go!
+
+---
+
+## Features Overview
+
+### AI Chat Interface
+
+- **Live trajectory streaming** — watch tool calls, file edits, and thinking steps happen in real-time.
+- **Rich Markdown rendering** — AI responses render with full syntax highlighting, tables, and code blocks.
+- **Remote prompting** — type a message or attach an image and it's injected directly into the active agent.
+- **Thinking indicator** — animated typing bubble when the agent is generating.
+
+### Native PTY Terminal
+
+- **Full interactive shell** — run any command: `vim`, `htop`, `ssh`, `git`, etc.
+- **ANSI color rendering** — full 256-color and true-color terminal output.
+- **Termux-style UX** — extra keys bar, pinch-to-zoom, long-press to copy.
+- **E2EE tunnel** — all terminal I/O is end-to-end encrypted through the Cloudflare tunnel.
+
+### Workspace Explorer
+
+- **Live file tree** — browse your IDE workspace in real-time.
+- **File viewer** — tap any file to read its contents.
+- **File writing** — make quick edits on the go.
+
+### Security
+
+- **Biometric auth gate** — Face Unlock or fingerprint required before any connection.
+- **Ed25519 verification** — cryptographic identity verification on every connection.
+- **Zero port exposure** — no firewall rules, no port forwarding. Everything goes through Cloudflare.
+
+---
+
+## Troubleshooting
+
+### Phone can't connect
+
+:::danger[Invalid token (close `4001`)]
+The pairing token on the phone doesn't match the Gateway.
+**Fix:** Re-run `antimatter-gateway pair` and scan the new QR code.
+:::
+
+:::caution[Gateway not running]
+If you see "Connection refused":
+1. Run `antimatter-gateway start`
+2. Check if port `8765` is in use: `lsof -i :8765`
+:::
+
+### No agent activity shows up
+
+- Make sure an adapter (`antimatter-ag2`, etc.) is running.
+- Make sure an agent conversation is **actively running** in the IDE/CLI.
+- Check the Gateway logs: `antimatter-gateway logs`
+
+### FAQ
+
+**Is Antimatter affiliated with Google?**
+No. It's an unofficial, community-driven project, not affiliated with Google or the AntiGravity IDE project.
+
+**Do I need a custom domain?**
+No. TryCloudflare works with zero configuration. A domain (Cloudflare Zero Trust) is recommended for the strongest security.
+
+**Where are my keys stored?**
+In your OS keychain — never written to plain-text config files. They persist across restarts.
+
+**What data does Antimatter collect?**
+None. It's fully local + tunnel. No telemetry, no analytics, no cloud services beyond Cloudflare.
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

@@ -1,0 +1,196 @@
+---
+title: iOS App
+description: Complete reference for the Antimatter iOS app — SwiftUI, SwiftTerm, CryptoKit, Face ID, and native PTY terminal.
+sidebar:
+  order: 4
+---
+
+import AuthorCard from '../../components/AuthorCard.astro';
+
+The Antimatter iOS app is a native companion application built with **SwiftUI** and **Swift 6**, providing the same full-featured experience as the Android app — live agent monitoring, remote prompting, workspace browsing, and a native PTY terminal — all secured by Ed25519 cryptography and end-to-end encryption.
+
+:::note[iOS Development Status]
+The iOS app is in active development and is feature-matched to the Android version. All features documented here are either shipped or in active implementation. Build from source using Xcode 16+.
+:::
+
+- **Source:** [`ios/`](https://github.com/saifmukhtar/antimatter/tree/main/ios)
+- **Min iOS:** iOS 16.0
+- **Language:** Swift 6
+- **UI Framework:** SwiftUI
+- **Package Manager:** Swift Package Manager (SPM)
+
+---
+
+## Architecture
+
+The iOS app follows a **Coordinator + MVVM** architecture pattern:
+
+```
+AntimatterApp.swift          # App entry point, lifecycle
+AppCoordinator.swift         # Root navigation coordinator
+├── ConnectCoordinator       # Pairing and connection flow
+├── ChatCoordinator          # AI chat and trajectory view
+├── FilesCoordinator         # Workspace file browser
+└── TerminalCoordinator      # Native PTY terminal
+```
+
+### Package Dependencies (SPM)
+
+| Package | Purpose |
+|---|---|
+| `SwiftTerm` | Native xterm/VT100 terminal emulator for the PTY terminal feature |
+| `CryptoKit` (system) | Ed25519 signature verification, AES-GCM E2EE decryption |
+| `Network` (system) | URLSession WebSocket client |
+| `CoreData` / `SwiftData` | Local conversation and artifact persistence |
+| `LocalAuthentication` | Face ID / Touch ID biometric auth gate |
+
+---
+
+## Features
+
+### AI Chat Interface
+
+- **Live trajectory streaming** — receives `STEP` events from the Gateway and renders them in real-time as thinking blocks, tool calls, and text responses.
+- **Rich Markdown rendering** — AI responses rendered with full Markdown support including code syntax highlighting.
+- **Remote prompting** — compose and send text prompts (or image attachments) to the active adapter from anywhere.
+- **Thinking indicator** — animated typing indicator while the agent generates.
+
+### Native PTY Terminal
+
+The terminal feature uses **SwiftTerm** to provide a complete interactive shell experience:
+
+- Full **VT100/xterm** terminal emulation with ANSI color rendering.
+- **256-color** and **true-color** support.
+- **Pinch-to-zoom** font size control.
+- **Long-press** to copy terminal output.
+- Keyboard extras: ESC, TAB, CTRL, arrow keys.
+- All terminal I/O is **E2EE encrypted** through the Cloudflare tunnel.
+
+```swift title="TerminalViewController.swift (simplified)"
+import SwiftTerm
+
+class TerminalViewController: UIViewController {
+    let terminalView = TerminalView(frame: .zero)
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        terminalView.delegate = self
+        // Connect to Gateway PTY session
+        viewModel.startPtySession { output in
+            self.terminalView.feed(byteArray: output)
+        }
+    }
+}
+
+extension TerminalViewController: TerminalViewDelegate {
+    func send(source: TerminalView, data: ArraySlice<UInt8>) {
+        viewModel.sendPtyInput(data: Data(data))
+    }
+}
+```
+
+### Workspace Browser
+
+- **Live file tree** — fetches the workspace directory structure via `GET_FILES`.
+- **File viewer** — syntax-highlighted content viewer for source files.
+- **File writing** — send quick edits on the go via `WRITE_FILE`.
+
+### Security & Biometric Auth
+
+The iOS app uses `LocalAuthentication` to require **Face ID or Touch ID** before establishing any WebSocket connection:
+
+```swift title="BiometricAuthManager.swift (simplified)"
+import LocalAuthentication
+
+func requireBiometricAuth() async throws {
+    let context = LAContext()
+    guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else {
+        throw AuthError.biometricUnavailable
+    }
+    try await context.evaluatePolicy(
+        .deviceOwnerAuthenticationWithBiometrics,
+        localizedReason: "Verify your identity to connect to your AI agent"
+    )
+}
+```
+
+### Ed25519 Cryptographic Handshake
+
+```swift title="CryptoKit Ed25519 verification"
+import CryptoKit
+
+func verifyHandshake(challenge: Data, signature: Data, publicKey: Curve25519.Signing.PublicKey) -> Bool {
+    do {
+        return try publicKey.isValidSignature(
+            Curve25519.Signing.ECDSASignature(rawRepresentation: signature),
+            for: challenge
+        )
+    } catch {
+        return false
+    }
+}
+```
+
+---
+
+## Building the App
+
+### Prerequisites
+
+- **Xcode 16+** (macOS only)
+- **iOS 16+ simulator or device**
+- **Swift 6** toolchain (bundled with Xcode 16)
+
+### Build Steps
+
+```bash title="Clone and open"
+git clone https://github.com/saifmukhtar/antimatter.git
+cd antimatter/ios
+open AntimatterApp.xcworkspace
+```
+
+In Xcode:
+1. Select your target device or simulator (iPhone, iPad).
+2. Set your **Team** in Signing & Capabilities if building for a real device.
+3. Press **⌘R** to build and run.
+
+### SPM Package Resolution
+
+Swift Package Manager resolves dependencies automatically when you open the workspace. If packages fail to resolve:
+
+```bash title="Clear package cache"
+rm -rf ~/Library/Caches/org.swift.swiftpm
+xcodebuild -resolvePackageDependencies -workspace AntimatterApp.xcworkspace -scheme AntimatterApp
+```
+
+---
+
+## Screen Inventory
+
+| Screen | SwiftUI View | Description |
+|---|---|---|
+| Connect | `ConnectView` | QR scanner + pairing flow + adapter selection |
+| Chat | `ChatView` + `ChatBubble` | Trajectory stream + message input |
+| Files | `FilesView` + `FileDetailView` | Workspace browser + file viewer |
+| Terminal | `TerminalView` | Native SwiftTerm PTY terminal |
+| Settings | `SettingsView` | App preferences, connection management |
+
+---
+
+## Tech Stack Summary
+
+| Category | Framework / Library |
+|---|---|
+| Language | Swift 6 |
+| UI | SwiftUI + UIKit (where needed) |
+| Navigation | AppCoordinator pattern |
+| Networking | URLSession WebSocket (async/await) |
+| Cryptography | CryptoKit (Ed25519, AES-GCM) |
+| Terminal | SwiftTerm |
+| Persistence | SwiftData / CoreData |
+| Biometrics | LocalAuthentication (Face ID, Touch ID) |
+| Camera | AVFoundation (QR scanner) |
+
+<hr class="gradient-divider" />
+
+<AuthorCard />

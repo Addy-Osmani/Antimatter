@@ -1,0 +1,143 @@
+---
+// ArchDiagram.astro — Interactive SVG architecture diagram
+---
+
+<div class="arch-diagram" id="arch-svg-wrapper">
+  <svg
+    viewBox="0 0 900 520"
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Antimatter Architecture Diagram"
+    style="width:100%;height:auto;min-height:300px;"
+    id="arch-svg"
+  >
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 Z" fill="rgba(59,130,246,0.6)" />
+      </marker>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#22D3EE" stop-opacity="0.1"/>
+      </linearGradient>
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.2"/>
+        <stop offset="100%" stop-color="#6366F1" stop-opacity="0.1"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Phone -->
+    <g class="arch-group" id="node-phone" data-tooltip="Android / iOS App">
+      <rect x="10" y="190" width="140" height="140" rx="12" fill="url(#blueGrad)" stroke="rgba(59,130,246,0.5)" stroke-width="1.5" />
+      <text x="80" y="248" class="arch-label" text-anchor="middle" font-weight="600">📱 Mobile App</text>
+      <text x="80" y="266" class="arch-sublabel" text-anchor="middle">Android &amp; iOS</text>
+      <text x="80" y="284" class="arch-sublabel" text-anchor="middle">Kotlin / SwiftUI</text>
+      <text x="80" y="302" class="arch-sublabel" text-anchor="middle" fill="rgba(34,211,238,0.8)">Ed25519 + E2EE</text>
+    </g>
+
+    <!-- Cloudflare -->
+    <g class="arch-group" id="node-cf" data-tooltip="Cloudflare Tunnel — zero config secure tunnel">
+      <rect x="210" y="220" width="140" height="80" rx="12" fill="url(#cyanGrad)" stroke="rgba(249,115,22,0.4)" stroke-width="1.5" />
+      <text x="280" y="254" class="arch-label" text-anchor="middle" font-weight="600">☁️ Cloudflare</text>
+      <text x="280" y="272" class="arch-sublabel" text-anchor="middle">Zero Trust Tunnel</text>
+      <text x="280" y="288" class="arch-sublabel" text-anchor="middle" fill="rgba(249,115,22,0.8)">wss:// TLS</text>
+    </g>
+
+    <!-- Gateway -->
+    <g class="arch-group" id="node-gateway" data-tooltip="Antimatter Gateway — handles all security, routing, crypto">
+      <rect x="400" y="180" width="160" height="160" rx="12" fill="url(#blueGrad)" stroke="rgba(59,130,246,0.6)" stroke-width="2" filter="url(#glow)" />
+      <text x="480" y="230" class="arch-label" text-anchor="middle" font-weight="700" font-size="14">⚙️ Gateway</text>
+      <text x="480" y="250" class="arch-sublabel" text-anchor="middle">antimatter-core</text>
+      <line x1="410" y1="260" x2="550" y2="260" stroke="rgba(59,130,246,0.2)" stroke-width="1"/>
+      <text x="480" y="278" class="arch-sublabel" text-anchor="middle">🔐 Ed25519 Crypto</text>
+      <text x="480" y="296" class="arch-sublabel" text-anchor="middle">🛡 Token Auth</text>
+      <text x="480" y="314" class="arch-sublabel" text-anchor="middle">📡 IPC Router :8765</text>
+    </g>
+
+    <!-- Adapters -->
+    <g class="arch-group" id="node-ag" data-tooltip="Antigravity IDE Adapter — TypeScript VS Code extension">
+      <rect x="640" y="60" width="150" height="90" rx="10" fill="url(#blueGrad)" stroke="rgba(99,102,241,0.5)" stroke-width="1.5" />
+      <text x="715" y="98" class="arch-label" text-anchor="middle" font-weight="600">🎯 AG Adapter</text>
+      <text x="715" y="116" class="arch-sublabel" text-anchor="middle">Antigravity IDE</text>
+      <text x="715" y="134" class="arch-sublabel" text-anchor="middle">TypeScript · .vsix</text>
+    </g>
+
+    <g class="arch-group" id="node-ag2" data-tooltip="Antigravity 2.0 Adapter — standalone Python daemon">
+      <rect x="640" y="215" width="150" height="90" rx="10" fill="url(#blueGrad)" stroke="rgba(99,102,241,0.5)" stroke-width="1.5" />
+      <text x="715" y="253" class="arch-label" text-anchor="middle" font-weight="600">🐍 AG2 Adapter</text>
+      <text x="715" y="271" class="arch-sublabel" text-anchor="middle">Antigravity 2.0</text>
+      <text x="715" y="289" class="arch-sublabel" text-anchor="middle">Python daemon</text>
+    </g>
+
+    <g class="arch-group" id="node-cc" data-tooltip="Claude Code Adapter — Node.js Claude SDK streaming">
+      <rect x="640" y="370" width="150" height="90" rx="10" fill="url(#blueGrad)" stroke="rgba(99,102,241,0.5)" stroke-width="1.5" />
+      <text x="715" y="408" class="arch-label" text-anchor="middle" font-weight="600">🤖 CC Adapter</text>
+      <text x="715" y="426" class="arch-sublabel" text-anchor="middle">Claude Code</text>
+      <text x="715" y="444" class="arch-sublabel" text-anchor="middle">Node.js · SDK</text>
+    </g>
+
+    <!-- Arrows: Phone → Cloudflare -->
+    <line x1="150" y1="260" x2="208" y2="260" stroke="rgba(59,130,246,0.6)" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr)" />
+    <text x="179" y="252" class="arch-sublabel" text-anchor="middle" font-size="9" fill="rgba(34,211,238,0.8)">E2EE</text>
+
+    <!-- Arrows: Cloudflare → Gateway -->
+    <line x1="350" y1="260" x2="398" y2="260" stroke="rgba(59,130,246,0.6)" stroke-width="1.5" marker-end="url(#arr)" />
+
+    <!-- Arrows: Gateway → Adapters -->
+    <line x1="560" y1="220" x2="638" y2="140" stroke="rgba(99,102,241,0.5)" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)" />
+    <line x1="560" y1="260" x2="638" y2="260" stroke="rgba(99,102,241,0.5)" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)" />
+    <line x1="560" y1="300" x2="638" y2="385" stroke="rgba(99,102,241,0.5)" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)" />
+
+    <!-- IPC label -->
+    <text x="600" y="208" class="arch-sublabel" text-anchor="middle" font-size="9" fill="rgba(99,102,241,0.9)">IPC ws://127.0.0.1:8765</text>
+  </svg>
+
+  <!-- Tooltip -->
+  <div id="arch-tooltip" style="
+    display:none;
+    position:absolute;
+    background:rgba(15,23,42,0.95);
+    border:1px solid rgba(59,130,246,0.3);
+    border-radius:8px;
+    padding:0.5rem 0.9rem;
+    font-size:0.8rem;
+    color:#E2E8F0;
+    pointer-events:none;
+    backdrop-filter:blur(12px);
+    max-width:240px;
+    z-index:10;
+  "></div>
+</div>
+
+<script>
+const wrapper = document.getElementById('arch-svg-wrapper') as HTMLElement;
+const tooltip = document.getElementById('arch-tooltip') as HTMLElement;
+
+wrapper.querySelectorAll('.arch-group').forEach(g => {
+  g.addEventListener('mouseenter', (e) => {
+    const el = e.currentTarget as SVGGElement;
+    const tip = el.dataset.tooltip;
+    if (!tip) return;
+    tooltip.textContent = tip;
+    tooltip.style.display = 'block';
+    // highlight
+    const rect = el.querySelector('rect');
+    if (rect) rect.style.filter = 'brightness(1.4)';
+  });
+  g.addEventListener('mousemove', (e) => {
+    const me = e as MouseEvent;
+    const rect = wrapper.getBoundingClientRect();
+    tooltip.style.left = (me.clientX - rect.left + 12) + 'px';
+    tooltip.style.top  = (me.clientY - rect.top  + 12) + 'px';
+  });
+  g.addEventListener('mouseleave', (e) => {
+    tooltip.style.display = 'none';
+    const el = e.currentTarget as SVGGElement;
+    const rect = el.querySelector('rect');
+    if (rect) rect.style.filter = '';
+  });
+});
+</script>
