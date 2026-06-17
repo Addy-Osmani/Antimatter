@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-68%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-63-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-67%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-64-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 63 |
+| **Total Runs** | 64 |
 | **Passed** | 43 |
-| **Failed** | 17 |
-| **Pass Rate** | 68% |
+| **Failed** | 18 |
+| **Pass Rate** | 67% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-17 08:38 | Android CI | ❌ FAIL | chore(deps): bump astro @astrojs/starlight and @astrojs/starlight-tailwind | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27676403054) |
 | 2026-06-17 08:36 | Android CI | ❌ FAIL | Chore: Added proper license and deleted unused files | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27676314112) |
 | 2026-06-17 08:35 | Adapters CI | ✅ PASS | chore(deps): bump astro @astrojs/starlight and @astrojs/starlight-tailwind | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27676403146) |
 | 2026-06-17 08:35 | Core CI | ✅ PASS | chore(deps): bump astro @astrojs/starlight and @astrojs/starlight-tailwind | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27676402977) |
@@ -63,4 +64,3 @@
 | 2026-06-13 12:14 | Android CI | ✅ PASS | security: fix CodeQL vulnerabilities (injection auth permissions logs) | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466414667) |
 | 2026-06-13 12:12 | Extension CI | ✅ PASS | security: fix CodeQL vulnerabilities (injection auth permissions logs) | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466414671) |
 | 2026-06-13 11:48 | CodeQL Advanced | ✅ PASS | fix(python): correct invalid PyPI classifier in pyproject.toml | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465693612) |
-| 2026-06-13 11:43 | CI | ✅ PASS | fix(python): correct invalid PyPI classifier in pyproject.toml | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27465693645) |
