@@ -9,6 +9,10 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.security.SecureRandom
 import android.util.Base64
 import java.util.UUID
@@ -49,9 +53,17 @@ class UserPreferencesRepository(private val context: Context) {
     private val _savedCredentialsFlow = MutableStateFlow<Credentials>(Credentials(null, null, null, null, null))
     val savedCredentialsFlow: StateFlow<Credentials> = _savedCredentialsFlow.asStateFlow()
 
+    private val _isLoadedFlow = MutableStateFlow(false)
+    val isLoadedFlow: StateFlow<Boolean> = _isLoadedFlow.asStateFlow()
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     init {
-        loadProfiles()
-        migrateLegacyCredentials()
+        scope.launch {
+            loadProfiles()
+            migrateLegacyCredentials()
+            _isLoadedFlow.value = true
+        }
     }
 
     private fun loadProfiles() {
@@ -148,8 +160,16 @@ class UserPreferencesRepository(private val context: Context) {
     
     // For backwards compatibility where legacy code called saveCredentials directly
     suspend fun saveCredentials(url: String, clientId: String, clientSecret: String, token: String?, pubKey: String?) {
-        val creds = Credentials(url, clientId, clientSecret, token, pubKey)
-        saveProfile("Scanned Connection", creds)
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val creds = Credentials(url, clientId, clientSecret, token, pubKey)
+            // Prevent duplicate profiles with the same URL
+            val existing = _profilesFlow.value.find { it.credentials.url == url }
+            if (existing != null) {
+                setActiveProfile(existing.id)
+            } else {
+                saveProfile("Scanned Connection", creds)
+            }
+        }
     }
 
     suspend fun clearCredentials() {
@@ -168,6 +188,6 @@ class UserPreferencesRepository(private val context: Context) {
             passphrase = Base64.encodeToString(key, Base64.NO_WRAP)
             securePrefs.edit().putString(DB_PASSPHRASE, passphrase).apply()
         }
-        return passphrase.toByteArray()
+        return Base64.decode(passphrase, Base64.NO_WRAP)
     }
 }

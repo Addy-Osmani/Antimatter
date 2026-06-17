@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -48,7 +49,7 @@ class TerminalViewModel @Inject constructor(
 
     init {
         // Observe WebSocket events
-        viewModelScope.launch(Dispatchers.Unconfined) {
+        viewModelScope.launch(Dispatchers.Main.immediate) {
             webSocket.connectionState.collect { state ->
                 val connected = state == BridgeWebSocket.ConnectionState.CONNECTED
                 _isConnected.value = connected
@@ -60,7 +61,7 @@ class TerminalViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch(Dispatchers.Unconfined) {
+        viewModelScope.launch(Dispatchers.Main.immediate) {
             webSocket.messages.collect { message ->
                 if (message is InboundMessage.PtyOutput) {
                     handleMessage(message)
@@ -85,6 +86,12 @@ class TerminalViewModel @Inject constructor(
         ptyId = id
         val startMsg = OutboundMessage.PtyStart(id, 80, 24)
         webSocket.sendMessage(startMsg)
+        
+        // Emulate a clean Termux-like prompt
+        val initScript = "export PS1='~ $ '\nclear\n"
+        val initMsg = OutboundMessage.PtyInput(id, initScript)
+        webSocket.sendMessage(initMsg)
+        
         startIoLoop()
     }
 
@@ -92,9 +99,9 @@ class TerminalViewModel @Inject constructor(
         ioJob?.cancel()
         ioJob = viewModelScope.launch(Dispatchers.IO) {
             val buffer = ByteArray(4096)
-            while (true) {
-                // Read from TerminalSession (blocking read)
-                val bytesRead = terminalSession.readInput(buffer, true)
+            while (isActive) {
+                // Read from TerminalSession (non-blocking read)
+                val bytesRead = terminalSession.readInput(buffer, false)
                 if (bytesRead > 0) {
                     // Send input over websocket
                     val id = ptyId
@@ -113,11 +120,13 @@ class TerminalViewModel @Inject constructor(
     private suspend fun handleMessage(message: InboundMessage.PtyOutput) {
         // The gateway base64-encodes all PTY output. We must decode before feeding the emulator.
         val bytes = android.util.Base64.decode(message.data, android.util.Base64.DEFAULT)
-        withContext(Dispatchers.Main) {
+        withContext(Dispatchers.Main.immediate) {
             if (terminalSession.emulator != null) {
                 terminalSession.appendToEmulator(bytes, bytes.size)
             } else {
-                pendingOutput.add(bytes)
+                synchronized(pendingOutput) {
+                    pendingOutput.add(bytes)
+                }
             }
         }
     }
@@ -132,10 +141,14 @@ class TerminalViewModel @Inject constructor(
         resizeChannel.trySend(Pair(cols, rows))
         
         // Flush any buffered output if emulator is now ready
-        if (pendingOutput.isNotEmpty() && terminalSession.emulator != null) {
-            val allBytes = pendingOutput.reduce { acc, bytes -> acc + bytes }
-            terminalSession.appendToEmulator(allBytes, allBytes.size)
-            pendingOutput.clear()
+        if (terminalSession.emulator != null) {
+            synchronized(pendingOutput) {
+                if (pendingOutput.isNotEmpty()) {
+                    val allBytes = pendingOutput.reduce { acc, bytes -> acc + bytes }
+                    terminalSession.appendToEmulator(allBytes, allBytes.size)
+                    pendingOutput.clear()
+                }
+            }
         }
     }
 

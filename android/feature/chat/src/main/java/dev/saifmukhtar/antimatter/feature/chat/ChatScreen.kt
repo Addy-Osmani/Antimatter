@@ -30,6 +30,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import dev.saifmukhtar.antimatter.core.network.BridgeWebSocket
 import dev.saifmukhtar.antimatter.core.network.StepCase
 import dev.saifmukhtar.antimatter.core.network.TrajectoryStep
@@ -244,6 +246,15 @@ fun ChatScreen(
         }
     ) {
         Scaffold(
+            containerColor = Color.Transparent,
+            modifier = Modifier.background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            ),
             topBar = {
                 var expanded by remember { mutableStateOf(false) }
                 TopAppBar(
@@ -320,7 +331,7 @@ fun ChatScreen(
                     Icon(icon, contentDescription = "Connection", tint = tint, modifier = Modifier.padding(end = 16.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
                 )
             )
         },

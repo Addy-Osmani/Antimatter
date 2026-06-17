@@ -1,47 +1,75 @@
 package dev.saifmukhtar.antimatter.feature.terminal
 
+import android.graphics.Color as AndroidColor
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import com.termux.terminal.TerminalSessionClient
 import com.termux.view.TerminalView
 import com.termux.view.TerminalViewClient
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import dev.saifmukhtar.antimatter.core.ui.glowBorder
+
+// ─── Termux Authentic Color Palette ───────────────────────────────────────────
+private val TermuxBlack      = Color(0xFF000000)   // terminal background
+private val TermuxKeys       = Color(0xFF1C1C1C)   // extra keys bar background
+private val TermuxKeysBorder = Color(0xFF2E2E2E)   // subtle separator / key border
+private val TermuxGreen      = Color(0xFF73D216)   // Termux cursor / active accent
+private val TermuxGreenDim   = Color(0x3373D216)   // active key highlight (semi-transparent green)
+private val TermuxText       = Color(0xFFD4D4D4)   // normal key labels
+private val TermuxTextActive = Color(0xFF73D216)   // active key label text
+private val TermuxKeyShape   = RoundedCornerShape(4.dp)
 
 @Composable
 fun TerminalScreen(
     viewModel: TerminalViewModel = hiltViewModel()
 ) {
     val isConnected by viewModel.isConnected.collectAsState()
+
+    @Suppress("UNUSED_VARIABLE")
     val context = LocalContext.current
+
+    @Suppress("UNUSED_VARIABLE")
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    var terminalViewRef by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<TerminalView?>(null) }
+    var terminalViewRef by remember { mutableStateOf<TerminalView?>(null) }
 
     LaunchedEffect(terminalViewRef) {
         if (terminalViewRef != null) {
@@ -51,124 +79,247 @@ fun TerminalScreen(
         }
     }
 
-    val ctrlDownState = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-    val altDownState = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    // Modifier key toggle states — consumed by TerminalViewClient callbacks
+    val ctrlActive = remember { java.util.concurrent.atomic.AtomicBoolean(false) }
+    val altActive  = remember { java.util.concurrent.atomic.AtomicBoolean(false) }
+    
+    // For recomposing the UI based on state changes
+    var ctrlUiState by remember { mutableStateOf(false) }
+    var altUiState  by remember { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.surface
+        modifier       = Modifier.fillMaxSize(),
+        containerColor = TermuxBlack
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.surface)
+                .background(TermuxBlack)
+                .imePadding()
         ) {
-            // Extra Keys Row
-            Row(
-                modifier = Modifier.fillMaxWidth().height(36.dp).background(androidx.compose.ui.graphics.Color.DarkGray)
-            ) {
-                val buttonModifier = Modifier.weight(1f)
-                val activeColor = androidx.compose.ui.graphics.Color.LightGray
-                val defaultColor = androidx.compose.ui.graphics.Color.Transparent
-                val textStyle = androidx.compose.ui.text.TextStyle(color = androidx.compose.ui.graphics.Color.White, fontSize = 12.sp)
-                val btnPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
-                
-                TextButton(onClick = { ctrlDownState.value = !ctrlDownState.value }, modifier = buttonModifier, contentPadding = btnPadding, colors = androidx.compose.material3.ButtonDefaults.textButtonColors(containerColor = if (ctrlDownState.value) activeColor else defaultColor)) { Text("CTRL", style = textStyle) }
-                TextButton(onClick = { altDownState.value = !altDownState.value }, modifier = buttonModifier, contentPadding = btnPadding, colors = androidx.compose.material3.ButtonDefaults.textButtonColors(containerColor = if (altDownState.value) activeColor else defaultColor)) { Text("ALT", style = textStyle) }
-                TextButton(onClick = { terminalViewRef?.onKeyDown(111, android.view.KeyEvent(0, 111)); terminalViewRef?.onKeyUp(111, android.view.KeyEvent(1, 111)) }, modifier = buttonModifier, contentPadding = btnPadding) { Text("ESC", style = textStyle) }
-                TextButton(onClick = { terminalViewRef?.onKeyDown(61, android.view.KeyEvent(0, 61)); terminalViewRef?.onKeyUp(61, android.view.KeyEvent(1, 61)) }, modifier = buttonModifier, contentPadding = btnPadding) { Text("TAB", style = textStyle) }
-                TextButton(onClick = { terminalViewRef?.onKeyDown(19, android.view.KeyEvent(0, 19)); terminalViewRef?.onKeyUp(19, android.view.KeyEvent(1, 19)) }, modifier = buttonModifier, contentPadding = btnPadding) { Text("↑", style = textStyle) }
-                TextButton(onClick = { terminalViewRef?.onKeyDown(20, android.view.KeyEvent(0, 20)); terminalViewRef?.onKeyUp(20, android.view.KeyEvent(1, 20)) }, modifier = buttonModifier, contentPadding = btnPadding) { Text("↓", style = textStyle) }
-                TextButton(onClick = { terminalViewRef?.onKeyDown(21, android.view.KeyEvent(0, 21)); terminalViewRef?.onKeyUp(21, android.view.KeyEvent(1, 21)) }, modifier = buttonModifier, contentPadding = btnPadding) { Text("←", style = textStyle) }
-                TextButton(onClick = { terminalViewRef?.onKeyDown(22, android.view.KeyEvent(0, 22)); terminalViewRef?.onKeyUp(22, android.view.KeyEvent(1, 22)) }, modifier = buttonModifier, contentPadding = btnPadding) { Text("→", style = textStyle) }
-            }
-
+            // ── Terminal Emulator View ──────────────────────────────────────────
             AndroidView(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .background(TermuxBlack),
                 factory = { ctx ->
                     val terminalView = TerminalView(ctx, null)
                     terminalViewRef = terminalView
+
                     terminalView.layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
-                    terminalView.setBackgroundColor(android.graphics.Color.BLACK)
-                    terminalView.isFocusable = true
+
+                    terminalView.setBackgroundColor(AndroidColor.BLACK)
+                    terminalView.isFocusable            = true
                     terminalView.isFocusableInTouchMode = true
-                    
-                    var currentTextSize = 28f
-                    terminalView.setTextSize(currentTextSize.toInt()) // Set standard font size
-                    
-                    // Attach the session manually initialized
+
+                    // 14sp — Termux default text size
+                    var currentSizeSp = 14f
+                    terminalView.setTextSize(currentSizeSp.toInt())
+
                     terminalView.attachSession(viewModel.terminalSession)
-                    
-                    // Client to handle resizing
+
                     terminalView.setTerminalViewClient(object : TerminalViewClient {
+
                         override fun onScale(scale: Float): Float {
-                            currentTextSize *= scale
-                            currentTextSize = currentTextSize.coerceIn(8f, 100f)
-                            terminalView.setTextSize(currentTextSize.toInt())
+                            currentSizeSp = (currentSizeSp * scale).coerceIn(8f, 36f)
+                            terminalView.setTextSize(currentSizeSp.toInt())
                             return 1.0f
                         }
+
                         override fun onSingleTapUp(e: android.view.MotionEvent?) {
-                            terminalView.requestFocus()
-                            val imm = ctx.getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                            imm.showSoftInput(terminalView, 0)
+                            terminalView.post {
+                                terminalView.requestFocus()
+                                val imm = ctx.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
+                                        as android.view.inputmethod.InputMethodManager
+                                imm.showSoftInput(
+                                    terminalView,
+                                    android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT
+                                )
+                            }
                         }
-                        override fun shouldBackButtonBeMappedToEscape(): Boolean = false
-                        override fun shouldEnforceCharBasedInput(): Boolean = false
-                        override fun shouldUseCtrlSpaceWorkaround(): Boolean = false
-                        override fun isTerminalViewSelected(): Boolean = true
-                        override fun copyModeChanged(copyMode: Boolean) {}
-                        override fun onKeyDown(keyCode: Int, e: android.view.KeyEvent?, session: com.termux.terminal.TerminalSession?): Boolean = false
+
+                        override fun shouldBackButtonBeMappedToEscape(): Boolean = true
+                        override fun shouldEnforceCharBasedInput(): Boolean       = true
+                        override fun shouldUseCtrlSpaceWorkaround(): Boolean       = false
+                        override fun isTerminalViewSelected(): Boolean             = true
+                        override fun copyModeChanged(copyMode: Boolean)            = Unit
+
+                        override fun onKeyDown(
+                            keyCode: Int,
+                            e: android.view.KeyEvent?,
+                            session: com.termux.terminal.TerminalSession?
+                        ): Boolean = false
+
                         override fun onKeyUp(keyCode: Int, e: android.view.KeyEvent?): Boolean = false
-                        override fun onLongPress(event: android.view.MotionEvent?): Boolean = false
+                        override fun onLongPress(event: android.view.MotionEvent?): Boolean {
+                            if (event != null) {
+                                terminalView.showContextMenu()
+                                return true
+                            }
+                            return false
+                        }
+
                         override fun readControlKey(): Boolean {
-                            val down = ctrlDownState.value
-                            ctrlDownState.value = false
-                            return down
+                            val was = ctrlActive.getAndSet(false)
+                            if (was) ctrlUiState = false
+                            return was
                         }
+
                         override fun readAltKey(): Boolean {
-                            val down = altDownState.value
-                            altDownState.value = false
-                            return down
+                            val was = altActive.getAndSet(false)
+                            if (was) altUiState = false
+                            return was
                         }
+
                         override fun readShiftKey(): Boolean = false
-                        override fun readFnKey(): Boolean = false
-                        override fun onCodePoint(codePoint: Int, ctrlDown: Boolean, session: com.termux.terminal.TerminalSession?): Boolean = false
+                        override fun readFnKey(): Boolean    = false
+
+                        override fun onCodePoint(
+                            codePoint: Int,
+                            ctrlDown: Boolean,
+                            session: com.termux.terminal.TerminalSession?
+                        ): Boolean = false
+
                         override fun onEmulatorSet() {
-                            // First time emulator is set
                             val emulator = viewModel.terminalSession.emulator
                             if (emulator != null) {
                                 viewModel.onResize(emulator.mColumns, emulator.mRows)
                             }
                         }
-                        override fun logError(tag: String?, message: String?) {}
-                        override fun logWarn(tag: String?, message: String?) {}
-                        override fun logInfo(tag: String?, message: String?) {}
-                        override fun logDebug(tag: String?, message: String?) {}
-                        override fun logVerbose(tag: String?, message: String?) {}
-                        override fun logStackTraceWithMessage(tag: String?, message: String?, e: Exception?) {}
-                        override fun logStackTrace(tag: String?, e: Exception?) {}
+
+                        override fun logError(tag: String?, message: String?)   = Unit
+                        override fun logWarn(tag: String?, message: String?)    = Unit
+                        override fun logInfo(tag: String?, message: String?)    = Unit
+                        override fun logDebug(tag: String?, message: String?)   = Unit
+                        override fun logVerbose(tag: String?, message: String?) = Unit
+                        override fun logStackTraceWithMessage(tag: String?, message: String?, e: Exception?) = Unit
+                        override fun logStackTrace(tag: String?, e: Exception?) = Unit
                     })
 
-                    terminalView
-                },
-                update = { view ->
-                    // Every time layout updates, check emulator size
-                    val emulator = viewModel.terminalSession.emulator
-                    if (emulator != null && emulator.mColumns > 0 && emulator.mRows > 0) {
-                        viewModel.onResize(emulator.mColumns, emulator.mRows)
+                    terminalView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                        val emulator = viewModel.terminalSession.emulator
+                        if (emulator != null && emulator.mColumns > 0 && emulator.mRows > 0) {
+                            viewModel.onResize(emulator.mColumns, emulator.mRows)
+                        }
                     }
+                    terminalView
+                }
+            )
+
+            // ── Extra Keys Bar ─────────────────────────────────────────────────
+            ExtraKeysBar(
+                ctrlActive  = ctrlUiState,
+                altActive   = altUiState,
+                onCtrlClick = { 
+                    ctrlUiState = !ctrlUiState
+                    ctrlActive.set(ctrlUiState)
+                },
+                onAltClick  = { 
+                    altUiState = !altUiState
+                    altActive.set(altUiState)
+                },
+                onKey       = { keyCode ->
+                    terminalViewRef?.onKeyDown(keyCode, android.view.KeyEvent(0, keyCode))
+                    terminalViewRef?.onKeyUp(keyCode,   android.view.KeyEvent(1, keyCode))
                 }
             )
         }
     }
+}
 
-    // Biometric background-locking policy: only when returning from background, not tab switching.
-    // That means the terminal should remain active as long as the Activity is in the foreground.
-    // We don't implement biometric logic here, it is handled at the MainActivity level.
+// ─── Extra Keys Bar ────────────────────────────────────────────────────────────
+@Composable
+private fun ExtraKeysBar(
+    ctrlActive:  Boolean,
+    altActive:   Boolean,
+    onCtrlClick: () -> Unit,
+    onAltClick:  () -> Unit,
+    onKey:       (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp) // Slightly taller for 3D keys
+            .background(TermuxKeys)
+            .border(width = 0.5.dp, color = TermuxKeysBorder)
+            .padding(horizontal = 4.dp)
+            .horizontalScroll(rememberScrollState()),
+        verticalAlignment     = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        TermuxKey(label = "ESC",  active = false,      onClick = { onKey(111) })
+        TermuxKey(label = "/",    active = false,      onClick = { onKey(76)  })
+        TermuxKey(label = "-",    active = false,      onClick = { onKey(69)  })
+        TermuxKey(label = "HOME", active = false,      onClick = { onKey(122) })
+        TermuxKey(label = "↑",    active = false,      onClick = { onKey(19)  })
+        TermuxKey(label = "END",  active = false,      onClick = { onKey(123) })
+        TermuxKey(label = "PGUP", active = false,      onClick = { onKey(92)  })
+        TermuxKey(label = "CTRL", active = ctrlActive, onClick = onCtrlClick  )
+        TermuxKey(label = "ALT",  active = altActive,  onClick = onAltClick   )
+        TermuxKey(label = "TAB",  active = false,      onClick = { onKey(61)  })
+        TermuxKey(label = "←",    active = false,      onClick = { onKey(21)  })
+        TermuxKey(label = "↓",    active = false,      onClick = { onKey(20)  })
+        TermuxKey(label = "→",    active = false,      onClick = { onKey(22)  })
+        TermuxKey(label = "PGDN", active = false,      onClick = { onKey(93)  })
+    }
+}
+
+// ─── Single Key Chip ───────────────────────────────────────────────────────────
+@Composable
+private fun TermuxKey(
+    label:   String,
+    active:  Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    // 3D effect: shift down when pressed
+    val offsetY by androidx.compose.animation.core.animateDpAsState(
+        targetValue = if (isPressed) 2.dp else 0.dp,
+        label = "key_press"
+    )
+
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 2.dp)
+            .size(width = 44.dp, height = 36.dp)
+            .offset(y = offsetY)
+            .clip(TermuxKeyShape)
+            .background(if (active) TermuxGreenDim else Color(0xFF252525))
+            .border(
+                width = if (active) 1.5.dp else 1.dp,
+                color = if (active) TermuxGreen else TermuxKeysBorder,
+                shape = TermuxKeyShape
+            )
+            .then(
+                if (active) Modifier.glowBorder(TermuxGreen.copy(alpha = 0.5f), TermuxKeyShape, 4.dp)
+                else Modifier
+            )
+            // Bottom shadow for 3D effect when not pressed
+            .then(
+                if (!isPressed) Modifier.border(width = 2.dp, color = Color(0xFF151515), shape = TermuxKeyShape)
+                else Modifier
+            )
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text          = label,
+            color         = if (active) TermuxTextActive else TermuxText,
+            fontSize      = 12.sp,
+            fontWeight    = if (active) FontWeight.Bold else FontWeight.Medium,
+            fontFamily    = FontFamily.Monospace,
+            letterSpacing = 0.5.sp
+        )
+    }
 }

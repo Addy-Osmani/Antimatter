@@ -41,6 +41,7 @@ class BridgeWebSocket(private val context: Context) {
         .pingInterval(30, TimeUnit.SECONDS)
         .build()
 
+    @Volatile
     private var webSocket: WebSocket? = null
     private val gson = Gson()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -48,7 +49,7 @@ class BridgeWebSocket(private val context: Context) {
     private var currentUrl: String? = null
     private var token: String? = null
     private var clientId: String? = null
-    private var clientSecret: String? = null
+    private var clientSecret: ByteArray? = null
     private var pubKey: String? = null
     private var reconnectAttempt = 0
     private val isConnecting = java.util.concurrent.atomic.AtomicBoolean(false)
@@ -66,6 +67,7 @@ class BridgeWebSocket(private val context: Context) {
         var timeoutJob: Job? = null
     )
     private val pendingAcks = ConcurrentHashMap<String, PendingMessage>()
+    private val notificationIdCounter = java.util.concurrent.atomic.AtomicInteger(0)
 
     // State flows
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
@@ -100,7 +102,7 @@ class BridgeWebSocket(private val context: Context) {
         currentUrl = url
         this.token = token?.takeIf { it.isNotBlank() }
         this.clientId = clientId?.takeIf { it.isNotBlank() }
-        this.clientSecret = clientSecret?.takeIf { it.isNotBlank() }
+        this.clientSecret = clientSecret?.takeIf { it.isNotBlank() }?.toByteArray()
         this.pubKey = pubKey?.takeIf { it.isNotBlank() }
         connectInternal()
     }
@@ -128,7 +130,8 @@ class BridgeWebSocket(private val context: Context) {
                 
             if (clientId != null && clientSecret != null) {
                 requestBuilder.header("CF-Access-Client-Id", clientId!!)
-                requestBuilder.header("CF-Access-Client-Secret", clientSecret!!)
+                requestBuilder.header("CF-Access-Client-Secret", String(clientSecret!!))
+                clientSecret!!.fill(0) // Clear the secret from memory
             }
                 
             val request = requestBuilder.build()
@@ -163,7 +166,6 @@ class BridgeWebSocket(private val context: Context) {
                 }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                Log.d("BridgeWebSocket", "Received: ${text.take(100)}")
                 scope.launch {
                     try {
                         val jsonObject = JsonParser.parseString(text).asJsonObject
@@ -214,12 +216,14 @@ class BridgeWebSocket(private val context: Context) {
                             
                             val pubKeyStr = pubKey
                             val challenge = pendingChallenge
+                            pendingChallenge = null
                             
                             if (pubKeyStr != null && challenge != null) {
                                 try {
                                     val signatureBytes = android.util.Base64.decode(message.signature, android.util.Base64.DEFAULT)
                                     val pubKeyRawBytes = android.util.Base64.decode(pubKeyStr, android.util.Base64.DEFAULT)
                                     
+                                    // RFC 8410 SPKI prefix for Ed25519 (OID 1.3.101.112)
                                     val prefix = byteArrayOf(
                                         0x30, 0x2A, 0x30, 0x05, 0x06, 0x03, 0x2B, 0x65, 0x70, 0x03, 0x21, 0x00
                                     )
@@ -309,7 +313,12 @@ class BridgeWebSocket(private val context: Context) {
 
     private fun scheduleReconnect() {
         if (manuallyDisconnected || currentUrl == null) return
-        if (reconnectAttempt >= 20) return // Max retries reached
+        if (reconnectAttempt >= 20) {
+            scope.launch {
+                _messages.emit(InboundMessage.Error("Failed to connect after 20 attempts. Please check your network or restart the app."))
+            }
+            return
+        }
         
         reconnectAttempt++
         // Exponential backoff: max 30s
@@ -357,6 +366,9 @@ class BridgeWebSocket(private val context: Context) {
                 } else {
                     Log.e("BridgeWebSocket", "Failed to deliver message ${pending.id} after 3 retries.")
                     pendingAcks.remove(pending.id)
+                    scope.launch {
+                        _messages.emit(InboundMessage.Error("Message could not be delivered to the agent."))
+                    }
                 }
             }
         }
@@ -400,6 +412,6 @@ class BridgeWebSocket(private val context: Context) {
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+        notificationManager.notify(notificationIdCounter.incrementAndGet(), notification)
     }
 }

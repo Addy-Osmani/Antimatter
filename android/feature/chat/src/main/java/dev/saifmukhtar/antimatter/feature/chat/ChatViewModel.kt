@@ -137,7 +137,7 @@ class ChatViewModel @Inject constructor(
                     it.copy(
                         conversationId = message.conversationId,
                         expectedStepCount = message.stepCount,
-                        currentModel = message.model,
+                        currentModel = message.model ?: it.currentModel,
                         cloudflareUrl = message.cloudflareUrl,
                         environment = message.environment
                     )
@@ -282,7 +282,13 @@ class ChatViewModel @Inject constructor(
                 }
             }
             is InboundMessage.Error -> {
-                _uiState.update { it.copy(error = message.message) }
+                _uiState.update { state -> 
+                    val newSteps = state.steps.toMutableList()
+                    if (state.isGenerating && newSteps.isNotEmpty() && newSteps.last().case == "userInput") {
+                        newSteps.removeLast()
+                    }
+                    state.copy(error = message.message, steps = newSteps, isGenerating = false)
+                }
                 // Auto-dismiss error after 5 seconds
                 viewModelScope.launch {
                     kotlinx.coroutines.delay(5000)
@@ -351,8 +357,13 @@ class ChatViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     android.util.Log.e("ChatViewModel", "Failed to process image", e)
-                    _uiState.update { it.copy(error = "Failed to process image") }
-                    webSocket.sendMessage(OutboundMessage.SendMessage(textToSend, agentId = _uiState.value.activeAgentId))
+                    _uiState.update { state -> 
+                        val newSteps = state.steps.toMutableList()
+                        if (newSteps.isNotEmpty() && newSteps.last().case == "userInput") {
+                            newSteps.removeLast()
+                        }
+                        state.copy(error = "Failed to process image", steps = newSteps, isGenerating = false)
+                    }
                 }
             }
         } else {
@@ -472,6 +483,6 @@ class ChatViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        webSocket.disconnect()
+        // Removed webSocket.disconnect() as it's a singleton (BUG-8)
     }
 }

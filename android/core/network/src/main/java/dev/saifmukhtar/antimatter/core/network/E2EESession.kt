@@ -26,7 +26,7 @@ class E2EESession {
 
     private var c2sKey: ByteArray? = null
     private var s2cKey: ByteArray? = null
-    private var msgCounter = 0
+    private val msgCounter = java.util.concurrent.atomic.AtomicInteger(0)
 
     /**
      * Completes the ECDH handshake and derives the directional keys.
@@ -66,9 +66,9 @@ class E2EESession {
      */
     fun encrypt(plaintext: String, direction: String = "cmd:"): EncryptedEnvelope {
         val key = c2sKey ?: throw IllegalStateException("Session keys not derived")
-        msgCounter++
+        val id = msgCounter.incrementAndGet()
         
-        val aad = "$direction:v1:msg_id:$msgCounter".toByteArray()
+        val aad = "$direction:v1:msg_id:$id".toByteArray()
         val nonce = ByteArray(12).apply { SecureRandom().nextBytes(this) }
         
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
@@ -140,7 +140,7 @@ class E2EESession {
             mac.update(blockIndex)
             t = mac.doFinal()
 
-            val copyLength = Math.min(32, outLength - offset)
+            val copyLength = minOf(32, outLength - offset)
             System.arraycopy(t, 0, okm, offset, copyLength)
             offset += copyLength
             blockIndex++

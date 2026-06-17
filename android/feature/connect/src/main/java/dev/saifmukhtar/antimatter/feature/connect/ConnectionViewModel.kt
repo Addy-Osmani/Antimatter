@@ -8,6 +8,8 @@ import dev.saifmukhtar.antimatter.core.network.BridgeWebSocket
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,11 +35,14 @@ class ConnectionViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userPrefs.savedCredentialsFlow.collect { creds ->
-                val url = creds.url
-                if (!url.isNullOrEmpty() && webSocket.connectionState.value == BridgeWebSocket.ConnectionState.DISCONNECTED) {
-                    webSocket.connect(url, creds.clientId, creds.clientSecret, creds.token, creds.pubKey)
-                }
+            // Wait for UserPreferencesRepository to load
+            userPrefs.isLoadedFlow.filter { it }.first()
+            
+            // One-time auto-connect on startup
+            val creds = userPrefs.savedCredentialsFlow.value
+            val url = creds.url
+            if (!url.isNullOrEmpty() && webSocket.connectionState.value == BridgeWebSocket.ConnectionState.DISCONNECTED) {
+                webSocket.connect(url, creds.clientId, creds.clientSecret, creds.token, creds.pubKey)
             }
         }
     }
@@ -58,17 +63,20 @@ class ConnectionViewModel @Inject constructor(
     }
 
     fun disconnectManually() {
-        // Disconnect simply drops the websocket connection and clears active credentials,
-        // it no longer deletes the profiles.
+        webSocket.disconnect()
         viewModelScope.launch {
             userPrefs.clearCredentials()
         }
-        webSocket.disconnect()
     }
 
     fun switchProfile(id: String) {
         viewModelScope.launch {
             userPrefs.setActiveProfile(id)
+            val creds = userPrefs.savedCredentialsFlow.value
+            val url = creds.url
+            if (!url.isNullOrEmpty()) {
+                webSocket.connect(url, creds.clientId, creds.clientSecret, creds.token, creds.pubKey)
+            }
         }
     }
 
