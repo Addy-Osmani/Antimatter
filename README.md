@@ -5,6 +5,7 @@
 [![Docs](https://img.shields.io/badge/docs-Website-deep_purple.svg)](https://antimatter.saifmukhtar.dev)
 [![GitHub Stars](https://img.shields.io/github/stars/saifmukhtar/antimatter.svg?style=social)](https://github.com/saifmukhtar/antimatter/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/saifmukhtar/antimatter)
 
 > [!WARNING]
 > **Community Project Disclaimer**
@@ -43,9 +44,9 @@ The brain of the operation. This is a highly secure Python daemon that runs in t
 Lightweight, "dumb" IPC clients that connect to the Gateway. Because they don't have to worry about security or networking, they are extremely modular and custom-built for specific AI environments.
 
 We currently officially support:
-- **[Antigravity IDE Adapter (`ag`)](docs/AG.md)** - A TypeScript VS Code extension.
-- **[Antigravity 2.0 Adapter (`ag2`)](docs/AG2.md)** - A standalone Python daemon.
-- **[Claude Code Adapter (`cc`)](docs/CC.md)** - A Node.js streaming integration.
+- **[Antigravity IDE Adapter (`ag`)](https://antimatter.saifmukhtar.dev/adapters)** - A TypeScript VS Code extension.
+- **[Antigravity 2.0 Adapter (`ag2`)](https://antimatter.saifmukhtar.dev/adapters)** - A standalone Python daemon.
+- **[Claude Code Adapter (`cc`)](https://antimatter.saifmukhtar.dev/adapters)** - A Node.js streaming integration.
 
 *Want to connect a brand new AI agent? Just write a simple WebSocket IPC script and connect it to the Gateway!*
 
@@ -81,17 +82,17 @@ Install the adapter for the AI you are using. For example, for the Antigravity I
 Explore the depths of the ecosystem:
 
 **Getting Started**
-- [**Installation & Setup**](docs/INSTALLATION.md) - End-to-end quickstart.
-- [**Features Breakdown**](docs/FEATURES.md) - A detailed list of everything Antimatter can do.
+- [**Installation & Setup**](https://antimatter.saifmukhtar.dev/getting-started) - End-to-end quickstart.
+- [**Features Breakdown**](https://antimatter.saifmukhtar.dev) - A detailed list of everything Antimatter can do.
 
 **Architecture & Security**
-- [**Architecture Deep Dive**](docs/ARCHITECTURE.md) - Learn exactly how the Gateway routes IPC payloads.
-- [**Security Policy**](docs/SECURITY.md) - Read about our Biometric locks, Cryptographic Handshakes, and sandboxing.
-- [**Zero Trust Guide**](docs/ZERO_TRUST.md) - Add a secondary enterprise authentication layer with Cloudflare Access.
+- [**Architecture Deep Dive**](https://antimatter.saifmukhtar.dev/architecture) - Learn exactly how the Gateway routes IPC payloads.
+- [**Security Policy**](https://antimatter.saifmukhtar.dev/security) - Read about our Biometric locks, Cryptographic Handshakes, and sandboxing.
+- [**Zero Trust Guide**](https://antimatter.saifmukhtar.dev/security) - Add a secondary enterprise authentication layer with Cloudflare Access.
 
 **Reference**
-- [**WebSocket Protocol**](docs/PROTOCOL.md) - The complete message contract between the Gateway and the app.
-- [**Android App**](docs/ANDROID.md) - Learn how the Jetpack Compose app dynamically selects active adapters.
+- [**WebSocket Protocol**](https://antimatter.saifmukhtar.dev/protocol) - The complete message contract between the Gateway and the app.
+- [**Android App**](https://antimatter.saifmukhtar.dev/android) - Learn how the Jetpack Compose app dynamically selects active adapters.
 
 ---
 

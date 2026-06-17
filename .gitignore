@@ -9,6 +9,7 @@ reports/
 .vscode/
 .agents/
 outputs/
+.astro/
 
 # Python
 __pycache__/
