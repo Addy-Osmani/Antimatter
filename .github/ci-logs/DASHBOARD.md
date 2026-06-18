@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-68%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-66-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-67%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-67-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 66 |
+| **Total Runs** | 67 |
 | **Passed** | 45 |
-| **Failed** | 18 |
-| **Pass Rate** | 68% |
+| **Failed** | 19 |
+| **Pass Rate** | 67% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-18 20:09 | Adapters CI | ❌ FAIL | Chore: Adding leftover files | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27786288704) |
 | 2026-06-18 20:09 | iOS CI | ✅ PASS | Chore: Adding leftover files | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27786288660) |
 | 2026-06-17 08:48 | Deploy Docs to Cloudflare Pages | ✅ PASS | chore: update workflow dashboard | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27677072696) |
 | 2026-06-17 08:38 | Android CI | ❌ FAIL | chore(deps): bump astro @astrojs/starlight and @astrojs/starlight-tailwind | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27676403054) |
@@ -63,4 +64,3 @@
 | 2026-06-13 12:30 | Extension CI | ✅ PASS | security: fix CodeQL taint tracking for client secret logging | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466800993) |
 | 2026-06-13 12:29 | Python CI | ✅ PASS | security: fix CodeQL taint tracking for client secret logging | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466800994) |
 | 2026-06-13 12:21 | CodeQL Advanced | ✅ PASS | security: fix CodeQL vulnerabilities (injection auth permissions logs) | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466414684) |
-| 2026-06-13 12:14 | Android CI | ✅ PASS | security: fix CodeQL vulnerabilities (injection auth permissions logs) | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27466414667) |
