@@ -45,13 +45,55 @@ class AgentBridge:
         }))
 
     async def send_history(self):
-        # We just return the current conversation as the only one in history
-        # In a real app, you would scan brain/ for all conversations
-        conversations = [{
-            "id": self.conversation_id,
-            "timestamp": 0,
-            "title": "Current Session"
-        }]
+        brain_dir = os.path.join(self.app_data_dir, "brain")
+        conversations = []
+        if os.path.exists(brain_dir):
+            import json, re
+            for d in os.listdir(brain_dir):
+                d_path = os.path.join(brain_dir, d)
+                logs_dir = os.path.join(d_path, ".system_generated", "logs")
+                if os.path.isdir(logs_dir):
+                    transcript_path = os.path.join(logs_dir, "transcript.jsonl")
+                    if os.path.exists(transcript_path):
+                        timestamp = int(os.path.getmtime(transcript_path) * 1000)
+                        title = "New Conversation"
+                        try:
+                            with open(transcript_path, 'r', encoding='utf-8') as f:
+                                for line in f:
+                                    try:
+                                        data = json.loads(line)
+                                        if data.get("type") == "USER_INPUT":
+                                            content = data.get("content", "")
+                                            match = re.search(r'<USER_REQUEST>\s*(.*?)\s*</USER_REQUEST>', content, re.DOTALL)
+                                            if match:
+                                                title = match.group(1).strip()
+                                            else:
+                                                title = re.sub(r'<[^>]+>', '', content).strip()
+                                            # Truncate title
+                                            if len(title) > 50:
+                                                title = title[:47] + "..."
+                                            break
+                                    except Exception:
+                                        pass
+                        except Exception:
+                            pass
+                        
+                        conversations.append({
+                            "id": d,
+                            "timestamp": timestamp,
+                            "title": title
+                        })
+        
+        # Sort descending by timestamp
+        conversations.sort(key=lambda x: x["timestamp"], reverse=True)
+        
+        if not conversations:
+            conversations = [{
+                "id": self.conversation_id,
+                "timestamp": 0,
+                "title": "Current Session"
+            }]
+
         await self.websocket.send(json.dumps({
             "type": "HISTORY_LIST",
             "conversations": conversations
@@ -86,7 +128,7 @@ class AgentBridge:
                 if match:
                     parsed_content = match.group(1).strip()
                     if not parsed_content.startswith("Task id") and not parsed_content.startswith("Tool is running"):
-                        add_step("userInput", parsed_content)
+                        add_step("SYSTEM_MESSAGE", parsed_content)
             elif msg_type == "PLANNER_RESPONSE":
                 thinking = data.get("thinking", "")
                 if thinking:
@@ -141,12 +183,16 @@ class AgentBridge:
         self.last_position = 0
 
         if os.path.exists(transcript_path):
-            with open(transcript_path, 'r', encoding='utf-8') as f:
-                for line in f:
-                    parsed_steps = self._parse_line(line)
-                    if parsed_steps:
-                        steps.extend(parsed_steps)
-                self.last_position = f.tell()
+            try:
+                with open(transcript_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        parsed_steps = self._parse_line(line)
+                        if parsed_steps:
+                            steps.extend(parsed_steps)
+                    self.last_position = f.tell()
+
+            except Exception as e:
+                print(f"[Gateway] ERROR in reading transcript: {e}", flush=True)
 
         await self.websocket.send(json.dumps({
             "type": "STEP_BATCH",
@@ -215,10 +261,8 @@ class AgentBridge:
                     if subdirs:
                         newest_dir = max(subdirs, key=os.path.getmtime)
                         newest_convo_id = os.path.basename(newest_dir)
-                        if newest_convo_id != self.conversation_id and newest_convo_id != "scratch":
-                            self.conversation_id = newest_convo_id
-                            self.step_index = 0
-                            self.last_position = 0
+                        if newest_convo_id != "scratch":
+                            # Only broadcast history so the sidebar updates, don't force a UI switch
                             await self.send_history()
             except Exception:
                 pass
@@ -248,6 +292,19 @@ class AgentBridge:
             "type": "ARTIFACTS_LIST",
             "artifacts": artifacts
         }))
+
+    async def read_artifact(self, path: str):
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                await self.websocket.send(json.dumps({
+                    "type": "ARTIFACT_CONTENT",
+                    "path": path,
+                    "content": content
+                }))
+            except Exception:
+                pass
 
     async def send_workspace(self, root_path=None):
         if root_path is None:
@@ -308,17 +365,52 @@ class AgentBridge:
                 "message": f"Failed to read file: {e}"
             }))
 
-    async def process_message(self, text: str):
+    async def process_message(self, text: str, images: list = None):
+        if images is None:
+            images = []
+            
+        # Process images
+        if images:
+            import base64
+            import time
+            scratch_dir = os.path.join(self.app_data_dir, "brain", self.conversation_id, "scratch")
+            os.makedirs(scratch_dir, exist_ok=True)
+            
+            for i, b64_str in enumerate(images):
+                try:
+                    # Strip data URI prefix if present (e.g. data:image/jpeg;base64,)
+                    if "," in b64_str:
+                        b64_str = b64_str.split(",")[1]
+                        
+                    img_data = base64.b64decode(b64_str)
+                    timestamp = int(time.time() * 1000)
+                    filename = f"upload_{timestamp}_{i}.jpg"
+                    filepath = os.path.join(scratch_dir, filename)
+                    
+                    with open(filepath, "wb") as f:
+                        f.write(img_data)
+                        
+                    text += f"\n\n![Image](file://{filepath})"
+                except Exception as e:
+                    print(f"Failed to decode image {i}: {e}")
+
         # Notify Android app we received the input
         await self._send_step("userInput", text)
         await self._send_generating()
 
         try:
-            import subprocess
+            import asyncio
             agentapi_path = os.path.expanduser("~/.gemini/antigravity/bin/agentapi")
-            result = subprocess.run([agentapi_path, "send-message", self.conversation_id, text], capture_output=True, text=True)
-            if result.returncode != 0:
-                await self._send_step("errorMessage", f"Failed to inject message into IDE: {result.stderr}")
+            
+            proc = await asyncio.create_subprocess_exec(
+                agentapi_path, "send-message", self.conversation_id, text,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await proc.communicate()
+            
+            if proc.returncode != 0:
+                await self._send_step("errorMessage", f"Failed to inject message into IDE: {stderr.decode()}")
             else:
                 # Let the IDE handle generating the response!
                 await self._send_step("ephemeralMessage", "Message successfully queued to IDE Agent. Pull to refresh history.")

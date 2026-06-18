@@ -45,15 +45,19 @@ async def main():
             async with websockets.connect(uri) as websocket:
                 logger.info("[AG2 Adapter] Connected to Gateway IPC.")
                 
+                import uuid
                 # Register
                 await websocket.send(json.dumps({
                     "type": "REGISTER_ADAPTER",
+                    "id": str(uuid.uuid4()),
                     "name": "ag2",
                     "workspaceRoot": get_default_workspace()
                 }))
                 
                 convo_id = os.environ.get("AGY_CONVERSATION_ID") or get_latest_conversation_id(APP_DATA_DIR)
                 bridge = AgentBridge(websocket, str(APP_DATA_DIR), convo_id)
+                bridge._watch_task = asyncio.create_task(bridge.watch_brain_dir())
+                bridge._poll_task = asyncio.create_task(bridge.poll_transcript())
                 
                 try:
                     async for message in websocket:
@@ -62,11 +66,12 @@ async def main():
                             msg_type = data.get("type")
                             
                             if msg_type == "SUBSCRIBE_CONVERSATION":
+                                cid = data.get("conversationId")
+                                if cid:
+                                    bridge.conversation_id = cid
                                 if bridge.conversation_id:
                                     await bridge.send_transcript(bridge.conversation_id)
                                     await bridge.send_artifacts(bridge.conversation_id)
-                                bridge._watch_task = asyncio.create_task(bridge.watch_brain_dir())
-                                asyncio.create_task(bridge.poll_transcript())
                                 await bridge.send_workspace(get_default_workspace())
 
                             elif msg_type == "NEW_CONVERSATION":
@@ -83,6 +88,11 @@ async def main():
                                 if cid:
                                     await bridge.send_artifacts(cid)
 
+                            elif msg_type == "READ_ARTIFACT":
+                                path = data.get("path")
+                                if path:
+                                    await bridge.read_artifact(path)
+
                             elif msg_type == "GET_FILES":
                                 await bridge.send_workspace(get_default_workspace())
                                 
@@ -93,7 +103,8 @@ async def main():
                                 
                             elif msg_type == "SEND_MESSAGE":
                                 text = data.get("text", "")
-                                asyncio.create_task(bridge.process_message(text))
+                                images = data.get("images", [])
+                                asyncio.create_task(bridge.process_message(text, images))
                                 
                             elif msg_type == "PING":
                                 await websocket.send(json.dumps({"type": "PONG"}))

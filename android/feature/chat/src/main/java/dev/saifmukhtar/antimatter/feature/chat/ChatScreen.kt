@@ -39,8 +39,8 @@ import dev.saifmukhtar.antimatter.feature.chat.ChatUiState
 import dev.saifmukhtar.antimatter.core.ui.MarkdownText
 
 sealed class ChatItem {
-    data class SingleStep(val step: TrajectoryStep) : ChatItem()
-    data class ThoughtGroup(val steps: List<TrajectoryStep>) : ChatItem()
+    data class SingleStep(val step: TrajectoryStep, val originalIndex: Int) : ChatItem()
+    data class ThoughtGroup(val steps: List<TrajectoryStep>, val originalIndex: Int) : ChatItem()
 }
 
 fun cleanThoughtText(text: String?): String? {
@@ -92,23 +92,26 @@ fun groupSteps(steps: List<TrajectoryStep>): List<ChatItem> {
 
     val result = mutableListOf<ChatItem>()
     var currentGroup = mutableListOf<TrajectoryStep>()
-    
-    for (step in visibleSteps) {
+    var groupStartIndex = 0
+
+    for (i in visibleSteps.indices) {
+        val step = visibleSteps[i]
         if (step.stepCase == StepCase.PLANNER_RESPONSE) {
+            if (currentGroup.isEmpty()) groupStartIndex = i
             val cleanedText = cleanThoughtText(step.value)
             if (!cleanedText.isNullOrBlank()) {
                 currentGroup.add(step.copy(value = cleanedText))
             }
         } else {
             if (currentGroup.isNotEmpty()) {
-                result.add(ChatItem.ThoughtGroup(currentGroup))
+                result.add(ChatItem.ThoughtGroup(currentGroup, groupStartIndex))
                 currentGroup = mutableListOf<TrajectoryStep>()
             }
-            result.add(ChatItem.SingleStep(step))
+            result.add(ChatItem.SingleStep(step, i))
         }
     }
     if (currentGroup.isNotEmpty()) {
-        result.add(ChatItem.ThoughtGroup(currentGroup))
+        result.add(ChatItem.ThoughtGroup(currentGroup, groupStartIndex))
     }
     return result
 }
@@ -132,7 +135,8 @@ fun ChatScreen(
     onClearArtifactContent: () -> Unit,
     onSwitchAgent: (String) -> Unit,
     onSearchHistory: (String) -> Unit,
-    onSelectImage: (android.net.Uri?) -> Unit
+    onSelectImage: (android.net.Uri?) -> Unit,
+    onStepVisible: (Int) -> Unit
 ) {
     val listState = rememberLazyListState()
     val context = LocalContext.current
@@ -164,7 +168,11 @@ fun ChatScreen(
     val totalItemsCount = groupedItems.size + if (uiState.isGenerating) 1 else 0
 
     var unreadCount by remember { mutableStateOf(0) }
-    val isScrolledUp by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+    val isScrolledUp by remember { 
+        derivedStateOf { 
+            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 10 
+        } 
+    }
 
     // Reset unread count when user scrolls to bottom
     LaunchedEffect(isScrolledUp) {
@@ -177,9 +185,10 @@ fun ChatScreen(
     LaunchedEffect(uiState.steps.size) {
         if (totalItemsCount == 0) return@LaunchedEffect
         if (isInitialLoad) {
+            // We wait until the initial load is complete before enabling the auto-scroll badge logic.
+            // We removed the forced listState.scrollToItem(0) here because it was overwriting the saved scroll state!
             if (uiState.steps.size >= uiState.expectedStepCount) {
                 isInitialLoad = false
-                listState.scrollToItem(0) // Start at bottom for new chats
             }
         } else {
             if (isScrolledUp) {
@@ -353,7 +362,7 @@ fun ChatScreen(
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Text(
-                        text = "Agent is offline. Input disabled.",
+                        text = if (uiState.activeAgentId == null) "Please select an agent from the top dropdown." else "Agent is offline. Input disabled.",
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -401,6 +410,24 @@ fun ChatScreen(
                     .fillMaxSize()
                     .weight(1f)
             ) {
+                LaunchedEffect(listState) {
+                    snapshotFlow { listState.firstVisibleItemIndex }
+                        .collect { index ->
+                            // Calculate step index from reversed grouped list index
+                            val reversedItems = groupedItems.reversed()
+                            if (index in reversedItems.indices) {
+                                val item = reversedItems[index]
+                                if (item is ChatItem.SingleStep) {
+                                    onStepVisible(uiState.steps.indexOf(item.step))
+                                } else if (item is ChatItem.ThoughtGroup) {
+                                    item.steps.firstOrNull()?.let {
+                                        onStepVisible(uiState.steps.indexOf(it))
+                                    }
+                                }
+                            }
+                        }
+                }
+                
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
@@ -410,7 +437,12 @@ fun ChatScreen(
                     val reversedItems = groupedItems.reversed()
                     itemsIndexed(
                         items = reversedItems,
-                        key = { index, _ -> reversedItems.size - 1 - index }
+                        key = { _, item ->
+                            when (item) {
+                                is ChatItem.SingleStep -> "step_${item.originalIndex}"
+                                is ChatItem.ThoughtGroup -> "thought_group_${item.originalIndex}"
+                            }
+                        }
                     ) { _, item ->
                         when (item) {
                             is ChatItem.SingleStep -> {
@@ -455,7 +487,12 @@ fun ChatScreen(
                 if (isScrolledUp) {
                     SmallFloatingActionButton(
                         onClick = {
-                            scope.launch { listState.animateScrollToItem(0) }
+                            scope.launch { 
+                                if (listState.firstVisibleItemIndex > 50) {
+                                    listState.scrollToItem(50)
+                                }
+                                listState.animateScrollToItem(0) 
+                            }
                         },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)

@@ -72,9 +72,26 @@ class ChatViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            val localAgents = appDao.getAllAgentsFlow().firstOrNull() ?: emptyList()
-            val agentInfos = localAgents.map { dev.saifmukhtar.antimatter.core.network.InboundMessage.AgentInfo(it.id, it.name, "offline") }
-            _uiState.update { it.copy(availableAgents = agentInfos, activeAgentId = agentInfos.firstOrNull()?.id) }
+            val localAgents = appDao.getAllAgentsFlow().firstOrNull()
+            if (localAgents != null && localAgents.isNotEmpty()) {
+                val agentInfos = localAgents.map { dev.saifmukhtar.antimatter.core.network.InboundMessage.AgentInfo(it.id, it.name, it.status) }
+                _uiState.update { state -> 
+                    state.copy(
+                        availableAgents = agentInfos,
+                        activeAgentId = null // Require manual selection
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val localConversations = appDao.getAllConversationsFlow().firstOrNull()
+            if (localConversations != null && localConversations.isNotEmpty()) {
+                val historyList = localConversations.map { 
+                    dev.saifmukhtar.antimatter.core.network.ConversationSummary(id = it.id, title = it.title, timestamp = it.timestamp) 
+                }
+                _uiState.update { it.copy(history = historyList) }
+            }
         }
 
         @OptIn(kotlinx.coroutines.FlowPreview::class)
@@ -89,8 +106,25 @@ class ChatViewModel @Inject constructor(
         }
         // Observe connection state
         viewModelScope.launch {
+            var wasConnected = false
             webSocket.connectionState.collect { state ->
+                val isConnected = state == BridgeWebSocket.ConnectionState.CONNECTED
                 _uiState.update { it.copy(connectionState = state) }
+                
+                if (!wasConnected && isConnected) {
+                    // We just connected or reconnected after connection loss
+                    requestHistory()
+                    
+                    _uiState.value.conversationId?.let { cid ->
+                        // Re-subscribe to the active conversation so we don't miss new messages
+                        webSocket.sendMessage(OutboundMessage.SubscribeConversation(
+                            conversationId = cid,
+                            lastKnownStepCount = _uiState.value.steps.size,
+                            agentId = _uiState.value.activeAgentId
+                        ))
+                    }
+                }
+                wasConnected = isConnected
             }
         }
 
@@ -109,22 +143,9 @@ class ChatViewModel @Inject constructor(
             return
         }
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                // Use prefix match syntax for FTS
-                val ftsQuery = query.split(" ").joinToString(" ") { "$it*" }
-                val matchingSteps = appDao.searchSteps(ftsQuery)
-                val matchingIds = matchingSteps.map { it.conversationId }.toSet()
-                
-                val history = _uiState.value.history
-                val results = history.filter { it.id in matchingIds || it.title.contains(query, ignoreCase = true) }
-                
-                _uiState.update { it.copy(searchResults = results) }
-            } catch (e: Exception) {
-                // Fallback to title only if FTS fails
-                val history = _uiState.value.history
-                val results = history.filter { it.title.contains(query, ignoreCase = true) }
-                _uiState.update { it.copy(searchResults = results) }
-            }
+            val history = _uiState.value.history
+            val results = history.filter { it.title.contains(query, ignoreCase = true) }
+            _uiState.update { it.copy(searchResults = results) }
         }
     }
 
@@ -155,7 +176,6 @@ class ChatViewModel @Inject constructor(
                 if (cid != null && cid != previousConversationId) {
                     subscribeConversation(cid)
                 }
-                webSocket.sendMessage(OutboundMessage.GetHistory())
             }
             is InboundMessage.Step -> {
                 _uiState.update { state ->
@@ -261,23 +281,20 @@ class ChatViewModel @Inject constructor(
                     }
                 }
             }
-            is InboundMessage.FileContent -> {
-                // If it's a markdown artifact we requested, we assume it gets populated here.
-                if (message.path.endsWith(".md")) {
-                    _uiState.update { it.copy(activeArtifactContent = message.content) }
-                    _uiState.value.conversationId?.let { cid ->
-                        viewModelScope.launch(Dispatchers.IO) {
-                            val compressed = GzipUtils.compress(message.content)
-                            val name = message.path.substringAfterLast("/")
-                            appDao.insertArtifacts(listOf(
-                                dev.saifmukhtar.antimatter.core.data.ArtifactEntity(
-                                    conversationId = cid,
-                                    path = message.path,
-                                    name = name,
-                                    compressedContent = compressed
-                                )
-                            ))
-                        }
+            is InboundMessage.ArtifactContent -> {
+                _uiState.update { it.copy(activeArtifactContent = message.content) }
+                _uiState.value.conversationId?.let { cid ->
+                    viewModelScope.launch(Dispatchers.IO) {
+                        val compressed = GzipUtils.compress(message.content)
+                        val name = message.path.substringAfterLast("/")
+                        appDao.insertArtifacts(listOf(
+                            dev.saifmukhtar.antimatter.core.data.ArtifactEntity(
+                                conversationId = cid,
+                                path = message.path,
+                                name = name,
+                                compressedContent = compressed
+                            )
+                        ))
                     }
                 }
             }
@@ -296,7 +313,30 @@ class ChatViewModel @Inject constructor(
                 }
             }
             is InboundMessage.AvailableAgents -> {
-                _uiState.update { it.copy(availableAgents = message.agents, allowedWorkspaces = message.allowedWorkspaces) }
+                val oldActiveAgentId = _uiState.value.activeAgentId
+                var newActiveAgentId = oldActiveAgentId
+                val oldAgent = _uiState.value.availableAgents.find { it.id == oldActiveAgentId }
+                
+                if (oldActiveAgentId != null && message.agents.none { it.id == oldActiveAgentId }) {
+                    val sameNameAgent = message.agents.find { it.name == oldAgent?.name }
+                    newActiveAgentId = sameNameAgent?.id ?: message.agents.firstOrNull()?.id
+                }
+
+                _uiState.update { it.copy(
+                    availableAgents = message.agents, 
+                    allowedWorkspaces = message.allowedWorkspaces,
+                    activeAgentId = newActiveAgentId
+                ) }
+
+                if (newActiveAgentId != null && newActiveAgentId != oldActiveAgentId) {
+                    _uiState.update { it.copy(
+                        conversationId = null,
+                        steps = emptyList(),
+                        selectedImageUri = null
+                    ) }
+                    requestHistory()
+                }
+
                 viewModelScope.launch(Dispatchers.IO) {
                     message.agents.forEach { info ->
                         appDao.insertAgent(dev.saifmukhtar.antimatter.core.data.AgentEntity(id = info.id, name = info.name, status = info.status, lastSeen = System.currentTimeMillis()))
@@ -314,6 +354,7 @@ class ChatViewModel @Inject constructor(
     }
 
     fun sendMessage(text: String) {
+        val activeAgentId = _uiState.value.activeAgentId ?: return
         if (text.isBlank() && _uiState.value.selectedImageUri == null) return
         
         val imageUri = _uiState.value.selectedImageUri
@@ -373,27 +414,38 @@ class ChatViewModel @Inject constructor(
 
     fun startNewConversation() {
         _uiState.update { it.copy(steps = emptyList(), conversationId = null, isGenerating = false) }
-        webSocket.sendMessage(OutboundMessage.NewConversation(agentId = _uiState.value.activeAgentId))
+        _uiState.value.activeAgentId?.let {
+            webSocket.sendMessage(OutboundMessage.NewConversation(agentId = it))
+        }
         requestHistory() // Refresh history after starting new conversation
     }
 
     fun subscribeConversation(id: String) {
         viewModelScope.launch {
-            // Instantly load cached steps from Room
+            // Instantly load cached steps from Room to support offline viewing
             val cachedSteps = withContext(Dispatchers.IO) {
                 appDao.getStepsForConversation(id)
             }
-            val initialSteps = cachedSteps.map { it.toTrajectoryStep() }
-            
+
+            val initialSteps = mutableListOf<TrajectoryStep>()
+            cachedSteps.forEach { entity ->
+                while (initialSteps.size < entity.stepIndex) {
+                    initialSteps.add(TrajectoryStep(case = "unknown", value = "..."))
+                }
+                initialSteps.add(entity.toTrajectoryStep())
+            }
+
             _uiState.update { it.copy(steps = initialSteps, conversationId = id, isGenerating = false) }
-            
-            // Send delta sync request with lastKnownStepCount
-            webSocket.sendMessage(OutboundMessage.SubscribeConversation(id, lastKnownStepCount = initialSteps.size, agentId = _uiState.value.activeAgentId))
+
+            // Fetch only the new steps to save bandwidth and improve performance
+            webSocket.sendMessage(OutboundMessage.SubscribeConversation(conversationId = id, lastKnownStepCount = initialSteps.size, agentId = _uiState.value.activeAgentId))
         }
     }
 
     fun requestHistory() {
-        webSocket.sendMessage(OutboundMessage.GetHistory(agentId = _uiState.value.activeAgentId))
+        _uiState.value.activeAgentId?.let {
+            webSocket.sendMessage(OutboundMessage.GetHistory(agentId = it))
+        }
     }
 
     fun requestArtifacts() {
@@ -416,19 +468,23 @@ class ChatViewModel @Inject constructor(
     fun requestArtifactContent(path: String) {
         _uiState.value.conversationId?.let { cid ->
             viewModelScope.launch {
-                val cached = withContext(Dispatchers.IO) {
+                val existing = withContext(Dispatchers.IO) {
                     appDao.getArtifact(cid, path)
                 }
-                val compressedContent = cached?.compressedContent
+                val compressedContent = existing?.compressedContent
                 if (compressedContent != null) {
-                    try {
-                        val decompressed = GzipUtils.decompress(compressedContent)
-                        _uiState.update { it.copy(activeArtifactContent = decompressed) }
-                    } catch (e: Exception) {
-                        android.util.Log.e("ChatViewModel", "Failed to decompress artifact", e)
+                    viewModelScope.launch(Dispatchers.IO) {
+                        try {
+                            val decompressed = GzipUtils.decompress(compressedContent)
+                            _uiState.update { it.copy(activeArtifactContent = decompressed) }
+                        } catch (e: Exception) {
+                            android.util.Log.e("ChatViewModel", "Failed to decompress artifact", e)
+                            webSocket.sendMessage(OutboundMessage.ReadArtifact(conversationId = cid, path = path, agentId = _uiState.value.activeAgentId))
+                        }
                     }
+                } else {
+                    webSocket.sendMessage(OutboundMessage.ReadArtifact(conversationId = cid, path = path, agentId = _uiState.value.activeAgentId))
                 }
-                webSocket.sendMessage(OutboundMessage.ReadFile(path, agentId = _uiState.value.activeAgentId))
             }
         }
     }
@@ -468,6 +524,30 @@ class ChatViewModel @Inject constructor(
             val summaries = localHistory.map { dev.saifmukhtar.antimatter.core.network.ConversationSummary(id = it.id, timestamp = it.timestamp, title = it.title) }
             _uiState.update { it.copy(history = summaries) }
         }
+    }
+
+    private var lastFetchedOffset = -1
+
+    fun onStepVisible(stepIndex: Int) {
+        val steps = _uiState.value.steps
+        if (stepIndex in steps.indices) {
+            val step = steps[stepIndex]
+            if (step.case == "unknown" && step.value == "...") {
+                val total = _uiState.value.expectedStepCount
+                if (total > 0) {
+                    // Calculate offset from the end
+                    val offset = kotlin.math.max(0, total - stepIndex - 25)
+                    if (offset != lastFetchedOffset) {
+                        lastFetchedOffset = offset
+                        fetchHistoryPage(_uiState.value.conversationId ?: return, offset, 50)
+                    }
+                }
+            }
+        }
+    }
+
+    fun fetchHistoryPage(conversationId: String, offset: Int, limit: Int) {
+        webSocket.sendMessage(OutboundMessage.GetHistoryPage(conversationId, offset, limit, agentId = _uiState.value.activeAgentId))
     }
 
     fun updateScrollState(index: Int, offset: Int) {
