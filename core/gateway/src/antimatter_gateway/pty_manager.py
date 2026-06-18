@@ -3,6 +3,7 @@ import os
 import ptyprocess
 import base64
 import logging
+import signal
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,14 @@ class PtyManager:
             return
 
         try:
+            env = os.environ.copy()
+            env["TERM"] = "xterm-256color"
+            env["LANG"] = "en_US.UTF-8"
+            env["PS1"] = "\\[\\e[1;34m\\]\\w\\[\\e[0m\\] \\$ "
+            env["PROMPT_COMMAND"] = ""
+
             # Spawn a raw byte-oriented pty
-            pty = ptyprocess.PtyProcess.spawn(['/bin/bash'], dimensions=(rows, cols))
+            pty = ptyprocess.PtyProcess.spawn(['/bin/bash', '--noprofile', '--norc'], dimensions=(rows, cols), env=env)
             self.sessions[session_id] = pty
             logger.info(f"Started PTY session {session_id} with PID {pty.pid}")
 
@@ -85,7 +92,10 @@ class PtyManager:
         if session_id not in self.sessions:
             return
         try:
-            self.sessions[session_id].setwinsize(rows, cols)
+            pty_proc = self.sessions[session_id]
+            pty_proc.setwinsize(rows, cols)
+            if pty_proc.pid:
+                os.kill(pty_proc.pid, signal.SIGWINCH)
         except Exception as e:
             logger.error(f"Failed to resize PTY {session_id}: {e}")
 

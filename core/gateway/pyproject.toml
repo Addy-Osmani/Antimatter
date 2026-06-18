@@ -5,6 +5,7 @@ name = "antimatter-gateway"
 dependencies = [
     "websockets>=12.0",
     "qrcode>=7.4.2",
+    "aiofiles>=23.0.0",
     "antimatter-shared-config",
     "antimatter-shared-crypto",
     "antimatter-shared-protocol",

@@ -1,6 +1,8 @@
 import asyncio
 import json
 import logging
+import pathlib
+import aiofiles
 from antimatter_crypto.e2ee import E2EESession
 from antimatter_gateway.pty_manager import PtyManager
 
@@ -10,12 +12,21 @@ class MessageRouter:
     def __init__(self, gateway=None):
         self.gateway = gateway
         self.clients = set()
-        self.adapters = {} # id -> {"name": str, "ws": websocket}
+        self.adapters = {}  # id -> {"name": str, "ws": websocket, "workspace_root": str}
         self.pty_manager = PtyManager(self)
+
+        # Workspace is completely independent of agents.
+        # Initialise from the first allowed_workspace in config, fall back to CWD.
+        allowed = (gateway.config.allowed_workspaces if gateway else [])
+        self.current_workspace: str = allowed[0] if allowed else str(pathlib.Path.cwd())
+        logger.info(f"Gateway workspace initialised to: {self.current_workspace}")
+
+    # ------------------------------------------------------------------ #
+    # Client / Adapter lifecycle
+    # ------------------------------------------------------------------ #
 
     def add_client(self, websocket):
         self.clients.add(websocket)
-        # When a client connects, instantly send them the list of agents
         asyncio.create_task(self.broadcast_system_state())
 
     def remove_client(self, websocket):
@@ -30,120 +41,239 @@ class MessageRouter:
             del self.adapters[agent_id]
             await self.broadcast_system_state()
 
+    # ------------------------------------------------------------------ #
+    # System state broadcast
+    # ------------------------------------------------------------------ #
+
+    # ------------------------------------------------------------------ #
+    # Tree serialisation helper
+    # ------------------------------------------------------------------ #
+
+    def _node_to_dict(self, node) -> dict:
+        """
+        Recursively converts a FileNode pydantic model to a plain dict,
+        renaming `is_directory` → `isDir` at every depth so Android Gson
+        can deserialise nested folders correctly.
+        """
+        d: dict = {
+            "name": node.name,
+            "path": node.path,
+            "isDir": node.is_directory,
+        }
+        if node.size is not None:
+            d["size"] = node.size
+        if node.children is not None:
+            d["children"] = [self._node_to_dict(child) for child in node.children]
+        return d
+
+    # ------------------------------------------------------------------ #
+    # System state broadcast
+    # ------------------------------------------------------------------ #
+
     async def broadcast_system_state(self):
-        # Implementation to send AVAILABLE_AGENTS to clients
         if not self.clients or not self.gateway:
             return
-            
+
         agents = [
             {"id": aid, "name": info["name"], "status": "online", "workspaceRoot": info["workspace_root"]}
             for aid, info in self.adapters.items()
         ]
-        
+
         payload = {
-            "type": "AVAILABLE_AGENTS", 
+            "type": "AVAILABLE_AGENTS",
             "agents": agents,
-            "allowed_workspaces": self.gateway.config.allowed_workspaces
+            "allowed_workspaces": self.gateway.config.allowed_workspaces,
+            # Always include the gateway's active workspace so the app can reflect it
+            "current_workspace": self.current_workspace,
         }
-        
+
         await self.broadcast_to_clients(payload, self.gateway.e2ee)
+
+    # ------------------------------------------------------------------ #
+    # Workspace helper
+    # ------------------------------------------------------------------ #
+
+    def _resolve_path(self, path: str) -> pathlib.Path:
+        """
+        Resolve a path against the current workspace.
+        Absolute paths are used as-is; relative paths are anchored to
+        self.current_workspace.  Raises ValueError if the resolved path
+        escapes the workspace (path traversal guard).
+        """
+        p = pathlib.Path(path)
+        if not p.is_absolute():
+            p = pathlib.Path(self.current_workspace) / p
+        p = p.resolve()
+
+        # Security: reject paths that escape the current workspace
+        workspace = pathlib.Path(self.current_workspace).resolve()
+        try:
+            p.relative_to(workspace)
+        except ValueError:
+            raise ValueError(f"Path traversal rejected: {path!r} is outside workspace {self.current_workspace!r}")
+
+        return p
+
+    # ------------------------------------------------------------------ #
+    # Command routing
+    # ------------------------------------------------------------------ #
 
     async def route_to_adapter(self, parsed_cmd: dict, e2ee: E2EESession, websocket):
         """
-        Receives decrypted command from client, routes to local adapter or handles it internally.
+        Receives a decrypted command from a mobile client and either
+        handles it natively inside the gateway or forwards it to a
+        connected adapter (AI agent).
+
+        Filesystem commands (GET_FILES, READ_FILE, WRITE_FILE,
+        CHANGE_WORKSPACE) are ALWAYS handled natively — they never
+        require an agent to be connected.
         """
         cmd_type = parsed_cmd.get("type")
-        
-        # Internal Gateway Commands (no agentId required)
+
+        # ── PTY commands ────────────────────────────────────────────────
         if cmd_type == "PTY_START":
-            # For simplicity, session ID is the client websocket id or 'default'
             session_id = id(websocket)
-            cols = parsed_cmd.get("cols", 80)
-            rows = parsed_cmd.get("rows", 24)
-            await self.pty_manager.start_pty(session_id, cols, rows)
-            return
-            
-        if cmd_type == "PTY_INPUT":
-            session_id = id(websocket)
-            data = parsed_cmd.get("data", "")
-            self.pty_manager.write_input(session_id, data)
-            return
-            
-        if cmd_type == "PTY_RESIZE":
-            session_id = id(websocket)
-            cols = parsed_cmd.get("cols", 80)
-            rows = parsed_cmd.get("rows", 24)
-            self.pty_manager.resize(session_id, cols, rows)
-            return
-            
-        if cmd_type == "PTY_PING":
-            session_id = id(websocket)
-            self.pty_manager.ping(session_id)
+            await self.pty_manager.start_pty(session_id,
+                                             parsed_cmd.get("cols", 80),
+                                             parsed_cmd.get("rows", 24))
             return
 
-        # Internal commands that can optionally apply to an adapter, but work natively too
+        if cmd_type == "PTY_INPUT":
+            self.pty_manager.write_input(id(websocket), parsed_cmd.get("data", ""))
+            return
+
+        if cmd_type == "PTY_RESIZE":
+            self.pty_manager.resize(id(websocket),
+                                    parsed_cmd.get("cols", 80),
+                                    parsed_cmd.get("rows", 24))
+            return
+
+        if cmd_type == "PTY_PING":
+            self.pty_manager.ping(id(websocket))
+            return
+
+        # ── Workspace selection ─────────────────────────────────────────
         if cmd_type == "CHANGE_WORKSPACE":
-            new_path = parsed_cmd.get("path")
-            agent_id = parsed_cmd.get("agentId")
-            if new_path in self.gateway.config.allowed_workspaces:
-                if agent_id and agent_id in self.adapters:
-                    self.adapters[agent_id]["workspace_root"] = new_path
-                    logger.info(f"Workspace for agent {agent_id} changed to {new_path}")
-                else:
-                    self.current_workspace = new_path
-                    logger.info(f"Native gateway workspace changed to {new_path}")
+            new_path = parsed_cmd.get("path", "")
+            allowed = self.gateway.config.allowed_workspaces if self.gateway else []
+            if new_path in allowed:
+                self.current_workspace = new_path
+                logger.info(f"Gateway workspace changed to: {new_path}")
                 await self.broadcast_system_state()
             else:
-                logger.warning(f"Rejected workspace change: {new_path} is not in allowed_workspaces")
-            return
-            
-        if cmd_type == "GET_FILES":
-            from antimatter_fs.tree import build_file_tree
-            agent_id = parsed_cmd.get("agentId")
-            if agent_id and agent_id in self.adapters:
-                root_path = self.adapters[agent_id].get("workspace_root") or getattr(self, "current_workspace", ".")
-            else:
-                root_path = getattr(self, "current_workspace", ".")
-                
-            tree = await build_file_tree(root_path)
-            
-            tree_dict = []
-            for node in tree:
-                d = node.model_dump()
-                d["isDir"] = d.pop("is_directory", False)
-                tree_dict.append(d)
-            
-            await self.broadcast_to_clients({
-                "type": "FILE_TREE",
-                "tree": tree_dict
-            }, e2ee)
+                logger.warning(f"CHANGE_WORKSPACE rejected — not in allowed_workspaces: {new_path!r}")
+                await self.broadcast_to_clients({
+                    "type": "ERROR",
+                    "message": f"Workspace '{new_path}' is not in the allowed list."
+                }, e2ee)
             return
 
-        # Commands routed to specific agents
+        # ── File tree ───────────────────────────────────────────────────
+        if cmd_type == "GET_FILES":
+            from antimatter_fs.tree import build_file_tree
+            try:
+                tree = await build_file_tree(self.current_workspace)
+                # Use recursive helper so isDir is renamed at EVERY depth,
+                # not just on top-level nodes.
+                tree_dict = [self._node_to_dict(node) for node in tree]
+                await self.broadcast_to_clients({
+                    "type": "FILE_TREE",
+                    "tree": tree_dict,
+                    "workspace": self.current_workspace,
+                }, e2ee)
+            except Exception as ex:
+                logger.error(f"GET_FILES failed: {ex}")
+                await self.broadcast_to_clients({
+                    "type": "ERROR",
+                    "message": f"Could not read workspace: {ex}"
+                }, e2ee)
+            return
+
+        # ── Read file ───────────────────────────────────────────────────
+        if cmd_type == "READ_FILE":
+            raw_path = parsed_cmd.get("path", "")
+            try:
+                resolved = self._resolve_path(raw_path)
+
+                # Guard: if the client accidentally sends a directory path,
+                # return a clear error instead of crashing with EISDIR.
+                if resolved.is_dir():
+                    logger.warning(f"READ_FILE: {resolved} is a directory — ignoring")
+                    await self.broadcast_to_clients({
+                        "type": "ERROR",
+                        "message": f"'{resolved.name}' is a folder, not a file."
+                    }, e2ee)
+                    return
+
+                async with aiofiles.open(resolved, "r", encoding="utf-8", errors="replace") as f:
+                    content = await f.read()
+                ext = resolved.suffix.lstrip(".").lower()
+                await self.broadcast_to_clients({
+                    "type": "FILE_CONTENT",
+                    "path": str(resolved),
+                    "content": content,
+                    "language": ext or "text",
+                }, e2ee)
+                logger.info(f"READ_FILE: {resolved} ({len(content)} chars)")
+            except Exception as ex:
+                logger.error(f"READ_FILE failed for {raw_path!r}: {ex}")
+                await self.broadcast_to_clients({
+                    "type": "ERROR",
+                    "message": f"Could not read file: {ex}"
+                }, e2ee)
+            return
+
+        # ── Write file ──────────────────────────────────────────────────
+        if cmd_type == "WRITE_FILE":
+            raw_path = parsed_cmd.get("path", "")
+            content = parsed_cmd.get("content", "")
+            try:
+                resolved = self._resolve_path(raw_path)
+                resolved.parent.mkdir(parents=True, exist_ok=True)
+                async with aiofiles.open(resolved, "w", encoding="utf-8") as f:
+                    await f.write(content)
+                logger.info(f"WRITE_FILE: {resolved} ({len(content)} chars)")
+                await self.broadcast_to_clients({
+                    "type": "FILE_WRITE_OK",
+                    "path": str(resolved),
+                }, e2ee)
+            except Exception as ex:
+                logger.error(f"WRITE_FILE failed for {raw_path!r}: {ex}")
+                await self.broadcast_to_clients({
+                    "type": "ERROR",
+                    "message": f"Could not write file: {ex}"
+                }, e2ee)
+            return
+
+        # ── Agent-routed commands ───────────────────────────────────────
         agent_id = parsed_cmd.get("agentId")
         if not agent_id:
             logger.warning(f"No agentId specified in command: {cmd_type}")
             return
-            
+
         adapter = self.adapters.get(agent_id)
         if not adapter:
-            logger.warning(f"Target agent {agent_id} is offline. Dropping command.")
+            logger.warning(f"Target agent {agent_id} is offline. Dropping command: {cmd_type}")
             return
 
         try:
             await adapter["ws"].send(json.dumps(parsed_cmd))
-        except Exception as e:
-            logger.error(f"Failed to route to adapter {agent_id}: {e}")
+        except Exception as ex:
+            logger.error(f"Failed to route to adapter {agent_id}: {ex}")
+
+    # ------------------------------------------------------------------ #
+    # Broadcast helpers
+    # ------------------------------------------------------------------ #
 
     async def broadcast_to_clients(self, payload: dict, e2ee: E2EESession):
         """
-        Takes raw JSON payload from an adapter, encrypts it with the 
-        server-to-client key, and sends it to all Android apps.
+        Encrypts payload with the server-to-client key and sends it to
+        every authenticated mobile client.
         """
         plaintext = json.dumps(payload)
         envelope = e2ee.encrypt(plaintext, direction="output")
         payload_str = json.dumps(envelope)
-        
+
         for client in list(self.clients):
             try:
                 await client.send(payload_str)

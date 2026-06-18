@@ -125,7 +125,7 @@ antimatter-gateway pair
 ```
 
 A QR code will appear in the terminal. It encodes:
-- The WebSocket URL (`wss://xxxx.trycloudflare.com`)
+- The WebSocket URL (`wss://antimatter.yourdomain.com`)
 - Your 256-bit pairing token (hex-encoded)
 - The Gateway's Ed25519 public key
 
@@ -194,7 +194,7 @@ If you see "Connection refused":
 No. It's an unofficial, community-driven project, not affiliated with Google or the AntiGravity IDE project.
 
 **Do I need a custom domain?**
-No. TryCloudflare works with zero configuration. A domain (Cloudflare Zero Trust) is recommended for the strongest security.
+Yes. For security reasons, Antimatter requires a stable Cloudflare Zero Trust tunnel with your own domain name. Temporary `trycloudflare` tunnels are not supported.
 
 **Where are my keys stored?**
 In your OS keychain — never written to plain-text config files. They persist across restarts.

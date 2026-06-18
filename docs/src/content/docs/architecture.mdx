@@ -70,7 +70,7 @@ The Gateway is the **brain of the operation**. It runs as a background process a
 
 ### Cloudflare Tunnel
 
-The Gateway spawns `cloudflared` to expose a secure `wss://` endpoint — no firewall rules, no port forwarding, no static IP required. TryCloudflare generates a free random URL; a custom domain via Cloudflare Zero Trust provides the strongest security.
+The Gateway exposes a secure `wss://` endpoint through your Cloudflare Zero Trust tunnel — no firewall rules, no port forwarding, no static IP required.
 
 ### Ed25519 Cryptography
 

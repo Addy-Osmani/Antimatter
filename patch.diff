@@ -1,0 +1,54 @@
+--- android/feature/chat/src/main/java/dev/saifmukhtar/antimatter/feature/chat/ChatScreen.kt
++++ android/feature/chat/src/main/java/dev/saifmukhtar/antimatter/feature/chat/ChatScreen.kt
+@@ -95,6 +95,7 @@
+ }
+ 
+ sealed class ChatItem {
+-    data class SingleStep(val step: TrajectoryStep) : ChatItem()
+-    data class ThoughtGroup(val steps: List<TrajectoryStep>) : ChatItem()
++    data class SingleStep(val step: TrajectoryStep, val originalIndex: Int) : ChatItem()
++    data class ThoughtGroup(val steps: List<TrajectoryStep>, val originalIndex: Int) : ChatItem()
+ }
+ 
+@@ -107,17 +108,18 @@
+     var currentGroup = mutableListOf<TrajectoryStep>()
+     
+-    for (step in visibleSteps) {
++    for (i in visibleSteps.indices) {
++        val step = visibleSteps[i]
+         if (step.stepCase == StepCase.PLANNER_RESPONSE) {
+             val cleanedText = cleanThoughtText(step.value)
+             if (!cleanedText.isNullOrBlank()) {
+                 currentGroup.add(step.copy(value = cleanedText))
+             }
+         } else {
+             if (currentGroup.isNotEmpty()) {
+-                result.add(ChatItem.ThoughtGroup(currentGroup))
++                result.add(ChatItem.ThoughtGroup(currentGroup, i - currentGroup.size))
+                 currentGroup = mutableListOf<TrajectoryStep>()
+             }
+-            result.add(ChatItem.SingleStep(step))
++            result.add(ChatItem.SingleStep(step, i))
+         }
+     }
+     
+     if (currentGroup.isNotEmpty()) {
+-        result.add(ChatItem.ThoughtGroup(currentGroup))
++        result.add(ChatItem.ThoughtGroup(currentGroup, visibleSteps.size - currentGroup.size))
+     }
+@@ -443,10 +445,9 @@
+                         key = { index, item -> 
+                             when (item) {
+                                 is ChatItem.SingleStep -> {
+-                                    val idx = uiState.steps.indexOf(item.step)
+-                                    if (idx >= 0) "step_$idx" else "unknown_${index}"
++                                    "step_${item.originalIndex}"
+                                 }
+                                 is ChatItem.ThoughtGroup -> {
+-                                    val firstStep = item.steps.firstOrNull()
+-                                    val idx = firstStep?.let { uiState.steps.indexOf(it) } ?: -1
+-                                    if (idx >= 0) "thought_group_$idx" else "thought_group_unknown_${index}"
++                                    "thought_group_${item.originalIndex}"
+                                 }
+                             }
+                         }

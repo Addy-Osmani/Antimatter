@@ -9,7 +9,6 @@ from antimatter_shared_config.config import load_config, save_config, Antimatter
 from antimatter_crypto.auth import Ed25519Auth
 from antimatter_crypto.e2ee import E2EESession
 from .qr import generate_qr_payload, print_qr_to_terminal
-from .tunnel import CloudflaredManager
 from .router import MessageRouter
 
 logger = logging.getLogger(__name__)
@@ -174,6 +173,14 @@ class GatewayServer:
             async for message in websocket:
                 try:
                     data = json.loads(message)
+                    msg_type = data.get("type", "UNKNOWN")
+                    if msg_type == "STEP_BATCH":
+                        steps = data.get("steps", [])
+                        logger.info(f"[Adapter -> Gateway] Received STEP_BATCH with {len(steps)} steps")
+                    elif msg_type == "DEBUG_ERROR":
+                        logger.error(f"[Adapter -> Gateway] DEBUG_ERROR: {data.get('message')}")
+                    else:
+                        logger.info(f"[Adapter -> Gateway] Received message type: {msg_type}")
                 except Exception:
                     continue
                 
@@ -190,30 +197,12 @@ class GatewayServer:
     async def start(self):
         logger.info("Starting Gateway WebSocket server on ws://127.0.0.1:8765")
         
-        # Start Tunnel if configured
         tunnel_url = self.config.cloudflare_url
-        self.cf_manager = None
-        
-        if not tunnel_url:
-            logger.info("Starting Cloudflare Quick Tunnel...")
-            self.cf_manager = CloudflaredManager(8765)
-            if await self.cf_manager.start():
-                try:
-                    await asyncio.wait_for(self.cf_manager.ready_event.wait(), timeout=15.0)
-                    tunnel_url = self.cf_manager.url
-                    import os
-                    from pathlib import Path
-                    ephemeral = Path(os.path.expanduser("~/.antimatter_daemon/ephemeral_tunnel.txt"))
-                    ephemeral.parent.mkdir(parents=True, exist_ok=True)
-                    if tunnel_url:
-                        ephemeral.write_text(tunnel_url)
-                except asyncio.TimeoutError:
-                    logger.warning("Quick tunnel timeout.")
         
         logger.info(f"Gateway running. Access via: {tunnel_url or 'ws://127.0.0.1:' + str(self.port)}")
         logger.info("Run 'antimatter qr' to view the pairing code.")
 
-        async with websockets.serve(self.handler, "127.0.0.1", self.port):
+        async with websockets.serve(self.handler, "127.0.0.1", self.port, max_size=None):
             await asyncio.Future()
 
 async def main_async(port: int = 8765):
