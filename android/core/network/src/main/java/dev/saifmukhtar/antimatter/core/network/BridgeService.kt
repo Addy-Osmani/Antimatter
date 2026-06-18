@@ -9,6 +9,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
+import android.net.wifi.WifiManager
 import androidx.core.app.NotificationCompat
 import android.content.pm.ServiceInfo
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,9 +26,22 @@ class BridgeService : Service() {
     @Inject lateinit var webSocket: BridgeWebSocket
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    
+    private var wakeLock: PowerManager.WakeLock? = null
+    private var wifiLock: WifiManager.WifiLock? = null
 
     override fun onCreate() {
         super.onCreate()
+        
+        // Acquire WakeLocks to prevent CPU and Wi-Fi from sleeping while connected
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Antimatter::BridgeWakeLock")
+        wakeLock?.acquire()
+
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "Antimatter::BridgeWifiLock")
+        wifiLock?.acquire()
+        
         createNotificationChannel()
         createAlertChannel()
         
@@ -44,6 +59,16 @@ class BridgeService : Service() {
                     stopSelf()
                 }
             }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            wakeLock?.takeIf { it.isHeld }?.release()
+            wifiLock?.takeIf { it.isHeld }?.release()
+        } catch (e: Exception) {
+            // Ignore release exceptions
         }
     }
 

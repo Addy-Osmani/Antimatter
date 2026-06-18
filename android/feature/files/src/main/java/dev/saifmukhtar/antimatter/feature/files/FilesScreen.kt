@@ -38,44 +38,132 @@ fun FilesScreen(
 
     Scaffold(
         topBar = {
+            var workspaceDropdownExpanded by remember { mutableStateOf(false) }
+
             TopAppBar(
-                title = { Text("Workspace", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-                ),
-                actions = {
-                    if (uiState.allowedWorkspaces.isNotEmpty()) {
-                        var expanded by remember { mutableStateOf(false) }
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // ── Left: screen title ─────────────────────────────────
+                        Text("Workspace", fontWeight = FontWeight.Bold)
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        // ── Center-right: workspace switcher chip ──────────────
                         Box {
-                            TextButton(onClick = { expanded = true }) {
-                                Text(
-                                    uiState.currentWorkspace?.substringAfterLast("/") ?: "Switch",
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+                            Surface(
+                                onClick = {
+                                    if (uiState.allowedWorkspaces.size > 1) {
+                                        workspaceDropdownExpanded = true
+                                    }
+                                },
+                                shape = RoundedCornerShape(20.dp),
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                modifier = Modifier.height(36.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Folder,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = uiState.currentWorkspace
+                                            ?.substringAfterLast("/")
+                                            ?.ifBlank { uiState.currentWorkspace }
+                                            ?: "No workspace",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        maxLines = 1
+                                    )
+                                    if (uiState.allowedWorkspaces.size > 1) {
+                                        Icon(
+                                            imageVector = if (workspaceDropdownExpanded)
+                                                Icons.Default.KeyboardArrowUp
+                                            else
+                                                Icons.Default.KeyboardArrowDown,
+                                            contentDescription = "Switch workspace",
+                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
                             }
+
                             DropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
+                                expanded = workspaceDropdownExpanded,
+                                onDismissRequest = { workspaceDropdownExpanded = false }
                             ) {
                                 uiState.allowedWorkspaces.forEach { ws ->
+                                    val isActive = ws == uiState.currentWorkspace
                                     DropdownMenuItem(
-                                        text = { Text(ws) },
+                                        text = {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = if (isActive) Icons.Default.FolderOpen else Icons.Default.Folder,
+                                                    contentDescription = null,
+                                                    tint = if (isActive) MaterialTheme.colorScheme.primary
+                                                           else MaterialTheme.colorScheme.onSurface,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Column {
+                                                    Text(
+                                                        text = ws.substringAfterLast("/").ifBlank { ws },
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                                                        color = if (isActive) MaterialTheme.colorScheme.primary
+                                                                else MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                    Text(
+                                                        text = ws,
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                }
+                                            }
+                                        },
                                         onClick = {
-                                            expanded = false
+                                            workspaceDropdownExpanded = false
                                             onChangeWorkspace(ws)
-                                        }
+                                        },
+                                        trailingIcon = if (isActive) {
+                                            { Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp)) }
+                                        } else null
                                     )
                                 }
                             }
                         }
+
+                        Spacer(modifier = Modifier.width(4.dp))
                     }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                ),
+                actions = {
                     IconButton(onClick = onRefresh) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = MaterialTheme.colorScheme.primary)
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             )
         },
         containerColor = MaterialTheme.colorScheme.background
+
     ) { paddingValues ->
         Box(
             modifier = Modifier

@@ -62,19 +62,20 @@ class E2EESession {
 
     /**
      * Encrypts a payload.
-     * Python AESGCM prepends the tag or appends it. JCA AES/GCM appends the tag to the ciphertext.
+     * direction should be a bare prefix like "cmd" or "output" (no trailing colon).
+     * The resulting AAD is formatted as "<direction>:v1:msg_id:<id>".
      */
-    fun encrypt(plaintext: String, direction: String = "cmd:"): EncryptedEnvelope {
+    fun encrypt(plaintext: String, direction: String = "cmd"): EncryptedEnvelope {
         val key = c2sKey ?: throw IllegalStateException("Session keys not derived")
         val id = msgCounter.incrementAndGet()
-        
+
         val aad = "$direction:v1:msg_id:$id".toByteArray()
         val nonce = ByteArray(12).apply { SecureRandom().nextBytes(this) }
-        
+
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         val keySpec = SecretKeySpec(key, "AES")
         val gcmSpec = GCMParameterSpec(128, nonce)
-        
+
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmSpec)
         cipher.updateAAD(aad)
         val ct = cipher.doFinal(plaintext.toByteArray())
@@ -88,12 +89,13 @@ class E2EESession {
 
     /**
      * Decrypts an incoming envelope.
+     * expectedDirection should be a bare prefix like "cmd" or "output" (no trailing colon).
      */
-    fun decrypt(ivB64: String, ctB64: String, aad: String, expectedDirection: String = "output:"): String {
+    fun decrypt(ivB64: String, ctB64: String, aad: String, expectedDirection: String = "output"): String {
         val key = s2cKey ?: throw IllegalStateException("Session keys not derived")
-        
-        if (!aad.startsWith(expectedDirection)) {
-            throw IllegalArgumentException("AAD direction mismatch: expected prefix $expectedDirection, got $aad")
+
+        if (!aad.startsWith("$expectedDirection:")) {
+            throw IllegalArgumentException("AAD direction mismatch: expected prefix $expectedDirection:, got $aad")
         }
 
         val nonce = Base64.decode(ivB64, Base64.DEFAULT)

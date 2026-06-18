@@ -35,12 +35,19 @@ class FilesViewModel @Inject constructor(
     val uiState: StateFlow<FilesUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch(Dispatchers.Unconfined) {
+        viewModelScope.launch(Dispatchers.Main.immediate) {
             webSocket.messages.collect { message ->
                 when (message) {
                     is InboundMessage.FileTree -> {
-                        android.util.Log.d("FilesViewModel", "Received FileTree with ${message.tree.size} items")
-                        _uiState.update { it.copy(fileTree = message.tree, isLoadingTree = false) }
+                        android.util.Log.d("FilesViewModel", "Received FileTree with ${message.tree.size} items, workspace=${message.workspace}")
+                        _uiState.update {
+                            it.copy(
+                                fileTree = message.tree,
+                                isLoadingTree = false,
+                                // Keep currentWorkspace in sync if the gateway tells us the root
+                                currentWorkspace = message.workspace.ifBlank { it.currentWorkspace }
+                            )
+                        }
                     }
                     is InboundMessage.FileContent -> {
                         _uiState.update { 
@@ -55,10 +62,17 @@ class FilesViewModel @Inject constructor(
                         _uiState.update { it.copy(isLoadingTree = false, isLoadingFile = false) }
                     }
                     is InboundMessage.AvailableAgents -> {
-                        _uiState.update { it.copy(allowedWorkspaces = message.allowedWorkspaces) }
-                        // Also grab the current workspace from the active agent if any
-                        message.agents.firstOrNull()?.workspaceRoot?.let { root ->
-                            _uiState.update { it.copy(currentWorkspace = root) }
+                        // Workspace is gateway-owned — never tied to a specific agent.
+                        // Use current_workspace that the gateway sends explicitly.
+                        val gatewayWorkspace = message.currentWorkspace.ifBlank {
+                            // Fallback: first allowed workspace, or keep current
+                            message.allowedWorkspaces.firstOrNull() ?: ""
+                        }
+                        _uiState.update {
+                            it.copy(
+                                allowedWorkspaces = message.allowedWorkspaces,
+                                currentWorkspace = gatewayWorkspace.ifBlank { it.currentWorkspace }
+                            )
                         }
                     }
                     else -> {}

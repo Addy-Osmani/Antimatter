@@ -36,7 +36,7 @@ fun ConnectScreen(
     savedClientId: String? = null,
     savedClientSecret: String? = null,
     profiles: List<GatewayProfile> = emptyList(),
-    onConnectClick: (String, String?, String?) -> Unit,
+    onConnectClick: (url: String, clientId: String?, clientSecret: String?, token: String?) -> Unit,
     onScanQRClick: () -> Unit,
     onProfileSelected: (String) -> Unit,
     onProfileDeleted: (String) -> Unit
@@ -259,10 +259,10 @@ fun ConnectScreen(
                                 if (!url.startsWith("ws://") && !url.startsWith("wss://")) {
                                     url = "wss://$url"
                                 }
-                                if (pairingToken.isNotBlank()) {
-                                    url = "$url?token=${pairingToken.trim()}"
-                                }
-                                onConnectClick(url, clientId.trim(), clientSecret.trim())
+                                // Pass the token as a separate argument (sent as Authorization: Bearer header)
+                                // rather than appending it to the URL as a query parameter.
+                                val token = pairingToken.trim().ifBlank { null }
+                                onConnectClick(url, clientId.trim(), clientSecret.trim(), token)
                             },
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             enabled = connectionState != BridgeWebSocket.ConnectionState.CONNECTING,

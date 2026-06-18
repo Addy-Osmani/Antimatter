@@ -3,9 +3,11 @@ package dev.saifmukhtar.antimatter.core.ui
 import android.content.Context
 import android.graphics.Color
 import android.widget.TextView
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import io.noties.markwon.Markwon
@@ -22,7 +24,9 @@ import dev.saifmukhtar.antimatter.core.ui.utils.GrammarLocatorDef
 fun MarkdownText(
     markdown: String,
     modifier: Modifier = Modifier,
-    textColor: Int = Color.WHITE,
+    // Default to onSurface so text is visible in both light and dark themes.
+    // Callers can override this when rendering on a non-surface background.
+    textColor: Int = MaterialTheme.colorScheme.onSurface.toArgb(),
     onLinkClicked: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current

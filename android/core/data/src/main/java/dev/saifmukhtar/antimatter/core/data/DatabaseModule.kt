@@ -13,14 +13,16 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext ctx: Context): AppDatabase =
-        AppDatabase.getDatabase(ctx)
-
-    @Provides
-    fun provideAppDao(db: AppDatabase): AppDao = db.appDao()
+    fun provideUserPrefs(@ApplicationContext ctx: Context): UserPreferencesRepository =
+        UserPreferencesRepository(ctx)
 
     @Provides
     @Singleton
-    fun provideUserPrefs(@ApplicationContext ctx: Context): UserPreferencesRepository =
-        UserPreferencesRepository(ctx)
+    fun provideAppDatabase(
+        @ApplicationContext ctx: Context,
+        userPrefs: UserPreferencesRepository
+    ): AppDatabase = AppDatabase.getDatabase(ctx, userPrefs.getDatabasePassphrase())
+
+    @Provides
+    fun provideAppDao(db: AppDatabase): AppDao = db.appDao()
 }

@@ -48,10 +48,4 @@ interface AppDao {
     @Query("SELECT * FROM artifacts WHERE conversationId = :conversationId AND path = :path")
     suspend fun getArtifact(conversationId: String, path: String): ArtifactEntity?
 
-    @Query("""
-        SELECT steps.* FROM steps 
-        JOIN steps_fts ON steps.conversationId = steps_fts.conversationId AND steps.stepIndex = steps_fts.stepIndex
-        WHERE steps_fts MATCH :query
-    """)
-    suspend fun searchSteps(query: String): List<StepEntity>
 }

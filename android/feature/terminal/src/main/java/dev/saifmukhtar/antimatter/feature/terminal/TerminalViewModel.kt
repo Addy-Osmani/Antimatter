@@ -12,6 +12,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import android.content.Context
+import android.content.ClipboardManager
+import android.content.ClipData
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -27,7 +31,8 @@ import java.util.UUID
 
 @HiltViewModel
 class TerminalViewModel @Inject constructor(
-    private val webSocket: BridgeWebSocket
+    private val webSocket: BridgeWebSocket,
+    @ApplicationContext private val context: Context
 ) : ViewModel(), TerminalSessionClient {
 
     private val _isConnected = MutableStateFlow(false)
@@ -41,6 +46,9 @@ class TerminalViewModel @Inject constructor(
 
     // Channel for buffering resize events so we can debounce them
     private val resizeChannel = Channel<Pair<Int, Int>>(Channel.CONFLATED)
+
+    // Channel signaling that the terminal has new input ready to be read
+    private val inputReadyChannel = Channel<Unit>(Channel.CONFLATED)
 
     private var ioJob: Job? = null
 
@@ -87,11 +95,6 @@ class TerminalViewModel @Inject constructor(
         val startMsg = OutboundMessage.PtyStart(id, 80, 24)
         webSocket.sendMessage(startMsg)
         
-        // Emulate a clean Termux-like prompt
-        val initScript = "export PS1='~ $ '\nclear\n"
-        val initMsg = OutboundMessage.PtyInput(id, initScript)
-        webSocket.sendMessage(initMsg)
-        
         startIoLoop()
     }
 
@@ -100,18 +103,18 @@ class TerminalViewModel @Inject constructor(
         ioJob = viewModelScope.launch(Dispatchers.IO) {
             val buffer = ByteArray(4096)
             while (isActive) {
-                // Read from TerminalSession (non-blocking read)
+                // Wait until the TerminalSession signals it has input ready.
+                // This avoids the 50ms busy-poll that wastes CPU when idle.
+                inputReadyChannel.receive()
+
                 val bytesRead = terminalSession.readInput(buffer, false)
                 if (bytesRead > 0) {
-                    // Send input over websocket
                     val id = ptyId
                     if (id != null) {
                         val dataB64 = android.util.Base64.encodeToString(buffer, 0, bytesRead, android.util.Base64.NO_WRAP)
                         val inputMsg = OutboundMessage.PtyInput(id, dataB64)
                         webSocket.sendMessage(inputMsg)
                     }
-                } else {
-                    delay(50) // Small delay if non-blocking returned 0, though readInput(..., true) is blocking
                 }
             }
         }
@@ -156,15 +159,32 @@ class TerminalViewModel @Inject constructor(
     
     override fun onTextChanged(session: TerminalSession) {
         _redrawEvent.tryEmit(Unit)
+        // Signal the IO loop that the user may have typed input ready to read.
+        inputReadyChannel.trySend(Unit)
     }
 
     override fun onTitleChanged(session: TerminalSession) {}
 
     override fun onSessionFinished(session: TerminalSession) {}
 
-    override fun onCopyTextToClipboard(session: TerminalSession, text: String) {}
+    override fun onCopyTextToClipboard(session: TerminalSession, text: String) {
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Terminal", text)
+        clipboard.setPrimaryClip(clip)
+    }
 
-    override fun onPasteTextFromClipboard(session: TerminalSession?) {}
+    override fun onPasteTextFromClipboard(session: TerminalSession?) {
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        if (clipboard.hasPrimaryClip()) {
+            val clip = clipboard.primaryClip
+            if (clip != null && clip.itemCount > 0) {
+                val text = clip.getItemAt(0).text?.toString()
+                if (!text.isNullOrEmpty()) {
+                    session?.emulator?.paste(text)
+                }
+            }
+        }
+    }
 
     override fun onBell(session: TerminalSession) {}
 

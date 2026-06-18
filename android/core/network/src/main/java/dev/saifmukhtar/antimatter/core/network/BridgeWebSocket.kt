@@ -21,6 +21,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import java.util.concurrent.ConcurrentHashMap
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -63,8 +65,8 @@ class BridgeWebSocket(private val context: Context) {
         val id: String,
         val message: OutboundMessage,
         val sentAt: Long,
-        var retryCount: Int = 0,
-        var timeoutJob: Job? = null
+        val retryCount: AtomicInteger = AtomicInteger(0),
+        val timeoutJob: AtomicReference<Job?> = AtomicReference(null)
     )
     private val pendingAcks = ConcurrentHashMap<String, PendingMessage>()
     private val notificationIdCounter = java.util.concurrent.atomic.AtomicInteger(0)
@@ -99,6 +101,7 @@ class BridgeWebSocket(private val context: Context) {
 
     fun connect(url: String, clientId: String? = null, clientSecret: String? = null, token: String? = null, pubKey: String? = null) {
         manuallyDisconnected = false
+        reconnectAttempt = 0
         currentUrl = url
         this.token = token?.takeIf { it.isNotBlank() }
         this.clientId = clientId?.takeIf { it.isNotBlank() }
@@ -131,7 +134,7 @@ class BridgeWebSocket(private val context: Context) {
             if (clientId != null && clientSecret != null) {
                 requestBuilder.header("CF-Access-Client-Id", clientId!!)
                 requestBuilder.header("CF-Access-Client-Secret", String(clientSecret!!))
-                clientSecret!!.fill(0) // Clear the secret from memory
+                // Note: Not clearing the secret to allow reconnects
             }
                 
             val request = requestBuilder.build()
@@ -175,7 +178,7 @@ class BridgeWebSocket(private val context: Context) {
                                 jsonObject.get("iv").asString,
                                 jsonObject.get("ct").asString,
                                 jsonObject.get("aad").asString,
-                                "output:"
+                                "output"
                             ) ?: throw java.lang.IllegalStateException("Received encrypted packet but E2EE session is not initialized")
                         } else {
                             text
@@ -193,6 +196,7 @@ class BridgeWebSocket(private val context: Context) {
                             "GENERATING" -> gson.fromJson(payloadText, InboundMessage.Generating::class.java)
                             "RESPONSE_COMPLETE" -> gson.fromJson(payloadText, InboundMessage.ResponseComplete::class.java)
                             "ACTIVE_FILE" -> gson.fromJson(payloadText, InboundMessage.ActiveFile::class.java)
+                            "ARTIFACT_CONTENT" -> gson.fromJson(payloadText, InboundMessage.ArtifactContent::class.java)
                             "FILE_CONTENT" -> gson.fromJson(payloadText, InboundMessage.FileContent::class.java)
                             "FILE_TREE" -> gson.fromJson(payloadText, InboundMessage.FileTree::class.java)
                             "CLOUDFLARE_URL" -> gson.fromJson(payloadText, InboundMessage.CloudflareUrl::class.java)
@@ -268,7 +272,7 @@ class BridgeWebSocket(private val context: Context) {
                             return@launch
                         } else if (message is InboundMessage.Ack) {
                             val pending = pendingAcks.remove(message.id)
-                            pending?.timeoutJob?.cancel()
+                            pending?.timeoutJob?.get()?.cancel()
                             Log.d("BridgeWebSocket", "ACK received for ${message.id}")
                             return@launch
                         } else if (message is InboundMessage.SystemNotification) {
@@ -354,13 +358,13 @@ class BridgeWebSocket(private val context: Context) {
     }
 
     private fun scheduleAckTimeout(pending: PendingMessage) {
-        pending.timeoutJob?.cancel()
-        pending.timeoutJob = scope.launch {
+        pending.timeoutJob.getAndSet(null)?.cancel()
+        val newJob = scope.launch {
             delay(5000) // 5 second timeout
             if (pendingAcks.containsKey(pending.id)) {
-                if (pending.retryCount < 3) {
-                    pending.retryCount++
-                    Log.w("BridgeWebSocket", "No ACK for ${pending.id}, retrying (${pending.retryCount}/3)...")
+                val retries = pending.retryCount.incrementAndGet()
+                if (retries <= 3) {
+                    Log.w("BridgeWebSocket", "No ACK for ${pending.id}, retrying ($retries/3)...")
                     sendMessage(pending.message)
                     scheduleAckTimeout(pending)
                 } else {
@@ -372,6 +376,7 @@ class BridgeWebSocket(private val context: Context) {
                 }
             }
         }
+        pending.timeoutJob.set(newJob)
     }
 
     private fun showSystemNotification(title: String, body: String) {

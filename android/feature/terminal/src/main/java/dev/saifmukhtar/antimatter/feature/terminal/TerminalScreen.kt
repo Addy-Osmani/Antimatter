@@ -123,83 +123,15 @@ fun TerminalScreen(
 
                     terminalView.attachSession(viewModel.terminalSession)
 
-                    terminalView.setTerminalViewClient(object : TerminalViewClient {
-
-                        override fun onScale(scale: Float): Float {
-                            currentSizeSp = (currentSizeSp * scale).coerceIn(8f, 36f)
-                            terminalView.setTextSize(currentSizeSp.toInt())
-                            return 1.0f
-                        }
-
-                        override fun onSingleTapUp(e: android.view.MotionEvent?) {
-                            terminalView.post {
-                                terminalView.requestFocus()
-                                val imm = ctx.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
-                                        as android.view.inputmethod.InputMethodManager
-                                imm.showSoftInput(
-                                    terminalView,
-                                    android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT
-                                )
-                            }
-                        }
-
-                        override fun shouldBackButtonBeMappedToEscape(): Boolean = true
-                        override fun shouldEnforceCharBasedInput(): Boolean       = true
-                        override fun shouldUseCtrlSpaceWorkaround(): Boolean       = false
-                        override fun isTerminalViewSelected(): Boolean             = true
-                        override fun copyModeChanged(copyMode: Boolean)            = Unit
-
-                        override fun onKeyDown(
-                            keyCode: Int,
-                            e: android.view.KeyEvent?,
-                            session: com.termux.terminal.TerminalSession?
-                        ): Boolean = false
-
-                        override fun onKeyUp(keyCode: Int, e: android.view.KeyEvent?): Boolean = false
-                        override fun onLongPress(event: android.view.MotionEvent?): Boolean {
-                            if (event != null) {
-                                terminalView.showContextMenu()
-                                return true
-                            }
-                            return false
-                        }
-
-                        override fun readControlKey(): Boolean {
-                            val was = ctrlActive.getAndSet(false)
-                            if (was) ctrlUiState = false
-                            return was
-                        }
-
-                        override fun readAltKey(): Boolean {
-                            val was = altActive.getAndSet(false)
-                            if (was) altUiState = false
-                            return was
-                        }
-
-                        override fun readShiftKey(): Boolean = false
-                        override fun readFnKey(): Boolean    = false
-
-                        override fun onCodePoint(
-                            codePoint: Int,
-                            ctrlDown: Boolean,
-                            session: com.termux.terminal.TerminalSession?
-                        ): Boolean = false
-
-                        override fun onEmulatorSet() {
-                            val emulator = viewModel.terminalSession.emulator
-                            if (emulator != null) {
-                                viewModel.onResize(emulator.mColumns, emulator.mRows)
-                            }
-                        }
-
-                        override fun logError(tag: String?, message: String?)   = Unit
-                        override fun logWarn(tag: String?, message: String?)    = Unit
-                        override fun logInfo(tag: String?, message: String?)    = Unit
-                        override fun logDebug(tag: String?, message: String?)   = Unit
-                        override fun logVerbose(tag: String?, message: String?) = Unit
-                        override fun logStackTraceWithMessage(tag: String?, message: String?, e: Exception?) = Unit
-                        override fun logStackTrace(tag: String?, e: Exception?) = Unit
-                    })
+                    terminalView.setTerminalViewClient(
+                        AntimatterTerminalViewClient(
+                            context = ctx,
+                            terminalView = terminalView,
+                            viewModel = viewModel,
+                            ctrlActive = ctrlActive,
+                            altActive = altActive
+                        )
+                    )
 
                     terminalView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
                         val emulator = viewModel.terminalSession.emulator

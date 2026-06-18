@@ -260,7 +260,8 @@ fun AntimatterNavigation(
                             onClearArtifactContent = { chatViewModel.clearActiveArtifact() },
                             onSwitchAgent = { id -> chatViewModel.switchAgent(id) },
                             onSearchHistory = { query -> chatViewModel.updateSearchQuery(query) },
-                            onSelectImage = { uri -> chatViewModel.selectImage(uri) }
+                            onSelectImage = { uri -> chatViewModel.selectImage(uri) },
+                            onStepVisible = { index -> chatViewModel.onStepVisible(index) }
                         )
                     } else if (currentTab == 1) {
                         FilesScreen(
@@ -289,8 +290,8 @@ fun AntimatterNavigation(
             savedClientId = savedCredentials.clientId,
             savedClientSecret = savedCredentials.clientSecret,
             profiles = profiles,
-            onConnectClick = { url, clientId, clientSecret -> 
-                connectionViewModel.connectManually(url, clientId, clientSecret) 
+            onConnectClick = { url, clientId, clientSecret, token ->
+                connectionViewModel.connectManually(url, clientId, clientSecret, token)
             },
             onScanQRClick = { isScanningQR = true },
             onProfileSelected = { id -> connectionViewModel.switchProfile(id) },

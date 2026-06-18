@@ -91,7 +91,16 @@ sealed class InboundMessage {
         val language: String = ""
     ) : InboundMessage()
 
-    data class FileTree(val tree: List<FileNode> = emptyList()) : InboundMessage()
+    data class ArtifactContent(
+        val path: String = "",
+        val content: String = "",
+        val language: String = ""
+    ) : InboundMessage()
+
+    data class FileTree(
+        val tree: List<FileNode> = emptyList(),
+        val workspace: String = ""
+    ) : InboundMessage()
     data class CloudflareUrl(val url: String = "") : InboundMessage()
     data class Error(val message: String = "") : InboundMessage()
     data class SystemAlert(val title: String = "", val body: String = "") : InboundMessage()
@@ -100,7 +109,12 @@ sealed class InboundMessage {
     data class AuthResponse(val signature: String = "", val pubkey: String = "") : InboundMessage()
     data class ArtifactsList(val artifacts: List<FileNode> = emptyList()) : InboundMessage()
     data class AgentInfo(val id: String, val name: String, val status: String, val workspaceRoot: String? = null)
-    data class AvailableAgents(val agents: List<AgentInfo> = emptyList(), @SerializedName("allowed_workspaces") val allowedWorkspaces: List<String> = emptyList()) : InboundMessage()
+    data class AvailableAgents(
+        val agents: List<AgentInfo> = emptyList(),
+        @SerializedName("allowed_workspaces") val allowedWorkspaces: List<String> = emptyList(),
+        // Gateway's active workspace — independent of any connected agent
+        @SerializedName("current_workspace") val currentWorkspace: String = ""
+    ) : InboundMessage()
     data class PtyOutput(val ptyId: String = "", val data: String = "") : InboundMessage()
 
     data class Ack(val id: String = "") : InboundMessage()
@@ -135,10 +149,19 @@ sealed class OutboundMessage {
         override val id: String? = null,
         override val agentId: String? = null
     ) : OutboundMessage()
+    data class GetHistoryPage(
+        val conversationId: String,
+        val offset: Int,
+        val limit: Int,
+        val type: String = "FETCH_HISTORY_PAGE",
+        override val id: String? = null,
+        override val agentId: String? = null
+    ) : OutboundMessage()
     data class GetHistory(val type: String = "GET_HISTORY", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
     data class Ping(val type: String = "PING", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
     data class AuthChallenge(val challenge: String, val type: String = "AUTH_CHALLENGE", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
     data class GetArtifacts(val conversationId: String, val type: String = "GET_ARTIFACTS", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
+    data class ReadArtifact(val conversationId: String, val path: String, val type: String = "READ_ARTIFACT", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
     
     data class WriteFile(val path: String, val content: String, val type: String = "WRITE_FILE", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
     data class ChangeWorkspace(val path: String, val type: String = "CHANGE_WORKSPACE", override val id: String? = null, override val agentId: String? = null) : OutboundMessage()
