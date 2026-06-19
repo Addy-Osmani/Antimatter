@@ -10,6 +10,7 @@ reports/
 .agents/
 outputs/
 .astro/
+.ruff_cache/
 
 # Python
 __pycache__/

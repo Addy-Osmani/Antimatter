@@ -15,6 +15,8 @@
 
 By securely tunneling your phone to your local host machine, you can view your active AI agent's trajectory, monitor its thought process, read logs in real-time, send new prompts, and browse your workspace files—all from your mobile device.
 
+
+
 ---
 
 ## ⚡ The Independent Adapter Model
@@ -37,7 +39,7 @@ flowchart LR
 
 Instead of packing complex security and tunneling code into every single AI integration, Antimatter splits the ecosystem into two distinct layers, ensuring absolute stability and security.
 
-### 1. The Gateway (`antimatter-core`)
+### 1. The Gateway (`antimatter-gateway`)
 The brain of the operation. This is a highly secure Python daemon that runs in the background. It manages **Cloudflare Tunnels**, generates 256-bit cryptographic keys, and handles the **Ed25519 Handshake** with your Android device. It hosts a secure local IPC router at `127.0.0.1:8765`.
 
 ### 2. The Adapters (`adapters/`)
@@ -59,7 +61,7 @@ Getting started is easier than ever with the new PyPI structure.
 ### 1. Install the Gateway
 Install the core infrastructure using `uv` (or `pip`):
 ```bash
-uv tool install antimatter-core
+uv tool install antimatter-gateway
 antimatter-gateway start
 ```
 
@@ -103,6 +105,23 @@ Explore the depths of the ecosystem:
 - **Zero Trust Security**: Ed25519 pairing prevents Man-In-The-Middle attacks even on compromised public networks.
 - **Seamless Tunnels**: Free Cloudflare Quick Tunnels provisioned automatically—no firewall configurations required.
 - **Offline History**: The Android app uses a local Room database to cache conversations and artifacts for offline viewing.
+
+### Workspace Explorer
+
+- **Live file tree** — browse your IDE workspace in real-time.
+- **File viewer** — tap any file to read its contents.
+- **File writing** — make quick edits on the go.
+
+> **Workspace Whitelisting**  
+> By default, the gateway restricts access to only the directory from which the adapter was started. To explicitly allow the Android App to browse and switch between specific directories, whitelist them by adding an `allowed_workspaces` array to your `~/.antimatter_daemon/config.json`:
+> ```json
+> {
+>     "allowed_workspaces": [
+>         "/home/user/my-project",
+>         "/home/user/another-project"
+>     ]
+> }
+> ```
 
 ---
 

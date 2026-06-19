@@ -15,6 +15,9 @@ This document tracks the current testing status of the Antimatter ecosystem, out
 
 - **Status**: Tested
 - **Functionality**: The persistent WebSocket connection between the local gateway and the Android app establishes successfully.
+  - The Gateway double-forks into a silent background daemon successfully.
+  - IPC token and PID files correctly persist to `~/.antimatter_daemon/`.
+  - Log rotation (`gateway.log`) correctly limits file size growth.
 - **🚨 Known Issues**:
   - The connection drops abruptly when the Android app is sent to the background. Background service persistence needs to be implemented.
 
@@ -271,6 +274,17 @@ This document tracks the current testing status of the Antimatter ecosystem, out
 - **Fix Needed**: Update this block with specifics once the user provides details.
 
 ---
+    
+    ### BUG-015 — Release Build Fails to Connect / Circles Endlessly
+    
+    - **Severity**: P1 High
+    - **Status**: 🟢 FIXED
+    - **Reported**: 2026-06-20
+    - **Symptom**: Debug builds of the Android app connect flawlessly to the Gateway, but Release builds (installed on physical devices) show a permanent loading circle when trying to access the workspace, and the terminal/agent connection fails silently.
+    - **Root Cause**: ProGuard / R8 code minification was aggressively stripping and renaming the properties of Antimatter's internal network data models (e.g., `E2EESession$EncryptedEnvelope`, `AgentInfo`, `FileNode`). Because Gson relies on exact field names (like `iv`, `ct`, `aad` for E2EE payloads) to correctly parse JSON, the release build sent malformed `{"a":"...", "b":"..."}` packets to the Python Gateway and crashed silently upon receiving `{"current_workspace": "..."}`.
+    - **Fix**: Added `-keep class dev.saifmukhtar.antimatter.core.network.** { *; }` to the `proguard-rules.pro` file, ensuring all network and domain objects retain their exact class structures and property names in the Release bundle.
+    
+    ---
 
 ### 4. Biometric Auth Gates
 
@@ -289,6 +303,17 @@ This document tracks the current testing status of the Antimatter ecosystem, out
 
 - **Status**: Untested
 - **Note**: Any features not explicitly listed above (e.g., remote prompting) have not been formally tested yet. We cannot guarantee their stability or working order at this time.
+
+---
+
+### BUG-014 — "Message from self" UI Label when injecting user prompts
+
+- **Severity**: P3 Low
+- **Status**: 🔴 KNOWN LIMITATION
+- **Reported**: 2026-06-19
+- **Symptom**: When injecting prompts from the Android app without an API key (via the `agentapi send-message` mechanism in the `AG2 Adapter`), the IDE's UI renders the message as coming from a system/subagent source (e.g., "Message from self") rather than a physical user keyboard input.
+- **Root Cause**: This is purely a visual limitation of headless IPC injection in Antigravity IDE. The `agentapi` binary designates inputs as system events.
+- **Impact**: The underlying AI agent correctly interprets it as a high-priority user instruction regardless of the UI label. No functional impact.
 
 ---
 
