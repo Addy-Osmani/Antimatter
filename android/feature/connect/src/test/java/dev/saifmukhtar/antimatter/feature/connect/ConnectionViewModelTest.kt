@@ -39,6 +39,12 @@ class ConnectionViewModelTest {
         val mockCredsFlow = MutableStateFlow(dev.saifmukhtar.antimatter.core.data.Credentials(null, null, null, null, null))
         whenever(userPrefsMock.savedCredentialsFlow).thenReturn(mockCredsFlow)
 
+        val mockLoadedFlow = MutableStateFlow(true)
+        whenever(userPrefsMock.isLoadedFlow).thenReturn(mockLoadedFlow)
+
+        val mockProfilesFlow = MutableStateFlow<List<dev.saifmukhtar.antimatter.core.data.GatewayProfile>>(emptyList())
+        whenever(userPrefsMock.profilesFlow).thenReturn(mockProfilesFlow)
+
         viewModel = ConnectionViewModel(webSocketMock, userPrefsMock)
     }
 
