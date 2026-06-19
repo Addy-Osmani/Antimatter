@@ -87,3 +87,4 @@ Date,Workflow,Status,Commit,URL
 2026-06-19 20:13,Adapters CI,✅ PASS,test(connect): fix NullPointerException in ConnectionViewModelTest,https://github.com/saifmukhtar/antimatter/actions/runs/27846410029
 2026-06-19 20:16,Android CI,❌ FAIL,fix(ag): add missing fetchHistoryPage method to BrainWatcher,https://github.com/saifmukhtar/antimatter/actions/runs/27846333368
 2026-06-19 20:21,Android CI,✅ PASS,test(connect): fix NullPointerException in ConnectionViewModelTest,https://github.com/saifmukhtar/antimatter/actions/runs/27846409856
+2026-06-19 20:28,Deploy Docs to Cloudflare Pages,✅ PASS,chore: update workflow dashboard,https://github.com/saifmukhtar/antimatter/actions/runs/27846984790
