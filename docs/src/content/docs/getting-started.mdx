@@ -17,7 +17,7 @@ Start here and follow the steps in order. The whole setup takes less than 5 minu
 
 | Requirement | Details |
 |---|---|
-| **Python 3.11+** | Required by the `antimatter-core` Gateway |
+| **Python 3.11+** | Required by the `antimatter-gateway` Gateway |
 | **Node.js 22+** | Required if using the `ag` or `cc` adapters |
 | **Android 8.0+** or **iOS 16+** | Mobile companion app |
 | **`uv`** (recommended) | Modern Python package manager — faster installs |
@@ -26,14 +26,14 @@ Start here and follow the steps in order. The whole setup takes less than 5 minu
 
 ## Step 1 — Install the Gateway
 
-The **Antimatter Gateway** (`antimatter-core`) is the secure infrastructure daemon. It manages Cloudflare tunnels, cryptographic keys, and routes messages between your phone and your AI adapters.
+The **Antimatter Gateway** (`antimatter-gateway`) is the secure infrastructure daemon. It manages Cloudflare tunnels, cryptographic keys, and routes messages between your phone and your AI adapters.
 
 ```bash title="Install via uv (recommended)"
-uv tool install antimatter-core
+uv tool install antimatter-gateway
 ```
 
 ```bash title="Or via pip"
-pip install antimatter-core
+pip install antimatter-gateway
 ```
 
 Then start the Gateway:
@@ -47,8 +47,8 @@ The Gateway will:
 - Spawn a Cloudflare tunnel to expose a public `wss://` endpoint
 - Generate and persist an Ed25519 keypair and 256-bit pairing token to your OS keychain
 
-:::tip[Run as a background service]
-On Linux/macOS you can run `antimatter-gateway start --daemon` to run it as a background process. Use `antimatter-gateway status` to check it's alive.
+:::tip[Runs in the Background]
+`antimatter-gateway start` automatically detaches and runs silently in the background. Use `antimatter-gateway status` to check if it is running, and `antimatter-gateway stop` to kill it.
 :::
 
 ---
@@ -105,7 +105,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ### iOS
 
-The iOS app is in active development and mirrors the full Android feature set. Build from source:
+The iOS app is currently in early scaffolding stages. It will eventually mirror the full Android feature set. Build from source:
 
 ```bash
 cd ios/
@@ -159,6 +159,19 @@ Then in the **Antimatter app**:
 - **File viewer** — tap any file to read its contents.
 - **File writing** — make quick edits on the go.
 
+:::tip[Workspace Whitelisting]
+By default, the gateway allows access only to the directory from which the adapter was started. If you want to explicitly allow the Android App to browse and switch between specific workspace directories, you can whitelist them by adding an `allowed_workspaces` array to your daemon config file (`~/.antimatter_daemon/config.json`):
+
+```json
+{
+    "allowed_workspaces": [
+        "/home/user/my-project",
+        "/home/user/another-project"
+    ]
+}
+```
+:::
+
 ### Security
 
 - **Biometric auth gate** — Face Unlock or fingerprint required before any connection.
@@ -186,7 +199,7 @@ If you see "Connection refused":
 
 - Make sure an adapter (`antimatter-ag2`, etc.) is running.
 - Make sure an agent conversation is **actively running** in the IDE/CLI.
-- Check the Gateway logs: `antimatter-gateway logs`
+- Check the Gateway logs: `cat ~/.antimatter_daemon/gateway.log`
 
 ### FAQ
 

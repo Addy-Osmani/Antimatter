@@ -9,7 +9,7 @@ import ArchDiagram from '../../components/ArchDiagram.astro';
 import AuthorCard from '../../components/AuthorCard.astro';
 
 :::note[TL;DR]
-A central **Gateway** (`antimatter-core`) runs in the background, managing the secure Cloudflare tunnel and Ed25519 cryptography. Lightweight **Adapters** (`ag`, `ag2`, `cc`) connect to it locally over WebSocket IPC. When your mobile app sends a message through the tunnel, the Gateway routes it to the correct adapter, which interacts with its AI agent.
+A central **Gateway** (`antimatter-gateway`) runs in the background, managing the secure Cloudflare tunnel and Ed25519 cryptography. Lightweight **Adapters** (`ag`, `ag2`, `cc`) connect to it locally over WebSocket IPC. When your mobile app sends a message through the tunnel, the Gateway routes it to the correct adapter, which interacts with its AI agent.
 :::
 
 ---
@@ -39,14 +39,16 @@ Instead of baking security, networking, and tunneling logic into every agent int
           │  IPC ws://127.0.0.1:8765              │
           ▼                 ▼                     ▼
 ┌──────────────────────────────────────────────────────────────┐
-│              antimatter-core Gateway                         │
+│              antimatter-gateway Gateway                         │
 │                                                              │
 │  ┌─────────────────────────────────────────────────────────┐ │
 │  │         Security & Infrastructure Layer                  │ │
 │  │  ├─ Ed25519 Keypair (OS Keychain)                       │ │
 │  │  ├─ 256-bit Bearer Token (OS Keychain)                  │ │
-│  │  ├─ Cloudflare Tunnel Manager                           │ │
-│  │  └─ IPC Router (ws://127.0.0.1:8765)                   │ │
+│  ├─ Daemon Manager (~/.antimatter_daemon/gateway.pid)   │ │
+│  ├─ Rotating Logger (~/.antimatter_daemon/gateway.log)  │ │
+│  ├─ Cloudflare Tunnel Manager                           │ │
+│  └─ IPC Router (ws://127.0.0.1:8765)                   │ │
 │  └───────────────────────────────────────────────────────  ┘ │
 └─────────────────────────────────┬────────────────────────────┘
                                   │ Cloudflare Tunnel (wss://)
@@ -67,6 +69,10 @@ Instead of baking security, networking, and tunneling logic into every agent int
 ## Layer 1: The Gateway (`core/`)
 
 The Gateway is the **brain of the operation**. It runs as a background process and handles everything complex so adapters don't have to:
+
+### Background Daemonization
+
+When started with `antimatter-gateway start`, the process immediately double-forks and detaches from the terminal. It tracks its process ID at `~/.antimatter_daemon/gateway.pid` and safely rotates its standard output/errors to `~/.antimatter_daemon/gateway.log` (capped at 5MB).
 
 ### Cloudflare Tunnel
 

@@ -51,15 +51,18 @@ Anything else → **HTTP 403 Forbidden**. This prevents malicious websites in yo
 
 ---
 
-## Layer 2: 256-bit Bearer Token
+## Layer 2: 256-bit Bearer & IPC Tokens
 
-On first run, the Gateway generates a **256-bit (32-byte) cryptographic pairing token** using OS-level entropy:
+On first run, the Gateway generates two **256-bit (32-byte) cryptographic tokens** using OS-level entropy:
 
-- Stored **permanently in the OS keychain** (macOS Keychain, Windows Credential Manager, Linux `libsecret`).
-- Never written to plain-text config files.
-- Persists across restarts.
+1. **Pairing Token** (Mobile ↔ Gateway):
+   - Stored **permanently in the OS keychain** (macOS Keychain, Windows Credential Manager, Linux `libsecret`).
+   - If the keychain is unavailable, it falls back to a headless AES-GCM vault secured by a key derived via **600,000 PBKDF2 iterations**.
+2. **IPC Token** (Adapter ↔ Gateway):
+   - Stored in `~/.antimatter_daemon/.ipc_token` (mode `0600`).
+   - Ensures local adapters are authenticated before establishing an IPC bridge.
 
-Every WebSocket connection must present this token. The Gateway verifies it using **`crypto.timingSafeEqual`** — immune to timing side-channel attacks. Invalid token → close code **`4001 Unauthorized`**.
+Both tokens are verified using **`crypto.timingSafeEqual`** (or its Python equivalent `hmac.compare_digest`) — immune to timing side-channel attacks. Invalid token → close code **`4001 Unauthorized`**.
 
 ---
 
@@ -93,6 +96,7 @@ Pairing time:
   Phone generates ephemeral DH keypair → shares public key via QR
   Gateway generates ephemeral DH keypair → shares public key in response
   Both sides derive identical 256-bit shared secret (ECDH)
+  *(This guarantees **Forward Secrecy** — because keys are ephemeral per-session, a compromised key today cannot decrypt past traffic.)*
 
 Runtime:
   Sender: AES-GCM encrypt(payload, sharedSecret, randomNonce)

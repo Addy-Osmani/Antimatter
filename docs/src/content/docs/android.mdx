@@ -8,7 +8,7 @@ sidebar:
 import AuthorCard from '../../components/AuthorCard.astro';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-The Antimatter Android app is a native companion application built with **Kotlin** and **Jetpack Compose**. It connects to the `antimatter-core` Gateway over an encrypted WebSocket tunnel, and provides a full-featured interface to monitor, control, and interact with your AI agent remotely.
+The Antimatter Android app is a native companion application built with **Kotlin** and **Jetpack Compose**. It connects to the `antimatter-gateway` Gateway over an encrypted WebSocket tunnel, and provides a full-featured interface to monitor, control, and interact with your AI agent remotely.
 
 - **Source:** [`android/`](https://github.com/saifmukhtar/antimatter/tree/main/android)
 - **Package:** `dev.saifmukhtar.antimatter`
@@ -54,7 +54,7 @@ Offline persistence layer.
 
 | Component | Technology | Purpose |
 |---|---|---|
-| Room Database | `AppDatabase.kt` | SQLite persistence for conversations, steps, artifacts |
+| Room Database | `AppDatabase.kt` | **SQLCipher** encrypted SQLite persistence for conversations, steps, artifacts |
 | FTS Table | Room FTS4 extension | Full-text search across all trajectory data |
 | DataStore | Jetpack DataStore | User settings, selected adapter, connection preferences |
 | `StepDao` | Room DAO | CRUD + FTS queries for agent trajectory steps |
@@ -155,6 +155,10 @@ biometricPrompt.authenticate(promptInfo)
 
 Supported: Fingerprint, Face Unlock, PIN/Pattern fallback.
 
+:::note[Why are we using an Alpha dependency?]
+You may notice the app uses `androidx.biometric:biometric:1.2.0-alpha05`. While normally `alpha` indicates unstable software, this specific version is considered the industry standard for production apps needing proper Device Credential (PIN/Pattern) fallback on Android 11+ (API 30+). The stable `1.1.0` release has known bugs with these modern APIs, so this alpha version is intentionally selected for maximum stability.
+:::
+
 ---
 
 ## Building the App
@@ -205,9 +209,9 @@ Supported: Fingerprint, Face Unlock, PIN/Pattern fallback.
 | UI | Jetpack Compose + Material 3 | Latest |
 | DI | Hilt | 2.51+ |
 | Networking | OkHttp | 4.x |
-| Persistence | Room + DataStore | Latest |
+| Persistence | Room (SQLCipher encrypted) + DataStore | Latest |
 | Terminal | Termux terminal-emulator (NDK) | Fork |
-| Camera | CameraX | Latest |
+| Camera/QR | CameraX + ZXing Core | Latest |
 | Biometrics | AndroidX Biometric | Latest |
 | Build | Gradle (Kotlin DSL) | 8.x |
 
