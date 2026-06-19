@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-64%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-74-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-65%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-75-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 74 |
-| **Passed** | 48 |
+| **Total Runs** | 75 |
+| **Passed** | 49 |
 | **Failed** | 23 |
-| **Pass Rate** | 64% |
+| **Pass Rate** | 65% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-19 20:04 | Core CI | ✅ PASS | chore: update root config and documentation | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27846058475) |
 | 2026-06-19 04:05 | Deploy Docs to Cloudflare Pages | ✅ PASS | chore: update workflow dashboard | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27804635525) |
 | 2026-06-18 20:13 | Android CI | ❌ FAIL | chore(deps-dev): bump undici from 7.27.2 to 7.28.0 in /adapters/ag | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27786398876) |
 | 2026-06-18 20:11 | Android CI | ❌ FAIL | Chore: Adding leftover files | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27786288633) |
@@ -63,4 +64,3 @@
 | 2026-06-15 20:39 | Deploy Documentation | ✅ PASS | Chore: Update Readme | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27574862495) |
 | 2026-06-15 20:38 | Core CI | ❌ FAIL | Chore: Update Readme | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27574862489) |
 | 2026-06-14 09:11 | CodeQL Advanced | ✅ PASS | Future roadmap: Planning to support ios platform | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27494010402) |
-| 2026-06-14 09:04 | Android CI | ✅ PASS | Future roadmap: Planning to support ios platform | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27494010347) |

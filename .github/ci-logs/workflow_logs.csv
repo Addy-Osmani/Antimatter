@@ -73,3 +73,4 @@ Date,Workflow,Status,Commit,URL
 2026-06-18 20:11,Android CI,❌ FAIL,Chore: Adding leftover files,https://github.com/saifmukhtar/antimatter/actions/runs/27786288633
 2026-06-18 20:13,Android CI,❌ FAIL,chore(deps-dev): bump undici from 7.27.2 to 7.28.0 in /adapters/ag,https://github.com/saifmukhtar/antimatter/actions/runs/27786398876
 2026-06-19 04:05,Deploy Docs to Cloudflare Pages,✅ PASS,chore: update workflow dashboard,https://github.com/saifmukhtar/antimatter/actions/runs/27804635525
+2026-06-19 20:04,Core CI,✅ PASS,chore: update root config and documentation,https://github.com/saifmukhtar/antimatter/actions/runs/27846058475
