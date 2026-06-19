@@ -79,3 +79,4 @@ Date,Workflow,Status,Commit,URL
 2026-06-19 20:05,npm_and_yarn in /docs for esbuild - Update #1423490227,❌ FAIL,chore: update workflow dashboard,https://github.com/saifmukhtar/antimatter/actions/runs/27846102222
 2026-06-19 20:06,npm_and_yarn in /docs for astro, @astrojs/starlight, @astrojs/starlight-tailwind - Update #1423490383,✅ PASS,chore: update workflow dashboard,https://github.com/saifmukhtar/antimatter/actions/runs/27846110645
 2026-06-19 20:06,iOS CI,✅ PASS,chore(deps): bump astro @astrojs/starlight and @astrojs/starlight-tailwind,https://github.com/saifmukhtar/antimatter/actions/runs/27846157693
+2026-06-19 20:07,Adapters CI,❌ FAIL,chore(deps): bump astro @astrojs/starlight and @astrojs/starlight-tailwind,https://github.com/saifmukhtar/antimatter/actions/runs/27846157721
