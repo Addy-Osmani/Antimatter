@@ -1,11 +1,11 @@
 # Antimatter Ecosystem
 
-[![F-Droid](https://img.shields.io/badge/F--Droid-Get_it_on-blue.svg)](https://f-droid.org/packages/dev.saifmukhtar.antimatter/)
-[![GitHub Sponsor](https://img.shields.io/badge/Sponsor-❤️-blue.svg)](https://github.com/sponsors/saifmukhtar)
-[![Docs](https://img.shields.io/badge/docs-Website-deep_purple.svg)](https://antimatter.saifmukhtar.dev)
-[![GitHub Stars](https://img.shields.io/github/stars/saifmukhtar/antimatter.svg?style=social)](https://github.com/saifmukhtar/antimatter/stargazers)
+[![F-Droid](https://img.shields.io/badge/F--Droid-Get_it_on-blue.svg)](https://f-droid.org/packages/dev.Addy-Osmani.antimatter/)
+[![GitHub Sponsor](https://img.shields.io/badge/Sponsor-❤️-blue.svg)](https://github.com/sponsors/Addy-Osmani)
+[![Docs](https://img.shields.io/badge/docs-Website-deep_purple.svg)](https://antimatter.Addy-Osmani.dev)
+[![GitHub Stars](https://img.shields.io/github/stars/Addy-Osmani/antimatter.svg?style=social)](https://github.com/Addy-Osmani/antimatter/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/saifmukhtar/antimatter)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Addy-Osmani/antimatter)
 
 > [!WARNING]
 > **Community Project Disclaimer**
@@ -46,9 +46,9 @@ The brain of the operation. This is a highly secure Python daemon that runs in t
 Lightweight, "dumb" IPC clients that connect to the Gateway. Because they don't have to worry about security or networking, they are extremely modular and custom-built for specific AI environments.
 
 We currently officially support:
-- **[Antigravity IDE Adapter (`ag`)](https://antimatter.saifmukhtar.dev/adapters)** - A TypeScript VS Code extension.
-- **[Antigravity 2.0 Adapter (`ag2`)](https://antimatter.saifmukhtar.dev/adapters)** - A standalone Python daemon.
-- **[Claude Code Adapter (`cc`)](https://antimatter.saifmukhtar.dev/adapters)** - A Node.js streaming integration.
+- **[Antigravity IDE Adapter (`ag`)](https://antimatter.Addy-Osmani.dev/adapters)** - A TypeScript VS Code extension.
+- **[Antigravity 2.0 Adapter (`ag2`)](https://antimatter.Addy-Osmani.dev/adapters)** - A standalone Python daemon.
+- **[Claude Code Adapter (`cc`)](https://antimatter.Addy-Osmani.dev/adapters)** - A Node.js streaming integration.
 
 *Want to connect a brand new AI agent? Just write a simple WebSocket IPC script and connect it to the Gateway!*
 
@@ -67,7 +67,7 @@ antimatter-gateway start
 
 ### 2. Install Your Adapter
 Install the adapter for the AI you are using. For example, for the Antigravity IDE:
-- Download the `.vsix` from our [GitHub Releases](https://github.com/saifmukhtar/antimatter/releases) and install it in VS Code. It will automatically connect to your running Gateway!
+- Download the `.vsix` from our [GitHub Releases](https://github.com/Addy-Osmani/antimatter/releases) and install it in VS Code. It will automatically connect to your running Gateway!
 
 ### 3. Pair Your Phone
 1. Download the **Antimatter Android App** from F-Droid or GitHub Releases.
@@ -79,22 +79,22 @@ Install the adapter for the AI you are using. For example, for the Antigravity I
 ## 📖 Official Documentation
 
 **We have a dedicated documentation website!**  
-👉 **[Read the Official Antimatter Documentation Here](https://antimatter.saifmukhtar.dev)**
+👉 **[Read the Official Antimatter Documentation Here](https://antimatter.Addy-Osmani.dev)**
 
 Explore the depths of the ecosystem:
 
 **Getting Started**
-- [**Installation & Setup**](https://antimatter.saifmukhtar.dev/getting-started) - End-to-end quickstart.
-- [**Features Breakdown**](https://antimatter.saifmukhtar.dev) - A detailed list of everything Antimatter can do.
+- [**Installation & Setup**](https://antimatter.Addy-Osmani.dev/getting-started) - End-to-end quickstart.
+- [**Features Breakdown**](https://antimatter.Addy-Osmani.dev) - A detailed list of everything Antimatter can do.
 
 **Architecture & Security**
-- [**Architecture Deep Dive**](https://antimatter.saifmukhtar.dev/architecture) - Learn exactly how the Gateway routes IPC payloads.
-- [**Security Policy**](https://antimatter.saifmukhtar.dev/security) - Read about our Biometric locks, Cryptographic Handshakes, and sandboxing.
-- [**Zero Trust Guide**](https://antimatter.saifmukhtar.dev/security) - Add a secondary enterprise authentication layer with Cloudflare Access.
+- [**Architecture Deep Dive**](https://antimatter.Addy-Osmani.dev/architecture) - Learn exactly how the Gateway routes IPC payloads.
+- [**Security Policy**](https://antimatter.Addy-Osmani.dev/security) - Read about our Biometric locks, Cryptographic Handshakes, and sandboxing.
+- [**Zero Trust Guide**](https://antimatter.Addy-Osmani.dev/security) - Add a secondary enterprise authentication layer with Cloudflare Access.
 
 **Reference**
-- [**WebSocket Protocol**](https://antimatter.saifmukhtar.dev/protocol) - The complete message contract between the Gateway and the app.
-- [**Android App**](https://antimatter.saifmukhtar.dev/android) - Learn how the Jetpack Compose app dynamically selects active adapters.
+- [**WebSocket Protocol**](https://antimatter.Addy-Osmani.dev/protocol) - The complete message contract between the Gateway and the app.
+- [**Android App**](https://antimatter.Addy-Osmani.dev/android) - Learn how the Jetpack Compose app dynamically selects active adapters.
 
 ---
 
@@ -127,11 +127,11 @@ Explore the depths of the ecosystem:
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=saifmukhtar%2FAntimatter&type=date&logscale=&legend=bottom-right">
+<a href="https://www.star-history.com/?repos=Addy-Osmani%2FAntimatter&type=date&logscale=&legend=bottom-right">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=saifmukhtar/Antimatter&type=date&theme=dark&logscale&legend=bottom-right" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=saifmukhtar/Antimatter&type=date&logscale&legend=bottom-right" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=saifmukhtar/Antimatter&type=date&logscale&legend=bottom-right" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Addy-Osmani/Antimatter&type=date&theme=dark&logscale&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Addy-Osmani/Antimatter&type=date&logscale&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Addy-Osmani/Antimatter&type=date&logscale&legend=bottom-right" />
  </picture>
 </a>
 
