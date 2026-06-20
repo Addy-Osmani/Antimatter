@@ -125,6 +125,18 @@ Explore the depths of the ecosystem:
 
 ---
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=saifmukhtar%2FAntimatter&type=date&logscale=&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=saifmukhtar/Antimatter&type=date&theme=dark&logscale&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=saifmukhtar/Antimatter&type=date&logscale&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=saifmukhtar/Antimatter&type=date&logscale&legend=bottom-right" />
+ </picture>
+</a>
+
+---
+
 ## 👥 Contributing & Community
 
 We love contributions! Antimatter is built by developers, for developers.
