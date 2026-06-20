@@ -1,19 +1,20 @@
 # 🔄 CI/CD WORKFLOW DASHBOARD
 
-![Pass Rate](https://img.shields.io/badge/Pass%20Rate-65%25-brightgreen)
-![Total Runs](https://img.shields.io/badge/Total%20Runs-91-blue)
+![Pass Rate](https://img.shields.io/badge/Pass%20Rate-66%25-brightgreen)
+![Total Runs](https://img.shields.io/badge/Total%20Runs-92-blue)
 
 | Metric | Count |
 |--------|-------|
-| **Total Runs** | 91 |
-| **Passed** | 60 |
+| **Total Runs** | 92 |
+| **Passed** | 61 |
 | **Failed** | 28 |
-| **Pass Rate** | 65% |
+| **Pass Rate** | 66% |
 
 ## Recent Runs
 
 | Date (UTC) | Workflow | Status | Commit | URL |
 |------------|----------|--------|--------|-----|
+| 2026-06-20 07:42 | Android CI | ✅ PASS | Include Star History in README | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27864535134) |
 | 2026-06-20 07:40 | Adapters CI | ✅ PASS | Include Star History in README | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27864535145) |
 | 2026-06-20 07:40 | Core CI | ✅ PASS | Include Star History in README | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27864535138) |
 | 2026-06-19 20:28 | Deploy Docs to Cloudflare Pages | ✅ PASS | chore: update workflow dashboard | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27846984790) |
@@ -63,4 +64,3 @@
 | 2026-06-15 22:36 | Android CI | ⚠️ CANCEL | Merge pull request #3 from saifmukhtar/dependabot/npm_and_yarn/adapters/ag/form-data-4.0.6 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27580907090) |
 | 2026-06-15 22:35 | iOS CI | ✅ PASS | Merge pull request #3 from saifmukhtar/dependabot/npm_and_yarn/adapters/ag/form-data-4.0.6 | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27580907075) |
 | 2026-06-15 22:31 | CodeQL Advanced | ✅ PASS | feat: implement native PTY terminal for iOS Android and Gateway | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27580233296) |
-| 2026-06-15 22:30 | Android CI | ✅ PASS | feat: implement native PTY terminal for iOS Android and Gateway | [View Log](https://github.com/saifmukhtar/antimatter/actions/runs/27580233486) |
